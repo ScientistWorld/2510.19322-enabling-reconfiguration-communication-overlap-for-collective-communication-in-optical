@@ -1,4 +1,4 @@
 action: submit
 gpus: 0
 test: false
-notes: "Run evaluate_train.sh and evaluate_test.sh against checkpoint artifacts; populate scores_train/test."
+notes: "Rerun train/test scoring after clamping floating-point volume-noise in schedule diagnostics."

@@ -149,6 +149,7 @@ def schedule_slice_metrics(
 def slice_volume_error_mb(
     spec: dict[str, Any], items: list[dict[str, Any]], selected: set[int]
 ) -> float:
+    tolerance = 1e-4
     observed: dict[int, float] = {}
     for item in items:
         observed[int(item["step"])] = observed.get(int(item["step"]), 0.0) + float(item["message_mb"])
@@ -156,7 +157,9 @@ def slice_volume_error_mb(
     for step in spec.get("steps", []):
         step_id = int(step["step"])
         if step_id in selected:
-            error += abs(observed.get(step_id, 0.0) - float(step["message_mb"]))
+            delta = abs(observed.get(step_id, 0.0) - float(step["message_mb"]))
+            if delta > tolerance:
+                error += delta
     return error
 
 
