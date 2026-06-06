@@ -21,3 +21,4 @@
 - Verified `scoring/reference.json` and `scoring/scores.json` with `python validate.py --compare`; all structure, separation, and score checks passed.
 
 ## Stop Justification
+- Completed at milestone `core_claim`.
