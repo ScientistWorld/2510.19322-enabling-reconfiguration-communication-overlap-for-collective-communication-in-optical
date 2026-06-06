@@ -11,11 +11,3 @@ Tests the same scheduling objective on a larger collective workload from the pap
 ## fig8_rabenseifner_allreduce_512node_k4
 
 Tests the scalability target at a substantially larger node count while keeping the paper's fixed network resource assumptions. This gives future agents a harder setting than the illustrative example while preserving the same correctness requirements and benefit metric.
-
-## fig8_pairwise_alltoall_5node_k4
-
-Tests the scheduler on the paper's Pairwise All-to-All scalability setting, where every ordered stage requires a different communication topology. This target checks whether CCT improvements remain possible for a dense exchange primitive with limited optical planes.
-
-## fig8_pairwise_alltoall_10node_k4
-
-Tests the larger Pairwise All-to-All scalability point from the paper. The target stresses a longer dynamic topology sequence while keeping the same fixed resource and timing assumptions as the smaller Pairwise setting.

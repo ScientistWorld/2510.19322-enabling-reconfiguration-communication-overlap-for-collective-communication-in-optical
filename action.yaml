@@ -1,5 +1,5 @@
-action: submit
+action: done
 gpus: 0
-test: true
+test: false
 milestone: core_claim_plus
-notes: "CPU test job to regenerate SWOT and baseline artifacts with added Fig. 8 Pairwise All-to-All targets, then run full/train/test evaluation."
+notes: "Final verification passed after removing unverified Pairwise targets and generalizing artifact-based evaluation."

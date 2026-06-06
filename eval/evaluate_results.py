@@ -7,12 +7,15 @@ import json
 from pathlib import Path
 
 
-def load_results(paths: list[Path]) -> dict:
+def load_results(artifacts: Path) -> dict:
     merged = {"experiments": {}}
-    for path in paths:
-        if not path.exists():
+    if not artifacts.exists():
+        return merged
+    for path in sorted(artifacts.rglob("*.json")):
+        try:
+            payload = json.loads(path.read_text())
+        except json.JSONDecodeError:
             continue
-        payload = json.loads(path.read_text())
         for exp_name, exp_payload in payload.get("experiments", {}).items():
             slot = merged["experiments"].setdefault(exp_name, {"results": {}})
             if "spec" in exp_payload:
@@ -22,12 +25,7 @@ def load_results(paths: list[Path]) -> dict:
 
 
 def evaluate(artifacts: Path, output: Path) -> dict:
-    payload = load_results(
-        [
-            artifacts / "baseline" / "baseline_results.json",
-            artifacts / "swot" / "swot_results.json",
-        ]
-    )
+    payload = load_results(artifacts)
     scores = {"experiments": {}}
     for exp_name, exp_payload in payload["experiments"].items():
         results = exp_payload["results"]
