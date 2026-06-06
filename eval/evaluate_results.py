@@ -29,16 +29,20 @@ def evaluate(artifacts: Path, output: Path) -> dict:
     scores = {"experiments": {}}
     for exp_name, exp_payload in payload["experiments"].items():
         results = exp_payload["results"]
+        spec = exp_payload.get("spec")
         out_results = {}
         strawman_cct = None
         if "strawman_icr" in results:
             strawman_cct = float(results["strawman_icr"]["cct_us"])
         for method_name, result in results.items():
             cct = float(result["cct_us"])
+            valid_schedule = float(result.get("valid_schedule", 0.0))
+            if spec and result.get("schedule"):
+                valid_schedule = 1.0 if validate_schedule(spec, result["schedule"]) else 0.0
+                cct = max(float(item["transmit_end_us"]) for item in result["schedule"])
             row = {
                 "cct_us": cct,
-                "valid_schedule": float(result.get("valid_schedule", 0.0)),
-                "reconfiguration_events": float(result.get("reconfiguration_events", 0.0)),
+                "valid_schedule": valid_schedule,
             }
             if strawman_cct and method_name == "swot":
                 row["cct_reduction_vs_strawman_pct"] = 100.0 * (strawman_cct - cct) / strawman_cct
@@ -49,6 +53,51 @@ def evaluate(artifacts: Path, output: Path) -> dict:
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(scores, indent=2))
     return scores
+
+
+def validate_schedule(spec: dict, schedule: list[dict]) -> bool:
+    steps = spec.get("steps", [])
+    if not steps or not schedule:
+        return False
+    tolerance = 1e-4
+    by_step = {}
+    by_plane = {}
+    for item in schedule:
+        by_step.setdefault(int(item["step"]), []).append(item)
+        by_plane.setdefault(int(item["plane"]), []).append(item)
+        if float(item["transmit_start_us"]) + tolerance < float(item["reconfig_end_us"]):
+            return False
+        if int(item.get("reconfigured", 0)):
+            duration = float(item["reconfig_end_us"]) - float(item["reconfig_start_us"])
+            if abs(duration - float(spec["reconfig_latency_us"])) > tolerance:
+                return False
+
+    previous_step_end = 0.0
+    for step in steps:
+        step_id = int(step["step"])
+        items = by_step.get(step_id, [])
+        if not items:
+            return False
+        if any(int(item["config"]) != int(step["config"]) for item in items):
+            return False
+        volume = sum(float(item["message_mb"]) for item in items)
+        if abs(volume - float(step["message_mb"])) > tolerance:
+            return False
+        if any(float(item["transmit_start_us"]) + tolerance < previous_step_end for item in items):
+            return False
+        previous_step_end = max(float(item["transmit_end_us"]) for item in items)
+
+    for items in by_plane.values():
+        activities = []
+        for item in items:
+            if int(item.get("reconfigured", 0)):
+                activities.append((float(item["reconfig_start_us"]), float(item["reconfig_end_us"])))
+            activities.append((float(item["transmit_start_us"]), float(item["transmit_end_us"])))
+        activities.sort()
+        for (_, prev_end), (cur_start, _) in zip(activities, activities[1:]):
+            if cur_start + tolerance < prev_end:
+                return False
+    return True
 
 
 def main() -> None:

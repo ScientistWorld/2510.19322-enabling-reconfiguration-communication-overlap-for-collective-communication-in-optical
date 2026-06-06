@@ -26,4 +26,4 @@ No scored job has completed yet. The first submitted job will run `scripts/repro
 ## Deviations from Paper
 
 - The core reference experiment exactly follows the paper's Fig. 5 illustrative timing setup.
-- The additional 16-node benchmark is a scaled smoke test for the gym, not a paper-reported result.
+- A 16-node scaled workload factory is available in `data/collectives.py` for future extension, but default scoring is restricted to the paper-reported Fig. 5 target.

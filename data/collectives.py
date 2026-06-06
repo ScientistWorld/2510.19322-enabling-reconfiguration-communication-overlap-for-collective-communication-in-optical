@@ -103,6 +103,9 @@ def scaled_rabenseifner_allreduce(
 
 EXPERIMENTS = {
     "fig5_rabenseifner_allreduce_8node": rabenseifner_allreduce_8node_example,
+}
+
+OPTIONAL_EXPERIMENTS = {
     "scaled_rabenseifner_allreduce_16node_k4": lambda: scaled_rabenseifner_allreduce(16, 4),
 }
 
@@ -111,4 +114,7 @@ def get_experiment(name: str) -> ExperimentSpec:
     try:
         return EXPERIMENTS[name]()
     except KeyError as exc:
-        raise KeyError(f"unknown experiment {name!r}; choices: {sorted(EXPERIMENTS)}") from exc
+        if name in OPTIONAL_EXPERIMENTS:
+            return OPTIONAL_EXPERIMENTS[name]()
+        choices = sorted({*EXPERIMENTS, *OPTIONAL_EXPERIMENTS})
+        raise KeyError(f"unknown experiment {name!r}; choices: {choices}") from exc
