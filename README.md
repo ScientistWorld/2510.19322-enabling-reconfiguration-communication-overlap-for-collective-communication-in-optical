@@ -121,12 +121,31 @@ All comparisons must use the same collective step sequence, optical degree, per-
 
 </details>
 
+### Iteration 2: gpt-5.5
+- **Milestone**: `core_claim` | **Status**: done
+- **Working time**: 5m | **GPU**: 0.0h
+- **Jobs**: 1 total (1 completed, 0 failed)
+
+<details>
+<summary>Progress Log</summary>
+
+### [2026-06-06 05:35] - method_runs
+- Implemented the SWOT MILP scheduler with heterogeneous message splitting, asynchronous per-plane reconfiguration timelines, and topology bypassing.
+- Ran the baseline, method, and evaluator end-to-end in managed job `7126c74f-64d`.
+
+### [2026-06-06 05:40] - core_claim
+- Reproduced the paper's Fig. 5 core claim: SWOT reduces CCT from 1500.0 us for Strawman-ICR to 1200.0 us.
+- Independent evaluator confirmed the generated SWOT schedule is valid and preserves collective step ordering, per-plane serial resource use, and transmission-after-reconfiguration precedence.
+
+### [2026-06-06 05:50] - core_claim
+- Continuation audit re-read `method/`, `data/`, `baseline/`, and `eval/`; the implementation is a real SWOT MILP scheduler, not a surrogate.
+- Re-ran standalone `scripts/evaluate.sh` and `python validate.py --compare`; scores still match the paper's Fig. 5 target and all separation checks pass.
+
+</details>
+
 
 ---
 
 # Reproduction Milestones
 
-**Current: method_runs**
-
-## Stop Justification
-- Completed at milestone `method_runs`.
+**Current: core_claim**
