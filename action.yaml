@@ -1,8 +1,8 @@
 # IMPORTANT: Once you set action to 'submit' or 'done', STOP immediately.
 # Do NOT sleep, poll, or wait for jobs. The system reads this file
 # only after your turn ends. Sleeping blocks the entire pipeline.
-action: done
-gpus: 0
-test: true
-milestone: core_claim
-notes: "Reproduced the core Fig. 5 claim: SWOT MILP scheduler achieves 1200 us CCT versus 1500 us for strawman ICR, with independent evaluation and validation passing."
+action: pending
+gpus: 1
+test: false
+milestone: method_runs
+notes: ""
