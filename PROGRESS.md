@@ -18,6 +18,7 @@
   - `strawman_icr`: `cct_us = 1500.0`, `valid_schedule = 1.0`, `cct_reduction_vs_strawman_pct = 0.0`
   - `swot`: `cct_us = 1200.0`, `valid_schedule = 1.0`, `cct_reduction_vs_strawman_pct = 20.0`
 - `python validate.py --compare` passed, including import-separation checks and confirmation that `eval/` reads generated method outputs.
+- Continuation audit on 2026-06-06 re-ran standalone `scripts/evaluate.sh` followed by `python validate.py --compare`; both completed successfully with the same reproduced scores.
 
 ## Remaining
 
@@ -28,6 +29,7 @@
 
 - The external job log path supplied by the scheduler was not readable from this shell, but the generated workspace artifacts were present and validated.
 - No blocking issues remain for the core claim.
+- Continuation audit found no implementation, evaluation, or deliverable issues requiring code changes.
 
 ## Deviations from Paper
 

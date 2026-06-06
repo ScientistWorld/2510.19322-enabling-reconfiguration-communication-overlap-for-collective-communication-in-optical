@@ -5,4 +5,4 @@ action: done
 gpus: 0
 test: false
 milestone: core_claim
-notes: "Reproduced and validated the core claim: SWOT matches the paper's Fig. 5 1200 us CCT versus 1500 us for Strawman-ICR, with independent schedule validation and packaged scripts."
+notes: "Continuation audit restored core_claim: SWOT is a real MILP implementation, standalone evaluation passes, and scores match Fig. 5 at 1200 us versus 1500 us for Strawman-ICR."

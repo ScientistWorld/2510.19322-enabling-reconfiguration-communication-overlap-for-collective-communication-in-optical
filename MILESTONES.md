@@ -11,3 +11,7 @@
 ### [2026-06-06 05:40] - core_claim
 - Reproduced the paper's Fig. 5 core claim: SWOT reduces CCT from 1500.0 us for Strawman-ICR to 1200.0 us.
 - Independent evaluator confirmed the generated SWOT schedule is valid and preserves collective step ordering, per-plane serial resource use, and transmission-after-reconfiguration precedence.
+
+### [2026-06-06 05:50] - core_claim
+- Continuation audit re-read `method/`, `data/`, `baseline/`, and `eval/`; the implementation is a real SWOT MILP scheduler, not a surrogate.
+- Re-ran standalone `scripts/evaluate.sh` and `python validate.py --compare`; scores still match the paper's Fig. 5 target and all separation checks pass.
