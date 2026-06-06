@@ -2,36 +2,28 @@
 
 ## What Works
 
-<!-- What has been successfully reproduced so far. -->
+- Paper analysis completed from the markdown.
+- The benchmark is structured around deterministic collective-communication simulations; no external dataset is required.
+- Implemented workload definitions in `data/collectives.py`.
+- Implemented the paper baseline `strawman_icr` in `baseline/simulate_baselines.py`.
+- Implemented the SWOT MILP scheduler in `method/swot_scheduler.py`.
+- Implemented method-agnostic evaluation in `eval/evaluate_results.py`.
 
 ## Results
 
-<!-- Reproduced numbers compared to the paper's reported numbers. -->
+No scored job has completed yet. The first submitted job will run `scripts/reproduce.sh` and write `scoring/scores.json`.
 
 ## Remaining
 
-<!-- What still needs to be done to reach higher milestones. -->
+- Run the managed container job to install PuLP and execute the scheduler.
+- Compare reproduced numbers with the Fig. 5 reference using `python validate.py --compare`.
+- If the scheduler runs and supports the Fig. 5 claim, update milestone to `core_claim`; otherwise diagnose and resubmit.
 
 ## Issues
 
-<!-- Blockers, bugs, or difficulties encountered. -->
+- PuLP is not installed in the login-node Python. It is listed in `environment/setup.sh` and will be installed by the managed setup path for compute jobs.
 
 ## Deviations from Paper
 
-<!-- Do not edit this section unless you deviated from the paper's original setup.
-     For each deviation, document: what the paper used, what you substituted, and why.
-
-     ACCEPTABLE deviations (data/resource/scale substitutions — milestones still valid):
-       - Replaced a proprietary dataset with a public one
-       - Used a smaller model of the same architecture
-       - Scaled down training (fewer epochs, smaller batch)
-       - Used a different library for the same algorithm
-
-     UNACCEPTABLE deviations (algorithm substitutions — milestones above 'none' are void):
-       - Replaced the paper's algorithm with a fundamentally different one
-       - Wrote a generic model trained to approximate the method's outputs
-         instead of implementing the method's computational steps
-
-     The test: could someone reading your code identify which algorithm from
-     the paper you implemented? If not, you replaced the method. -->
-
+- The core reference experiment exactly follows the paper's Fig. 5 illustrative timing setup.
+- The additional 16-node benchmark is a scaled smoke test for the gym, not a paper-reported result.

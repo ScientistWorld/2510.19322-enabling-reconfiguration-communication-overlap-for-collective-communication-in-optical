@@ -1,78 +1,25 @@
 # Scientist Constraints
 
-<!-- Do not edit this unless you decide to stop -->
+## Workload
 
-<!--
-A scientist agent will attempt to improve on your reproduced results.
-These constraints define what the scientist must hold fixed, so that
-any improvement reflects genuine methodological innovation — not just
-throwing more resources at the problem.
+Scientists must evaluate on the provided collective step definitions in `data/collectives.py` unless they add a new experiment with a clearly named score entry. For the core target, the 8-node Rabenseifner AllReduce step sequence, message volumes, optical degree, bandwidth, and reconfiguration latency must remain unchanged.
 
-CONTEXT: Your reproduction becomes a benchmark environment. The scientist
-gets your code, data, evaluation pipeline, and these constraints. They
-must beat your scores while respecting every constraint listed here.
-Without good constraints, a scientist can trivially "improve" by swapping
-in a larger model, using a richer dataset that is simply publicly avaliable, or more 
-— none of which demonstrate real scientific insight.
+## Resources
 
-Your job is to act as a judge: distinguish between flexible innovation
-and non-genuine improvement. Constraints should block trivial gains
-(e.g. just swapping in a bigger model) while leaving room for creative
-methodology (e.g. a clever augmentation strategy, a better loss
-function, a novel use of existing tools). When in doubt, ask: "does
-this require insight, or just more resources?" Lock down the resources,
-leave the insight open. Do not block innovation.
+The optical degree, per-link bandwidth, base latency, and reconfiguration latency are fixed per experiment. Increasing `k`, aggregate bandwidth, or reducing latency is resource scaling rather than a scheduling improvement.
 
-For example, if a scientist downloads online IMDB reviews to supplement a
-sentiment dataset, that's resource scaling. But if they use an LLM to
-augment the existing training data, that's methodology — they designed
-that pipeline. This is just an example, but keep this kind of distinction 
-in mind when writing constraints.
+## Correctness
 
-Be SPECIFIC to this paper. Generic constraints are useless. Name the
-exact model, the exact dataset, the exact splits. Explain the reasoning
-so the scientist understands the intent behind each constraint, not
-just the rule — this helps them judge edge cases on their own.
+Schedules must preserve collective step barriers and may not transmit on an optical plane before the required circuit is configured. Evaluation must report `valid_schedule`; CCT improvements from invalid schedules are not acceptable.
 
-Think about at least:
-- Model: architecture, size, pretrained weights
-- Data: which datasets, which splits, whether external data is allowed
+## Evaluation Interface
 
-You may add other constraint categories if relevant to this paper
-(e.g. training procedure, evaluation protocol, problem formulation).
-
-Example for a sentiment analysis paper:
-
-## Model
-The scientist must use BERT-base-uncased (110M parameters, HuggingFace
-`bert-base-uncased`). The paper's contribution is a novel fine-tuning
-strategy, not architecture design. Switching to a larger model (e.g.
-DeBERTa-v3-large, 304M params) would improve accuracy but would not
-demonstrate any methodological insight. The scientist may modify the
-fine-tuning procedure, add adapter layers, change the classification
-head, or alter the training loop — but the base encoder must remain
-BERT-base-uncased with its standard pretrained weights.
-
-## Data
-The scientist must use only the provided SST-2 binary sentiment
-dataset (67,349 training examples, 872 validation, 1,821 test).
-No external sentiment corpora or additional human-labeled data.
-The test split must not be used for training or validation.
-
-Delete this comment block and fill in your actual constraints below.
-
-At the very end, write a compliance checklist for the scientist agent.
-Each item should be a concrete, verifiable condition the scientist can
-check off before submitting. These should mirror your constraints above
-but phrased as yes/no checks.
-
-Example checklist (for the sentiment analysis example above):
+Methods must write scheduler artifacts under `checkpoints/` in the same structure consumed by `eval/evaluate_results.py`, or extend the evaluator in a method-agnostic way. `eval/` must not import from `method/`.
 
 ## Compliance Checklist
-- [ ] Model is BERT-base-uncased (110M params), not a larger variant
-- [ ] No external sentiment datasets used beyond SST-2
-- [ ] Test split not used for training or validation
 
-ONLY WRITE ABOUT WHAT TO RESTRICT. NEVER WRITE ABOUT WHAT REMAINS OPEN.
-
--->
+- [ ] Core workload parameters in `data/collectives.py` are unchanged for `fig5_rabenseifner_allreduce_8node`
+- [ ] No additional optical planes or bandwidth are used for the same experiment
+- [ ] Reconfiguration latency is not reduced for the same experiment
+- [ ] `valid_schedule` is reported and equals 1 for claimed improvements
+- [ ] Evaluation code remains independent of `method/`

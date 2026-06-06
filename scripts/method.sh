@@ -10,5 +10,5 @@ set -e
 
 cd /home/user
 
-# TODO: run the paper's method
-# TODO: call scripts/evaluate.sh to score
+python -m method.swot_scheduler --output-dir checkpoints/swot --time-limit-s "${SWOT_SOLVER_TIME_LIMIT:-120}"
+bash scripts/evaluate.sh

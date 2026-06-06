@@ -17,4 +17,5 @@ set -e
 
 cd /home/user
 
-# TODO: run baseline
+python -m baseline.simulate_baselines --output-dir checkpoints/baseline
+bash scripts/evaluate.sh
