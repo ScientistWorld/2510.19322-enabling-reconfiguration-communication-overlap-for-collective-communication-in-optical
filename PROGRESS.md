@@ -7,7 +7,7 @@
 - Implemented workload definitions in `data/collectives.py`.
 - Implemented the paper baseline `strawman_icr` in `baseline/simulate_baselines.py`.
 - Implemented the SWOT MILP scheduler in `method/swot_scheduler.py`.
-- Implemented method-agnostic evaluation in `eval/evaluate_results.py`.
+- Implemented method-agnostic evaluation in `eval/evaluate_results.py`; it now independently validates schedule artifacts instead of trusting method-reported validity.
 
 ## Results
 
@@ -22,6 +22,7 @@ No scored job has completed yet. The first submitted job will run `scripts/repro
 ## Issues
 
 - PuLP is not installed in the login-node Python. It is listed in `environment/setup.sh` and will be installed by the managed setup path for compute jobs.
+- No completed `checkpoints/swot` artifact was present at audit time, so a new CPU smoke job is required.
 
 ## Deviations from Paper
 

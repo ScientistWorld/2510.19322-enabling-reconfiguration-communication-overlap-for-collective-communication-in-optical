@@ -5,4 +5,4 @@ action: submit
 gpus: 0
 test: true
 milestone: none
-notes: "CPU smoke job: install PuLP, run baseline and SWOT MILP scheduler, then write scoring/scores.json for first end-to-end validation."
+notes: "CPU smoke job after audit fixes: install PuLP, run baseline and SWOT MILP scheduler for the Fig. 5 target, and write scoring/scores.json."
