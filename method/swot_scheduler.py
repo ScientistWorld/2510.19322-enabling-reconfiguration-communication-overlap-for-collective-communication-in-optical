@@ -90,7 +90,7 @@ def solve_swot(spec: ExperimentSpec, time_limit_s: int = 120) -> Dict:
     solver = pulp.PULP_CBC_CMD(msg=False, timeLimit=time_limit_s)
     status_code = model.solve(solver)
     status = pulp.LpStatus[status_code]
-    if status not in {"Optimal", "Not Solved", "Integer Feasible"}:
+    if status not in {"Optimal", "Integer Feasible"}:
         raise RuntimeError(f"MILP failed for {spec.name}: {status}")
 
     schedule = []

@@ -13,7 +13,7 @@ The primary baseline is naive intra-collective reconfiguration: all optical plan
 
 The core target is the paper's 8-node Rabenseifner AllReduce example with two 400 Gbps optical planes, 200 us reconfiguration latency, 40 MB payload, and no base latency in the illustrated timing model. The paper reports 1500 us CCT for the naive baseline, 1200 us CCT for the optimized schedule, and 20% CCT reduction.
 
-The expanded scalability targets use the paper's Rabenseifner AllReduce setup from Fig. 8 with `k=4`, 200 Gbps per link, 32 MB messages, 20 us base latency, and 200 us reconfiguration latency. The paper reports CCT reductions over the naive baseline of 39.6% and 46.9% for Rabenseifner AllReduce at 64 and 512 nodes.
+The expanded scalability targets use the paper's Fig. 8 setup with `k=4`, 200 Gbps per link, 32 MB messages, 20 us base latency, and 200 us reconfiguration latency. The paper reports CCT reductions over the naive baseline of 39.6% and 46.9% for Rabenseifner AllReduce at 64 and 512 nodes, and 26.0% and 45.5% for Pairwise All-to-All at 5 and 10 nodes.
 
 ## Evaluation Protocol
 

@@ -104,6 +104,40 @@ def scaled_rabenseifner_allreduce(
     )
 
 
+def pairwise_alltoall(
+    nodes: int = 5,
+    optical_degree: int = 4,
+    payload_mb: float = 32.0,
+    total_node_gbps: float = 800.0,
+    base_latency_us: float = 20.0,
+    reconfig_latency_us: float = 200.0,
+    name: str | None = None,
+    description: str | None = None,
+) -> ExperimentSpec:
+    """Pairwise All-to-All scalability instance from the paper's Fig. 8.
+
+    The paper models Pairwise All-to-All as N-1 ordered exchange steps. In
+    each step, a node sends one of its N destination blocks, so the aggregate
+    per-step volume in this benchmark is the per-node payload divided by N.
+    """
+    if nodes <= 2:
+        raise ValueError("nodes must be greater than 2")
+    return ExperimentSpec(
+        name=name or f"fig8_pairwise_alltoall_{nodes}node_k{optical_degree}",
+        description=description
+        or "Paper Fig. 8 Pairwise All-to-All scalability setting.",
+        nodes=nodes,
+        optical_degree=optical_degree,
+        per_link_gbps=total_node_gbps / optical_degree,
+        base_latency_us=base_latency_us,
+        reconfig_latency_us=reconfig_latency_us,
+        steps=[
+            CollectiveStep(step_id, step_id, payload_mb / nodes)
+            for step_id in range(1, nodes)
+        ],
+    )
+
+
 EXPERIMENTS = {
     "fig5_rabenseifner_allreduce_8node": rabenseifner_allreduce_8node_example,
     "fig8_rabenseifner_allreduce_64node_k4": lambda: scaled_rabenseifner_allreduce(
@@ -117,6 +151,18 @@ EXPERIMENTS = {
         4,
         name="fig8_rabenseifner_allreduce_512node_k4",
         description="Paper Fig. 8 Rabenseifner AllReduce scalability point at 512 nodes.",
+    ),
+    "fig8_pairwise_alltoall_5node_k4": lambda: pairwise_alltoall(
+        5,
+        4,
+        name="fig8_pairwise_alltoall_5node_k4",
+        description="Paper Fig. 8 Pairwise All-to-All scalability point at 5 nodes.",
+    ),
+    "fig8_pairwise_alltoall_10node_k4": lambda: pairwise_alltoall(
+        10,
+        4,
+        name="fig8_pairwise_alltoall_10node_k4",
+        description="Paper Fig. 8 Pairwise All-to-All scalability point at 10 nodes.",
     ),
 }
 
