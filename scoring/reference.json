@@ -5,9 +5,12 @@
       "weight": 0.5,
       "primary_metric": "cct_us",
       "metrics": {
-        "cct_us": {"higher_is_better": false, "coefficient": -1.0},
-        "cct_reduction_vs_strawman_pct": {"higher_is_better": true, "coefficient": 0.5},
-        "valid_schedule": {"higher_is_better": true, "coefficient": 1.0}
+        "cct_us": {"higher_is_better": false, "coefficient": -1.0, "description": "Completion time of the scored collective slice in microseconds."},
+        "cct_reduction_vs_strawman_pct": {"higher_is_better": true, "coefficient": 0.5, "description": "Percent CCT reduction relative to the lockstep ICR strawman on the same slice."},
+        "reconfiguration_events": {"higher_is_better": false, "coefficient": -0.25, "description": "Number of optical-plane reconfigurations paid inside the scored slice."},
+        "valid_schedule": {"higher_is_better": true, "coefficient": 1.0, "description": "Binary check that the full serialized schedule respects step order, topology, volume, and reconfiguration constraints."},
+        "step_volume_error_mb": {"higher_is_better": false, "coefficient": -0.5, "description": "Absolute message-volume mismatch across the scored steps in MB."},
+        "max_plane_overlap_us": {"higher_is_better": false, "coefficient": -0.5, "description": "Largest illegal overlap between activities assigned to the same optical plane in microseconds."}
       },
       "results": {
         "strawman_icr": {
@@ -29,9 +32,12 @@
       "weight": 0.25,
       "primary_metric": "cct_reduction_vs_strawman_pct",
       "metrics": {
-        "cct_us": {"higher_is_better": false, "coefficient": -0.5},
-        "cct_reduction_vs_strawman_pct": {"higher_is_better": true, "coefficient": 1.0},
-        "valid_schedule": {"higher_is_better": true, "coefficient": 1.0}
+        "cct_us": {"higher_is_better": false, "coefficient": -0.5, "description": "Completion time of the scored collective slice in microseconds."},
+        "cct_reduction_vs_strawman_pct": {"higher_is_better": true, "coefficient": 1.0, "description": "Percent CCT reduction relative to the lockstep ICR strawman on the same slice."},
+        "reconfiguration_events": {"higher_is_better": false, "coefficient": -0.25, "description": "Number of optical-plane reconfigurations paid inside the scored slice."},
+        "valid_schedule": {"higher_is_better": true, "coefficient": 1.0, "description": "Binary check that the full serialized schedule respects step order, topology, volume, and reconfiguration constraints."},
+        "step_volume_error_mb": {"higher_is_better": false, "coefficient": -0.5, "description": "Absolute message-volume mismatch across the scored steps in MB."},
+        "max_plane_overlap_us": {"higher_is_better": false, "coefficient": -0.5, "description": "Largest illegal overlap between activities assigned to the same optical plane in microseconds."}
       },
       "results": {
         "strawman_icr": {
@@ -51,9 +57,12 @@
       "weight": 0.25,
       "primary_metric": "cct_reduction_vs_strawman_pct",
       "metrics": {
-        "cct_us": {"higher_is_better": false, "coefficient": -0.5},
-        "cct_reduction_vs_strawman_pct": {"higher_is_better": true, "coefficient": 1.0},
-        "valid_schedule": {"higher_is_better": true, "coefficient": 1.0}
+        "cct_us": {"higher_is_better": false, "coefficient": -0.5, "description": "Completion time of the scored collective slice in microseconds."},
+        "cct_reduction_vs_strawman_pct": {"higher_is_better": true, "coefficient": 1.0, "description": "Percent CCT reduction relative to the lockstep ICR strawman on the same slice."},
+        "reconfiguration_events": {"higher_is_better": false, "coefficient": -0.25, "description": "Number of optical-plane reconfigurations paid inside the scored slice."},
+        "valid_schedule": {"higher_is_better": true, "coefficient": 1.0, "description": "Binary check that the full serialized schedule respects step order, topology, volume, and reconfiguration constraints."},
+        "step_volume_error_mb": {"higher_is_better": false, "coefficient": -0.5, "description": "Absolute message-volume mismatch across the scored steps in MB."},
+        "max_plane_overlap_us": {"higher_is_better": false, "coefficient": -0.5, "description": "Largest illegal overlap between activities assigned to the same optical plane in microseconds."}
       },
       "results": {
         "strawman_icr": {

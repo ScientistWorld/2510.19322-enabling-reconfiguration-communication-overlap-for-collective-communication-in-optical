@@ -1,8 +1,8 @@
 """Score the held-out test slice from serialized scheduler artifacts.
 
 The split is by collective stage: test scores the second half of each
-Rabenseifner workload. It filters to the method entries already present in
-scoring/scores_train.json so final train/test reports compare the same methods.
+Rabenseifner workload. It enumerates method entries from the serialized
+artifacts and never imports method code.
 """
 
 from __future__ import annotations
@@ -36,12 +36,7 @@ def load_results(artifacts: Path) -> dict[str, Any]:
     return merged
 
 
-def train_methods(train_scores: Path) -> dict[str, list[str]]:
-    if not train_scores.exists():
-        raise FileNotFoundError(
-            f"{train_scores} does not exist; run scripts/evaluate_train.sh first"
-        )
-    payload = json.loads(train_scores.read_text())
+def artifact_methods(payload: dict[str, Any]) -> dict[str, list[str]]:
     methods_by_exp: dict[str, list[str]] = {}
     for exp_name, exp_payload in payload.get("experiments", {}).items():
         results = exp_payload.get("results", {})
@@ -92,21 +87,19 @@ def score_method(
 ) -> dict[str, float]:
     if spec and result.get("schedule"):
         valid = validate_schedule(spec, result["schedule"])
-        cct = schedule_span_us(result["schedule"], selected)
-        return {
-            "cct_us": cct if cct is not None else MISSING_CCT_US,
-            "valid_schedule": 1.0 if valid and cct is not None else 0.0,
-        }
+        row = schedule_slice_metrics(spec, result["schedule"], selected)
+        row["valid_schedule"] = 1.0 if valid and row["cct_us"] < MISSING_CCT_US else 0.0
+        return row
 
     if spec and result.get("method") == "strawman_icr":
-        return {
-            "cct_us": lockstep_slice_cct_us(spec, selected),
-            "valid_schedule": float(result.get("valid_schedule", 1.0)),
-        }
+        return lockstep_slice_score(spec, selected, float(result.get("valid_schedule", 1.0)))
 
     return {
         "cct_us": float(result.get("cct_us", MISSING_CCT_US)),
         "valid_schedule": float(result.get("valid_schedule", 0.0)),
+        "reconfiguration_events": float(result.get("reconfiguration_events", 0.0)),
+        "step_volume_error_mb": float(result.get("step_volume_error_mb", MISSING_CCT_US)),
+        "max_plane_overlap_us": float(result.get("max_plane_overlap_us", MISSING_CCT_US)),
     }
 
 
@@ -114,40 +107,86 @@ def missing_score() -> dict[str, float]:
     return {
         "cct_us": MISSING_CCT_US,
         "valid_schedule": 0.0,
+        "reconfiguration_events": MISSING_CCT_US,
+        "step_volume_error_mb": MISSING_CCT_US,
+        "max_plane_overlap_us": MISSING_CCT_US,
     }
 
 
-def schedule_span_us(schedule: list[dict[str, Any]], selected: set[int]) -> float | None:
+def schedule_slice_metrics(
+    spec: dict[str, Any], schedule: list[dict[str, Any]], selected: set[int]
+) -> dict[str, float]:
     items = [item for item in schedule if int(item["step"]) in selected]
     if not items:
-        return None
+        return missing_score()
 
     starts = []
     ends = []
+    activities_by_plane: dict[int, list[tuple[float, float]]] = {}
+    reconfiguration_events = 0
     for item in items:
+        plane = int(item["plane"])
         if int(item.get("reconfigured", 0)):
+            reconfiguration_events += 1
             starts.append(float(item.get("reconfig_start_us", item["transmit_start_us"])))
+            activities_by_plane.setdefault(plane, []).append(
+                (float(item["reconfig_start_us"]), float(item["reconfig_end_us"]))
+            )
         else:
             starts.append(float(item["transmit_start_us"]))
+        activities_by_plane.setdefault(plane, []).append(
+            (float(item["transmit_start_us"]), float(item["transmit_end_us"]))
+        )
         ends.append(float(item["transmit_end_us"]))
-    return max(ends) - min(starts)
+    return {
+        "cct_us": max(ends) - min(starts),
+        "reconfiguration_events": float(reconfiguration_events),
+        "step_volume_error_mb": slice_volume_error_mb(spec, items, selected),
+        "max_plane_overlap_us": max_plane_overlap_us(activities_by_plane),
+    }
 
 
-def lockstep_slice_cct_us(spec: dict[str, Any], selected: set[int]) -> float:
+def slice_volume_error_mb(
+    spec: dict[str, Any], items: list[dict[str, Any]], selected: set[int]
+) -> float:
+    observed: dict[int, float] = {}
+    for item in items:
+        observed[int(item["step"])] = observed.get(int(item["step"]), 0.0) + float(item["message_mb"])
+    error = 0.0
+    for step in spec.get("steps", []):
+        step_id = int(step["step"])
+        if step_id in selected:
+            error += abs(observed.get(step_id, 0.0) - float(step["message_mb"]))
+    return error
+
+
+def max_plane_overlap_us(activities_by_plane: dict[int, list[tuple[float, float]]]) -> float:
+    worst = 0.0
+    for activities in activities_by_plane.values():
+        activities.sort()
+        for (_, prev_end), (cur_start, _) in zip(activities, activities[1:]):
+            worst = max(worst, prev_end - cur_start)
+    return max(0.0, worst)
+
+
+def lockstep_slice_score(
+    spec: dict[str, Any], selected: set[int], valid_schedule: float
+) -> dict[str, float]:
     bandwidth = float(spec["per_link_gbps"]) / 8_000.0
     optical_degree = float(spec["optical_degree"])
     base_latency_us = float(spec.get("base_latency_us", 0.0))
     reconfig_latency_us = float(spec["reconfig_latency_us"])
-    steps = [
-        step
-        for step in sorted(spec.get("steps", []), key=lambda item: int(item["step"]))
-        if int(step["step"]) in selected
-    ]
+    all_steps = sorted(spec.get("steps", []), key=lambda item: int(item["step"]))
+    steps = [step for step in all_steps if int(step["step"]) in selected]
     if not steps:
-        return MISSING_CCT_US
+        return missing_score()
 
     cct = 0.0
-    previous_config = None
+    first_selected_index = all_steps.index(steps[0])
+    previous_config = (
+        int(all_steps[first_selected_index - 1]["config"]) if first_selected_index > 0 else None
+    )
+    reconfiguration_events = 0
     for step in steps:
         message_mb = float(step["message_mb"])
         cct += message_mb / (optical_degree * bandwidth)
@@ -156,8 +195,15 @@ def lockstep_slice_cct_us(spec: dict[str, Any], selected: set[int]) -> float:
         current_config = int(step["config"])
         if previous_config is not None and current_config != previous_config:
             cct += reconfig_latency_us
+            reconfiguration_events += 1
         previous_config = current_config
-    return cct
+    return {
+        "cct_us": cct,
+        "valid_schedule": valid_schedule,
+        "reconfiguration_events": float(reconfiguration_events),
+        "step_volume_error_mb": 0.0,
+        "max_plane_overlap_us": 0.0,
+    }
 
 
 def validate_schedule(spec: dict[str, Any], schedule: list[dict[str, Any]]) -> bool:
@@ -215,15 +261,14 @@ def validate_schedule(spec: dict[str, Any], schedule: list[dict[str, Any]]) -> b
     return True
 
 
-def evaluate(artifacts: Path, train_scores_path: Path, output: Path) -> dict[str, Any]:
+def evaluate(artifacts: Path, output: Path) -> dict[str, Any]:
     payload = load_results(artifacts)
-    required = train_methods(train_scores_path)
+    required = artifact_methods(payload)
     scores: dict[str, Any] = {
         "_metadata": {
             "slice": SLICE_NAME,
             "split": "second_half_collective_steps",
             "artifacts": str(artifacts),
-            "train_scores": str(train_scores_path),
         },
         "experiments": {},
     }
@@ -264,10 +309,9 @@ def evaluate(artifacts: Path, train_scores_path: Path, output: Path) -> dict[str
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--artifacts", default="checkpoints")
-    parser.add_argument("--train-scores", default="scoring/scores_train.json")
     parser.add_argument("--output", default="scoring/scores_test.json")
     args = parser.parse_args()
-    evaluate(Path(args.artifacts), Path(args.train_scores), Path(args.output))
+    evaluate(Path(args.artifacts), Path(args.output))
 
 
 if __name__ == "__main__":
