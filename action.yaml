@@ -1,8 +1,8 @@
 # IMPORTANT: Once you set action to 'submit' or 'done', STOP immediately.
 # Do NOT sleep, poll, or wait for jobs. The system reads this file
 # only after your turn ends. Sleeping blocks the entire pipeline.
-action: submit
+action: done
 gpus: 0
-test: true
-milestone: core_claim
-notes: "Continuation audit restored core_claim for Fig. 5 but found expanded targets missing from scores.json. Run the CPU reproduction for Fig. 5 plus both Fig. 8 AllReduce targets, then validate regenerated scores."
+test: false
+milestone: core_claim_plus
+notes: "Reproduced the Fig. 5 core claim and extended it to two Fig. 8 Rabenseifner AllReduce scalability settings; all schedules are valid and validate.py --compare passed."
