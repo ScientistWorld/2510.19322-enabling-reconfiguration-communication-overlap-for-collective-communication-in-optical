@@ -8,6 +8,7 @@
 - Implemented the paper baseline `strawman_icr` in `baseline/simulate_baselines.py`.
 - Implemented the SWOT MILP scheduler in `method/swot_scheduler.py`.
 - Implemented method-agnostic evaluation in `eval/evaluate_results.py`; it now independently validates schedule artifacts instead of trusting method-reported validity.
+- Current verified milestone is `core_claim`.
 
 ## Results
 

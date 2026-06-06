@@ -1,8 +1,8 @@
 # IMPORTANT: Once you set action to 'submit' or 'done', STOP immediately.
 # Do NOT sleep, poll, or wait for jobs. The system reads this file
 # only after your turn ends. Sleeping blocks the entire pipeline.
-action: pending
-gpus: 1
+action: done
+gpus: 0
 test: false
-milestone: method_runs
-notes: ""
+milestone: core_claim
+notes: "Reproduced and validated the core claim: SWOT matches the paper's Fig. 5 1200 us CCT versus 1500 us for Strawman-ICR, with independent schedule validation and packaged scripts."
