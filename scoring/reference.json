@@ -3,7 +3,7 @@
     "fig5_rabenseifner_allreduce_8node": {
       "description": "Paper Fig. 5 design-intuition example: 8-node Rabenseifner AllReduce with two 400 Gbps optical planes and 200 us reconfiguration latency.",
       "weight": 0.5,
-      "primary_metric": "cct_us",
+      "primary_metric": "cct_reduction_vs_strawman_pct",
       "metrics": {
         "cct_us": {"higher_is_better": false, "coefficient": -1.0, "description": "Completion time of the scored collective slice in microseconds."},
         "cct_reduction_vs_strawman_pct": {"higher_is_better": true, "coefficient": 0.5, "description": "Percent CCT reduction relative to the lockstep ICR strawman on the same slice."},

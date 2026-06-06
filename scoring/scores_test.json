@@ -1,7 +1,7 @@
 {
   "_metadata": {
     "slice": "test",
-    "split": "second_half_collective_steps",
+    "split": "held_out_suffix_collective_steps",
     "artifacts": "checkpoints"
   },
   "experiments": {
@@ -9,19 +9,19 @@
       "slice": "test",
       "step_split": {
         "selected_steps": [
-          4,
           5,
           6
         ],
         "held_out_steps": [
           1,
           2,
-          3
+          3,
+          4
         ]
       },
       "results": {
         "strawman_icr": {
-          "cct_us": 750.0,
+          "cct_us": 700.0,
           "valid_schedule": 1.0,
           "reconfiguration_events": 2.0,
           "step_volume_error_mb": 0.0,
@@ -29,12 +29,12 @@
           "cct_reduction_vs_strawman_pct": 0.0
         },
         "swot": {
-          "cct_us": 600.0,
+          "cct_us": 500.0,
           "reconfiguration_events": 2.0,
           "step_volume_error_mb": 0.0,
           "max_plane_overlap_us": 0.0,
           "valid_schedule": 1.0,
-          "cct_reduction_vs_strawman_pct": 20.0
+          "cct_reduction_vs_strawman_pct": 28.571428571428573
         }
       }
     },

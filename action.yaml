@@ -1,5 +1,5 @@
-action: submit
+action: done
 gpus: 0
 test: false
 milestone: core_claim
-notes: "Rerun train/test scoring after changing the 6-step Fig. 5 split from symmetric halves to prefix/suffix slices."
+notes: "core_claim supported: SWOT reduces CCT vs strawman with valid schedules; split primary reductions differ train/test (fig5 12.5/28.57, fig8-64 34.96/22.88, fig8-512 41.45/42.72); validate.py --compare passes."
