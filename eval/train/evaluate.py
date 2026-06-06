@@ -38,8 +38,14 @@ def load_results(artifacts: Path) -> dict[str, Any]:
 
 def selected_steps(spec: dict[str, Any]) -> set[int]:
     steps = sorted(int(step["step"]) for step in spec.get("steps", []))
-    midpoint = max(1, len(steps) // 2)
-    return set(steps[:midpoint])
+    split_at = split_index(steps)
+    return set(steps[:split_at])
+
+
+def split_index(steps: list[int]) -> int:
+    if len(steps) <= 6:
+        return max(1, math.ceil(2 * len(steps) / 3))
+    return max(1, len(steps) // 2)
 
 
 def score_slice(exp_payload: dict[str, Any], selected: set[int]) -> dict[str, dict[str, float]]:
@@ -254,7 +260,7 @@ def evaluate(artifacts: Path, output: Path) -> dict[str, Any]:
     scores: dict[str, Any] = {
         "_metadata": {
             "slice": SLICE_NAME,
-            "split": "first_half_collective_steps",
+            "split": "prefix_collective_steps",
             "artifacts": str(artifacts),
         },
         "experiments": {},

@@ -1,4 +1,5 @@
-action: done
+action: submit
 gpus: 0
 test: false
-notes: "first-half vs second-half collective-step split; 36 train metrics, 36 test metrics; swot reduction gaps: fig5 0.0 pp, fig8-64 -12.08 pp, fig8-512 +1.27 pp; valid schedules and feasibility diagnostics pass."
+milestone: core_claim
+notes: "Rerun train/test scoring after changing the 6-step Fig. 5 split from symmetric halves to prefix/suffix slices."
