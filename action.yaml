@@ -1,4 +1,4 @@
-action: submit
+action: done
 gpus: 0
 test: false
-notes: "Rerun train/test scoring after clamping floating-point volume-noise in schedule diagnostics."
+notes: "first-half vs second-half collective-step split; 36 train metrics, 36 test metrics; swot reduction gaps: fig5 0.0 pp, fig8-64 -12.08 pp, fig8-512 +1.27 pp; valid schedules and feasibility diagnostics pass."
