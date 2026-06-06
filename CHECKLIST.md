@@ -8,8 +8,8 @@
 
 ## Scoring
 - [x] `scoring/reference.json` — paper's reported numbers
-- [ ] Workspace validated via `python validate.py`
-- [ ] `scoring/scores.json` — reproduced numbers
+- [x] Workspace validated via `python validate.py`
+- [x] `scoring/scores.json` — reproduced numbers
 - [x] `scoring/EXPERIMENTS.md`
 - [x] `scoring/TARGETS.md`
 - [x] `scoring/CONSTRAINTS.md`
@@ -34,8 +34,8 @@
 - [x] Pretrained models downloaded if needed
 
 ## Milestones
-- [ ] `method_runs`
-- [ ] `core_claim`
+- [x] `method_runs`
+- [x] `core_claim`
 - [ ] `core_claim_plus`
 - [ ] `secondary_claims`
 - [ ] `majority`

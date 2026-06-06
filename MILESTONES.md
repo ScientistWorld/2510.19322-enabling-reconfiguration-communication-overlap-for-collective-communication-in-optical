@@ -1,6 +1,6 @@
 # Reproduction Milestones
 
-**Current: none**
+**Current: core_claim**
 
 ## Progress Log
 
@@ -13,5 +13,11 @@
 - Audited the implementation and confirmed it targets the paper's MILP scheduling method rather than a surrogate.
 - Fixed scoring issues so default scores match the paper-reported reference experiment and evaluation independently validates submitted schedules.
 - Resubmitting a CPU smoke job because no completed `checkpoints/` artifacts were present.
+
+### [2026-06-06 06:55] - core_claim
+- Completed the managed CPU smoke job successfully.
+- Ran the paper's SWOT MILP scheduler and the strawman ICR baseline on the Fig. 5 Rabenseifner AllReduce timing target.
+- Reproduced the paper's core timing claim: strawman ICR CCT 1500 us, SWOT CCT 1200 us, and 20.0% CCT reduction.
+- Verified `scoring/reference.json` and `scoring/scores.json` with `python validate.py --compare`; all structure, separation, and score checks passed.
 
 ## Stop Justification

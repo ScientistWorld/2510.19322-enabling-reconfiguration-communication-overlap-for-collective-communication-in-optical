@@ -11,18 +11,22 @@
 
 ## Results
 
-No scored job has completed yet. The first submitted job will run `scripts/reproduce.sh` and write `scoring/scores.json`.
+- Managed CPU job `7126c74f-64d` completed successfully.
+- `scripts/reproduce.sh` ran the strawman ICR baseline, the SWOT MILP scheduler, and the independent evaluator.
+- Reproduced Fig. 5 target:
+  - `strawman_icr`: `cct_us = 1500.0`, `valid_schedule = 1.0`, `cct_reduction_vs_strawman_pct = 0.0`
+  - `swot`: `cct_us = 1200.0`, `valid_schedule = 1.0`, `cct_reduction_vs_strawman_pct = 20.0`
+- `python validate.py --compare` passed, including import-separation checks and confirmation that `eval/` reads generated method outputs.
 
 ## Remaining
 
-- Run the managed container job to install PuLP and execute the scheduler.
-- Compare reproduced numbers with the Fig. 5 reference using `python validate.py --compare`.
-- If the scheduler runs and supports the Fig. 5 claim, update milestone to `core_claim`; otherwise diagnose and resubmit.
+- Higher milestones would require adding more paper figures and scenarios beyond the minimum Fig. 5 core claim.
+- The reusable environment is complete for the current target: `scripts/reproduce.sh` regenerates artifacts and `scripts/evaluate.sh` scores them.
 
 ## Issues
 
-- PuLP is not installed in the login-node Python. It is listed in `environment/setup.sh` and will be installed by the managed setup path for compute jobs.
-- No completed `checkpoints/swot` artifact was present at audit time, so a new CPU smoke job is required.
+- The external job log path supplied by the scheduler was not readable from this shell, but the generated workspace artifacts were present and validated.
+- No blocking issues remain for the core claim.
 
 ## Deviations from Paper
 
