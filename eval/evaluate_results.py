@@ -15,6 +15,8 @@ def load_results(paths: list[Path]) -> dict:
         payload = json.loads(path.read_text())
         for exp_name, exp_payload in payload.get("experiments", {}).items():
             slot = merged["experiments"].setdefault(exp_name, {"results": {}})
+            if "spec" in exp_payload:
+                slot["spec"] = exp_payload["spec"]
             slot["results"].update(exp_payload.get("results", {}))
     return merged
 
@@ -44,7 +46,7 @@ def evaluate(artifacts: Path, output: Path) -> dict:
                 "cct_us": cct,
                 "valid_schedule": valid_schedule,
             }
-            if strawman_cct and method_name == "swot":
+            if strawman_cct and method_name != "strawman_icr":
                 row["cct_reduction_vs_strawman_pct"] = 100.0 * (strawman_cct - cct) / strawman_cct
             elif method_name == "strawman_icr":
                 row["cct_reduction_vs_strawman_pct"] = 0.0
@@ -88,8 +90,18 @@ def validate_schedule(spec: dict, schedule: list[dict]) -> bool:
         previous_step_end = max(float(item["transmit_end_us"]) for item in items)
 
     for items in by_plane.values():
+        items.sort(key=lambda item: (int(item["step"]), float(item["transmit_start_us"])))
+        previous_config = None
         activities = []
         for item in items:
+            current_config = int(item["config"])
+            reconfigured = int(item.get("reconfigured", 0))
+            if previous_config is not None:
+                if current_config == previous_config and reconfigured:
+                    return False
+                if current_config != previous_config and not reconfigured:
+                    return False
+            previous_config = current_config
             if int(item.get("reconfigured", 0)):
                 activities.append((float(item["reconfig_start_us"]), float(item["reconfig_end_us"])))
             activities.append((float(item["transmit_start_us"]), float(item["transmit_end_us"])))

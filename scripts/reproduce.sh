@@ -18,5 +18,7 @@ set -e
 
 cd /home/user
 
+rm -rf checkpoints/baseline checkpoints/swot
+
 bash scripts/baseline.sh
 bash scripts/method.sh

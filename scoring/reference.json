@@ -2,7 +2,7 @@
   "experiments": {
     "fig5_rabenseifner_allreduce_8node": {
       "description": "Paper Fig. 5 design-intuition example: 8-node Rabenseifner AllReduce with two 400 Gbps optical planes and 200 us reconfiguration latency.",
-      "weight": 1.0,
+      "weight": 0.5,
       "primary_metric": "cct_us",
       "metrics": {
         "cct_us": {"higher_is_better": false, "coefficient": -1.0},
@@ -20,6 +20,50 @@
           "type": "proposed",
           "cct_us": 1200.0,
           "cct_reduction_vs_strawman_pct": 20.0,
+          "valid_schedule": 1.0
+        }
+      }
+    },
+    "fig8_rabenseifner_allreduce_64node_k4": {
+      "description": "Paper Fig. 8 scalability point: Rabenseifner AllReduce at 64 nodes, k=4, 32 MB message, 200 us reconfiguration latency.",
+      "weight": 0.25,
+      "primary_metric": "cct_reduction_vs_strawman_pct",
+      "metrics": {
+        "cct_us": {"higher_is_better": false, "coefficient": -0.5},
+        "cct_reduction_vs_strawman_pct": {"higher_is_better": true, "coefficient": 1.0},
+        "valid_schedule": {"higher_is_better": true, "coefficient": 1.0}
+      },
+      "results": {
+        "strawman_icr": {
+          "type": "baseline",
+          "cct_reduction_vs_strawman_pct": 0.0,
+          "valid_schedule": 1.0
+        },
+        "swot": {
+          "type": "proposed",
+          "cct_reduction_vs_strawman_pct": 39.6,
+          "valid_schedule": 1.0
+        }
+      }
+    },
+    "fig8_rabenseifner_allreduce_512node_k4": {
+      "description": "Paper Fig. 8 scalability point: Rabenseifner AllReduce at 512 nodes, k=4, 32 MB message, 200 us reconfiguration latency.",
+      "weight": 0.25,
+      "primary_metric": "cct_reduction_vs_strawman_pct",
+      "metrics": {
+        "cct_us": {"higher_is_better": false, "coefficient": -0.5},
+        "cct_reduction_vs_strawman_pct": {"higher_is_better": true, "coefficient": 1.0},
+        "valid_schedule": {"higher_is_better": true, "coefficient": 1.0}
+      },
+      "results": {
+        "strawman_icr": {
+          "type": "baseline",
+          "cct_reduction_vs_strawman_pct": 0.0,
+          "valid_schedule": 1.0
+        },
+        "swot": {
+          "type": "proposed",
+          "cct_reduction_vs_strawman_pct": 46.9,
           "valid_schedule": 1.0
         }
       }

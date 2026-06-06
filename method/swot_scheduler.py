@@ -72,10 +72,16 @@ def solve_swot(spec: ExperimentSpec, time_limit_s: int = 120) -> Dict:
                 # intervening use exists, the constraint is relaxed, allowing
                 # topology bypassing to be represented by skipped uses.
                 for prev in range(i):
-                    if steps[prev].config == step.config:
-                        continue
                     intervening = pulp.lpSum(use[h][j] for h in range(prev + 1, i))
-                    model += reconfig[i][j] >= use[i][j] + use[prev][j] - intervening - 1
+                    if steps[prev].config == step.config:
+                        # If this plane's most recent previous use already
+                        # had the needed topology, SWOT bypasses intervening
+                        # configurations and must not pay a redundant switch.
+                        model += reconfig[i][j] <= 2 - use[i][j] - use[prev][j] + intervening
+                    else:
+                        # If the most recent previous use had a different
+                        # topology, the plane must switch before transmitting.
+                        model += reconfig[i][j] >= use[i][j] + use[prev][j] - intervening - 1
 
         if i > 0:
             model += step_end[i] >= step_end[i - 1]
@@ -120,8 +126,10 @@ def solve_swot(spec: ExperimentSpec, time_limit_s: int = 120) -> Dict:
 
 def _validate_schedule(spec: ExperimentSpec, schedule: list[dict]) -> bool:
     by_step: Dict[int, list[dict]] = {}
+    by_plane: Dict[int, list[dict]] = {}
     for item in schedule:
         by_step.setdefault(item["step"], []).append(item)
+        by_plane.setdefault(item["plane"], []).append(item)
         if item["transmit_start_us"] + 1e-6 < item["reconfig_end_us"]:
             return False
     previous_end = 0.0
@@ -136,6 +144,18 @@ def _validate_schedule(spec: ExperimentSpec, schedule: list[dict]) -> bool:
         if any(item["transmit_start_us"] + 1e-6 < previous_end for item in items):
             return False
         previous_end = max(item["transmit_end_us"] for item in items)
+    for items in by_plane.values():
+        items.sort(key=lambda item: (item["step"], item["transmit_start_us"]))
+        previous_config = None
+        for item in items:
+            current_config = item["config"]
+            reconfigured = int(item.get("reconfigured", 0))
+            if previous_config is not None:
+                if current_config == previous_config and reconfigured:
+                    return False
+                if current_config != previous_config and not reconfigured:
+                    return False
+            previous_config = current_config
     return True
 
 

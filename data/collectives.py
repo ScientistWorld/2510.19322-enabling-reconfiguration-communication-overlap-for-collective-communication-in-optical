@@ -72,6 +72,8 @@ def scaled_rabenseifner_allreduce(
     total_node_gbps: float = 800.0,
     base_latency_us: float = 20.0,
     reconfig_latency_us: float = 200.0,
+    name: str | None = None,
+    description: str | None = None,
 ) -> ExperimentSpec:
     """A small scalable Rabenseifner AllReduce instance.
 
@@ -90,8 +92,9 @@ def scaled_rabenseifner_allreduce(
         steps.append(CollectiveStep(step_id, level + 1, payload_mb / (2 ** (level + 1))))
         step_id += 1
     return ExperimentSpec(
-        name=f"scaled_rabenseifner_allreduce_{nodes}node_k{optical_degree}",
-        description="Scaled Rabenseifner AllReduce setting for reproducible smoke evaluation.",
+        name=name or f"scaled_rabenseifner_allreduce_{nodes}node_k{optical_degree}",
+        description=description
+        or "Scaled Rabenseifner AllReduce setting for reproducible smoke evaluation.",
         nodes=nodes,
         optical_degree=optical_degree,
         per_link_gbps=total_node_gbps / optical_degree,
@@ -103,6 +106,18 @@ def scaled_rabenseifner_allreduce(
 
 EXPERIMENTS = {
     "fig5_rabenseifner_allreduce_8node": rabenseifner_allreduce_8node_example,
+    "fig8_rabenseifner_allreduce_64node_k4": lambda: scaled_rabenseifner_allreduce(
+        64,
+        4,
+        name="fig8_rabenseifner_allreduce_64node_k4",
+        description="Paper Fig. 8 Rabenseifner AllReduce scalability point at 64 nodes.",
+    ),
+    "fig8_rabenseifner_allreduce_512node_k4": lambda: scaled_rabenseifner_allreduce(
+        512,
+        4,
+        name="fig8_rabenseifner_allreduce_512node_k4",
+        description="Paper Fig. 8 Rabenseifner AllReduce scalability point at 512 nodes.",
+    ),
 }
 
 OPTIONAL_EXPERIMENTS = {

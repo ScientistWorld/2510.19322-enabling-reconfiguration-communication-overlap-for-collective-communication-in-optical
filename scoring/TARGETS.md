@@ -8,3 +8,21 @@ Tests whether a scheduler reduces communication completion time on the paper's c
 - **Benefit metric**: `cct_reduction_vs_strawman_pct` (higher is better)
 - **Constraint metric**: `valid_schedule` (higher is better; invalid schedules fail the benchmark regardless of CCT)
 - **How to run**: `bash scripts/reproduce.sh`, then inspect `scoring/scores.json`
+
+## Expansion: fig8_rabenseifner_allreduce_64node_k4
+
+Tests whether the same evaluation surface remains useful at the smaller scalability point reported in the paper's Fig. 8 AllReduce experiment.
+
+- **Metric**: `cct_us` (lower is better)
+- **Benefit metric**: `cct_reduction_vs_strawman_pct` (higher is better)
+- **Constraint metric**: `valid_schedule` (higher is better)
+- **How to run**: `bash scripts/reproduce.sh`, then inspect `scoring/scores.json`
+
+## Expansion: fig8_rabenseifner_allreduce_512node_k4
+
+Tests whether the same evaluation surface remains useful at the larger scalability point reported in the paper's Fig. 8 AllReduce experiment.
+
+- **Metric**: `cct_us` (lower is better)
+- **Benefit metric**: `cct_reduction_vs_strawman_pct` (higher is better)
+- **Constraint metric**: `valid_schedule` (higher is better)
+- **How to run**: `bash scripts/reproduce.sh`, then inspect `scoring/scores.json`
