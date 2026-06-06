@@ -30,7 +30,8 @@
 
 ## Remaining
 
-- Higher milestones would require adding more paper figures and scenarios beyond the current Rabenseifner AllReduce examples, such as All-to-All variants, topology/OCS-count sweeps, and additional baselines.
+- A CPU job is queued to regenerate artifacts for two added Pairwise All-to-All Fig. 8 targets. If those schedules are valid and improve over Strawman-ICR, the reproduction can move from `core_claim_plus` to `secondary_claims`.
+- Higher milestones would require adding more paper figures and scenarios beyond the current AllReduce and Pairwise All-to-All examples, such as Bruck All-to-All, topology/OCS-count sweeps, and additional baselines.
 - The reusable environment is complete for the current target: `scripts/reproduce.sh` regenerates artifacts and `scripts/evaluate.sh` scores them.
 - `scoring/scores.json` now contains every experiment listed in `scoring/TARGETS.md`.
 
@@ -46,3 +47,4 @@
 
 - The core reference experiment exactly follows the paper's Fig. 5 illustrative timing setup.
 - The Fig. 8 scalability targets reproduce the paper's Rabenseifner AllReduce node-count settings, but this reproduction still uses the aggregate per-step configuration model rather than explicit per-node OCS permutation matrices.
+- The Pairwise All-to-All targets use the paper's ordered stage count and fixed network settings, but also use the aggregate per-step configuration model rather than explicit per-node OCS permutation matrices.

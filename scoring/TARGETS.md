@@ -26,3 +26,21 @@ Tests whether the same evaluation surface remains useful at the larger scalabili
 - **Benefit metric**: `cct_reduction_vs_strawman_pct` (higher is better)
 - **Constraint metric**: `valid_schedule` (higher is better)
 - **How to run**: `bash scripts/reproduce.sh`, then inspect `scoring/scores.json`
+
+## Expansion: fig8_pairwise_alltoall_5node_k4
+
+Tests whether the scheduler handles the denser dynamic topology sequence from the paper's Pairwise All-to-All scalability experiment.
+
+- **Metric**: `cct_us` (lower is better)
+- **Benefit metric**: `cct_reduction_vs_strawman_pct` (higher is better)
+- **Constraint metric**: `valid_schedule` (higher is better)
+- **How to run**: `bash scripts/reproduce.sh`, then inspect `scoring/scores.json`
+
+## Expansion: fig8_pairwise_alltoall_10node_k4
+
+Tests whether the Pairwise All-to-All target remains useful as the number of ordered communication stages grows beyond the one-shot capacity discussed in the paper.
+
+- **Metric**: `cct_us` (lower is better)
+- **Benefit metric**: `cct_reduction_vs_strawman_pct` (higher is better)
+- **Constraint metric**: `valid_schedule` (higher is better)
+- **How to run**: `bash scripts/reproduce.sh`, then inspect `scoring/scores.json`

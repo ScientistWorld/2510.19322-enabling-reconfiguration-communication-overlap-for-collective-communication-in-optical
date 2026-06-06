@@ -1,5 +1,5 @@
-action: done
+action: submit
 gpus: 0
-test: false
-milestone: core_claim
-notes: "Packaging audit complete: no external artifacts required; fixed data/downloads .gitkeep ignore rule and validation passes."
+test: true
+milestone: core_claim_plus
+notes: "CPU test job to regenerate SWOT and baseline artifacts with added Fig. 8 Pairwise All-to-All targets, then run full/train/test evaluation."
