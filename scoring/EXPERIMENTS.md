@@ -11,11 +11,3 @@ Tests the same scheduling objective on a larger collective workload from the pap
 ## fig8_rabenseifner_allreduce_512node_k4
 
 Tests the scalability target at a substantially larger node count while keeping the paper's fixed network resource assumptions. This gives future agents a harder setting than the illustrative example while preserving the same correctness requirements and benefit metric.
-
-## fig8_pairwise_alltoall_5node_k4
-
-Tests the scalability target for a dense ordered exchange workload at the smaller node count reported in the paper. This target checks whether a candidate scheduler can improve completion time when every communication stage asks for a new topology and static reservation is capacity-limited.
-
-## fig8_pairwise_alltoall_10node_k4
-
-Tests the same dense ordered exchange workload at the larger reported node count. This target adds a second collective family to the benchmark and makes the evaluation less tied to the AllReduce traffic pattern.
