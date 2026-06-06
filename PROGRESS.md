@@ -29,6 +29,7 @@
 - The pending managed CPU job will regenerate scores for the added Fig. 8 scalability targets. If successful and the additional settings support the same CCT-reduction claim with valid schedules, the workspace can be advanced to `core_claim_plus`.
 - Higher milestones would require adding more paper figures and scenarios beyond the current AllReduce examples.
 - The reusable environment is complete for the current target: `scripts/reproduce.sh` regenerates artifacts and `scripts/evaluate.sh` scores them.
+- Continuation audit found that `scoring/reference.json` and `TARGETS.md` now include the two Fig. 8 scalability targets, but `scoring/scores.json` still contains only the older Fig. 5 run. A managed CPU job is required to regenerate the expanded score file in the container.
 
 ## Issues
 
