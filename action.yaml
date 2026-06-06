@@ -2,4 +2,4 @@ action: done
 gpus: 0
 test: false
 milestone: core_claim
-notes: "core_claim supported: SWOT reduces CCT vs strawman with valid schedules; split primary reductions differ train/test (fig5 12.5/28.57, fig8-64 34.96/22.88, fig8-512 41.45/42.72); validate.py --compare passes."
+notes: "Packaging audit complete: no external artifacts required; fixed data/downloads .gitkeep ignore rule and validation passes."
