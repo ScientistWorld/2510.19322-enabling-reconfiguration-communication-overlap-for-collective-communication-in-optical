@@ -1,0 +1,900 @@
+{
+  "experiments": {
+    "fig5_rabenseifner_allreduce_8node": {
+      "spec": {
+        "name": "fig5_rabenseifner_allreduce_8node",
+        "description": "8-node Rabenseifner AllReduce timeline from the paper's design-intuition example.",
+        "nodes": 8,
+        "optical_degree": 2,
+        "per_link_gbps": 400.0,
+        "base_latency_us": 0.0,
+        "reconfig_latency_us": 200.0,
+        "steps": [
+          {
+            "step": 1,
+            "config": 1,
+            "message_mb": 20.0
+          },
+          {
+            "step": 2,
+            "config": 2,
+            "message_mb": 10.0
+          },
+          {
+            "step": 3,
+            "config": 3,
+            "message_mb": 5.0
+          },
+          {
+            "step": 4,
+            "config": 3,
+            "message_mb": 5.0
+          },
+          {
+            "step": 5,
+            "config": 2,
+            "message_mb": 10.0
+          },
+          {
+            "step": 6,
+            "config": 1,
+            "message_mb": 20.0
+          }
+        ]
+      },
+      "results": {
+        "swot": {
+          "method": "swot",
+          "experiment": "fig5_rabenseifner_allreduce_8node",
+          "solver_status": "Optimal",
+          "cct_us": 1200.0,
+          "reconfiguration_events": 4,
+          "reconfiguration_us": 800.0,
+          "valid_schedule": 1.0,
+          "schedule": [
+            {
+              "step": 1,
+              "config": 1,
+              "plane": 0,
+              "message_mb": 15.0,
+              "reconfigured": 0,
+              "reconfig_start_us": 0.0,
+              "reconfig_end_us": 0.0,
+              "transmit_start_us": 0.0,
+              "transmit_end_us": 0.0
+            },
+            {
+              "step": 1,
+              "config": 1,
+              "plane": 1,
+              "message_mb": 5.0,
+              "reconfigured": 0,
+              "reconfig_start_us": 0.0,
+              "reconfig_end_us": 0.0,
+              "transmit_start_us": 0.0,
+              "transmit_end_us": 0.0
+            },
+            {
+              "step": 2,
+              "config": 2,
+              "plane": 1,
+              "message_mb": 10.0,
+              "reconfigured": 0,
+              "reconfig_start_us": 0.0,
+              "reconfig_end_us": 0.0,
+              "transmit_start_us": 0.0,
+              "transmit_end_us": 0.0
+            },
+            {
+              "step": 3,
+              "config": 3,
+              "plane": 0,
+              "message_mb": 5.0,
+              "reconfigured": 0,
+              "reconfig_start_us": 0.0,
+              "reconfig_end_us": 0.0,
+              "transmit_start_us": 0.0,
+              "transmit_end_us": 0.0
+            },
+            {
+              "step": 4,
+              "config": 3,
+              "plane": 0,
+              "message_mb": 5.0,
+              "reconfigured": 0,
+              "reconfig_start_us": 0.0,
+              "reconfig_end_us": 0.0,
+              "transmit_start_us": 0.0,
+              "transmit_end_us": 0.0
+            },
+            {
+              "step": 5,
+              "config": 2,
+              "plane": 1,
+              "message_mb": 10.0,
+              "reconfigured": 0,
+              "reconfig_start_us": 0.0,
+              "reconfig_end_us": 0.0,
+              "transmit_start_us": 0.0,
+              "transmit_end_us": 0.0
+            },
+            {
+              "step": 6,
+              "config": 1,
+              "plane": 0,
+              "message_mb": 15.0,
+              "reconfigured": 0,
+              "reconfig_start_us": 0.0,
+              "reconfig_end_us": 0.0,
+              "transmit_start_us": 0.0,
+              "transmit_end_us": 0.0
+            },
+            {
+              "step": 6,
+              "config": 1,
+              "plane": 1,
+              "message_mb": 5.0,
+              "reconfigured": 0,
+              "reconfig_start_us": 0.0,
+              "reconfig_end_us": 0.0,
+              "transmit_start_us": 0.0,
+              "transmit_end_us": 0.0
+            }
+          ]
+        }
+      }
+    },
+    "fig8_rabenseifner_allreduce_64node_k4": {
+      "spec": {
+        "name": "fig8_rabenseifner_allreduce_64node_k4",
+        "description": "Paper Fig. 8 Rabenseifner AllReduce scalability point at 64 nodes.",
+        "nodes": 64,
+        "optical_degree": 4,
+        "per_link_gbps": 200.0,
+        "base_latency_us": 20.0,
+        "reconfig_latency_us": 200.0,
+        "steps": [
+          {
+            "step": 1,
+            "config": 1,
+            "message_mb": 16.0
+          },
+          {
+            "step": 2,
+            "config": 2,
+            "message_mb": 8.0
+          },
+          {
+            "step": 3,
+            "config": 3,
+            "message_mb": 4.0
+          },
+          {
+            "step": 4,
+            "config": 4,
+            "message_mb": 2.0
+          },
+          {
+            "step": 5,
+            "config": 5,
+            "message_mb": 1.0
+          },
+          {
+            "step": 6,
+            "config": 6,
+            "message_mb": 0.5
+          },
+          {
+            "step": 7,
+            "config": 6,
+            "message_mb": 0.5
+          },
+          {
+            "step": 8,
+            "config": 5,
+            "message_mb": 1.0
+          },
+          {
+            "step": 9,
+            "config": 4,
+            "message_mb": 2.0
+          },
+          {
+            "step": 10,
+            "config": 3,
+            "message_mb": 4.0
+          },
+          {
+            "step": 11,
+            "config": 2,
+            "message_mb": 8.0
+          },
+          {
+            "step": 12,
+            "config": 1,
+            "message_mb": 16.0
+          }
+        ]
+      },
+      "results": {
+        "swot": {
+          "method": "swot",
+          "experiment": "fig8_rabenseifner_allreduce_64node_k4",
+          "solver_status": "Optimal",
+          "cct_us": 1840.0,
+          "reconfiguration_events": 16,
+          "reconfiguration_us": 3200.0,
+          "valid_schedule": 1.0,
+          "schedule": [
+            {
+              "step": 1,
+              "config": 1,
+              "plane": 0,
+              "message_mb": 2.3333324,
+              "reconfigured": 0,
+              "reconfig_start_us": 0.0,
+              "reconfig_end_us": 0.0,
+              "transmit_start_us": 0.0,
+              "transmit_end_us": 0.0
+            },
+            {
+              "step": 1,
+              "config": 1,
+              "plane": 2,
+              "message_mb": 6.8333338,
+              "reconfigured": 0,
+              "reconfig_start_us": 0.0,
+              "reconfig_end_us": 0.0,
+              "transmit_start_us": 0.0,
+              "transmit_end_us": 0.0
+            },
+            {
+              "step": 1,
+              "config": 1,
+              "plane": 3,
+              "message_mb": 6.8333338,
+              "reconfigured": 0,
+              "reconfig_start_us": 0.0,
+              "reconfig_end_us": 0.0,
+              "transmit_start_us": 0.0,
+              "transmit_end_us": 0.0
+            },
+            {
+              "step": 2,
+              "config": 2,
+              "plane": 0,
+              "message_mb": 3.5,
+              "reconfigured": 0,
+              "reconfig_start_us": 0.0,
+              "reconfig_end_us": 0.0,
+              "transmit_start_us": 0.0,
+              "transmit_end_us": 0.0
+            },
+            {
+              "step": 2,
+              "config": 2,
+              "plane": 1,
+              "message_mb": 4.5,
+              "reconfigured": 0,
+              "reconfig_start_us": 0.0,
+              "reconfig_end_us": 0.0,
+              "transmit_start_us": 0.0,
+              "transmit_end_us": 0.0
+            },
+            {
+              "step": 3,
+              "config": 3,
+              "plane": 0,
+              "message_mb": 1e-06,
+              "reconfigured": 0,
+              "reconfig_start_us": 0.0,
+              "reconfig_end_us": 0.0,
+              "transmit_start_us": 0.0,
+              "transmit_end_us": 0.0
+            },
+            {
+              "step": 3,
+              "config": 3,
+              "plane": 2,
+              "message_mb": 0.99999933,
+              "reconfigured": 0,
+              "reconfig_start_us": 0.0,
+              "reconfig_end_us": 0.0,
+              "transmit_start_us": 0.0,
+              "transmit_end_us": 0.0
+            },
+            {
+              "step": 3,
+              "config": 3,
+              "plane": 3,
+              "message_mb": 2.9999997,
+              "reconfigured": 0,
+              "reconfig_start_us": 0.0,
+              "reconfig_end_us": 0.0,
+              "transmit_start_us": 0.0,
+              "transmit_end_us": 0.0
+            },
+            {
+              "step": 4,
+              "config": 4,
+              "plane": 1,
+              "message_mb": 0.49999967,
+              "reconfigured": 0,
+              "reconfig_start_us": 0.0,
+              "reconfig_end_us": 0.0,
+              "transmit_start_us": 0.0,
+              "transmit_end_us": 0.0
+            },
+            {
+              "step": 4,
+              "config": 4,
+              "plane": 2,
+              "message_mb": 1.5000003,
+              "reconfigured": 0,
+              "reconfig_start_us": 0.0,
+              "reconfig_end_us": 0.0,
+              "transmit_start_us": 0.0,
+              "transmit_end_us": 0.0
+            },
+            {
+              "step": 5,
+              "config": 5,
+              "plane": 3,
+              "message_mb": 1.0,
+              "reconfigured": 0,
+              "reconfig_start_us": 0.0,
+              "reconfig_end_us": 0.0,
+              "transmit_start_us": 0.0,
+              "transmit_end_us": 0.0
+            },
+            {
+              "step": 6,
+              "config": 6,
+              "plane": 0,
+              "message_mb": 0.5,
+              "reconfigured": 0,
+              "reconfig_start_us": 0.0,
+              "reconfig_end_us": 0.0,
+              "transmit_start_us": 0.0,
+              "transmit_end_us": 0.0
+            },
+            {
+              "step": 7,
+              "config": 6,
+              "plane": 1,
+              "message_mb": 0.5,
+              "reconfigured": 0,
+              "reconfig_start_us": 0.0,
+              "reconfig_end_us": 0.0,
+              "transmit_start_us": 0.0,
+              "transmit_end_us": 0.0
+            },
+            {
+              "step": 8,
+              "config": 5,
+              "plane": 3,
+              "message_mb": 1.0,
+              "reconfigured": 0,
+              "reconfig_start_us": 0.0,
+              "reconfig_end_us": 0.0,
+              "transmit_start_us": 0.0,
+              "transmit_end_us": 0.0
+            },
+            {
+              "step": 9,
+              "config": 4,
+              "plane": 0,
+              "message_mb": 1e-06,
+              "reconfigured": 0,
+              "reconfig_start_us": 0.0,
+              "reconfig_end_us": 0.0,
+              "transmit_start_us": 0.0,
+              "transmit_end_us": 0.0
+            },
+            {
+              "step": 9,
+              "config": 4,
+              "plane": 2,
+              "message_mb": 1.999999,
+              "reconfigured": 0,
+              "reconfig_start_us": 0.0,
+              "reconfig_end_us": 0.0,
+              "transmit_start_us": 0.0,
+              "transmit_end_us": 0.0
+            },
+            {
+              "step": 10,
+              "config": 3,
+              "plane": 1,
+              "message_mb": 4.0,
+              "reconfigured": 0,
+              "reconfig_start_us": 0.0,
+              "reconfig_end_us": 0.0,
+              "transmit_start_us": 0.0,
+              "transmit_end_us": 0.0
+            },
+            {
+              "step": 11,
+              "config": 2,
+              "plane": 2,
+              "message_mb": 4.5,
+              "reconfigured": 0,
+              "reconfig_start_us": 0.0,
+              "reconfig_end_us": 0.0,
+              "transmit_start_us": 0.0,
+              "transmit_end_us": 0.0
+            },
+            {
+              "step": 11,
+              "config": 2,
+              "plane": 3,
+              "message_mb": 3.5,
+              "reconfigured": 0,
+              "reconfig_start_us": 0.0,
+              "reconfig_end_us": 0.0,
+              "transmit_start_us": 0.0,
+              "transmit_end_us": 0.0
+            },
+            {
+              "step": 12,
+              "config": 1,
+              "plane": 0,
+              "message_mb": 6.6666667,
+              "reconfigured": 0,
+              "reconfig_start_us": 0.0,
+              "reconfig_end_us": 0.0,
+              "transmit_start_us": 0.0,
+              "transmit_end_us": 0.0
+            },
+            {
+              "step": 12,
+              "config": 1,
+              "plane": 1,
+              "message_mb": 6.6666667,
+              "reconfigured": 0,
+              "reconfig_start_us": 0.0,
+              "reconfig_end_us": 0.0,
+              "transmit_start_us": 0.0,
+              "transmit_end_us": 0.0
+            },
+            {
+              "step": 12,
+              "config": 1,
+              "plane": 3,
+              "message_mb": 2.6666667,
+              "reconfigured": 0,
+              "reconfig_start_us": 0.0,
+              "reconfig_end_us": 0.0,
+              "transmit_start_us": 0.0,
+              "transmit_end_us": 0.0
+            }
+          ]
+        }
+      }
+    },
+    "fig8_rabenseifner_allreduce_512node_k4": {
+      "spec": {
+        "name": "fig8_rabenseifner_allreduce_512node_k4",
+        "description": "Paper Fig. 8 Rabenseifner AllReduce scalability point at 512 nodes.",
+        "nodes": 512,
+        "optical_degree": 4,
+        "per_link_gbps": 200.0,
+        "base_latency_us": 20.0,
+        "reconfig_latency_us": 200.0,
+        "steps": [
+          {
+            "step": 1,
+            "config": 1,
+            "message_mb": 16.0
+          },
+          {
+            "step": 2,
+            "config": 2,
+            "message_mb": 8.0
+          },
+          {
+            "step": 3,
+            "config": 3,
+            "message_mb": 4.0
+          },
+          {
+            "step": 4,
+            "config": 4,
+            "message_mb": 2.0
+          },
+          {
+            "step": 5,
+            "config": 5,
+            "message_mb": 1.0
+          },
+          {
+            "step": 6,
+            "config": 6,
+            "message_mb": 0.5
+          },
+          {
+            "step": 7,
+            "config": 7,
+            "message_mb": 0.25
+          },
+          {
+            "step": 8,
+            "config": 8,
+            "message_mb": 0.125
+          },
+          {
+            "step": 9,
+            "config": 9,
+            "message_mb": 0.0625
+          },
+          {
+            "step": 10,
+            "config": 9,
+            "message_mb": 0.0625
+          },
+          {
+            "step": 11,
+            "config": 8,
+            "message_mb": 0.125
+          },
+          {
+            "step": 12,
+            "config": 7,
+            "message_mb": 0.25
+          },
+          {
+            "step": 13,
+            "config": 6,
+            "message_mb": 0.5
+          },
+          {
+            "step": 14,
+            "config": 5,
+            "message_mb": 1.0
+          },
+          {
+            "step": 15,
+            "config": 4,
+            "message_mb": 2.0
+          },
+          {
+            "step": 16,
+            "config": 3,
+            "message_mb": 4.0
+          },
+          {
+            "step": 17,
+            "config": 2,
+            "message_mb": 8.0
+          },
+          {
+            "step": 18,
+            "config": 1,
+            "message_mb": 16.0
+          }
+        ]
+      },
+      "results": {
+        "swot": {
+          "method": "swot",
+          "experiment": "fig8_rabenseifner_allreduce_512node_k4",
+          "solver_status": "Optimal",
+          "cct_us": 2431.6667,
+          "reconfiguration_events": 21,
+          "reconfiguration_us": 4200.0,
+          "valid_schedule": 1.0,
+          "schedule": [
+            {
+              "step": 1,
+              "config": 1,
+              "plane": 0,
+              "message_mb": 3.6666667,
+              "reconfigured": 0,
+              "reconfig_start_us": 0.0,
+              "reconfig_end_us": 0.0,
+              "transmit_start_us": 0.0,
+              "transmit_end_us": 0.0
+            },
+            {
+              "step": 1,
+              "config": 1,
+              "plane": 1,
+              "message_mb": 8.6666667,
+              "reconfigured": 0,
+              "reconfig_start_us": 0.0,
+              "reconfig_end_us": 0.0,
+              "transmit_start_us": 0.0,
+              "transmit_end_us": 0.0
+            },
+            {
+              "step": 1,
+              "config": 1,
+              "plane": 2,
+              "message_mb": 3.6666667,
+              "reconfigured": 0,
+              "reconfig_start_us": 0.0,
+              "reconfig_end_us": 0.0,
+              "transmit_start_us": 0.0,
+              "transmit_end_us": 0.0
+            },
+            {
+              "step": 2,
+              "config": 2,
+              "plane": 0,
+              "message_mb": 4.6250003,
+              "reconfigured": 0,
+              "reconfig_start_us": 0.0,
+              "reconfig_end_us": 0.0,
+              "transmit_start_us": 0.0,
+              "transmit_end_us": 0.0
+            },
+            {
+              "step": 2,
+              "config": 2,
+              "plane": 2,
+              "message_mb": 3.3749998,
+              "reconfigured": 0,
+              "reconfig_start_us": 0.0,
+              "reconfig_end_us": 0.0,
+              "transmit_start_us": 0.0,
+              "transmit_end_us": 0.0
+            },
+            {
+              "step": 3,
+              "config": 3,
+              "plane": 1,
+              "message_mb": 1.7499995,
+              "reconfigured": 0,
+              "reconfig_start_us": 0.0,
+              "reconfig_end_us": 0.0,
+              "transmit_start_us": 0.0,
+              "transmit_end_us": 0.0
+            },
+            {
+              "step": 3,
+              "config": 3,
+              "plane": 3,
+              "message_mb": 2.2500005,
+              "reconfigured": 0,
+              "reconfig_start_us": 0.0,
+              "reconfig_end_us": 0.0,
+              "transmit_start_us": 0.0,
+              "transmit_end_us": 0.0
+            },
+            {
+              "step": 4,
+              "config": 4,
+              "plane": 0,
+              "message_mb": 1.999998,
+              "reconfigured": 0,
+              "reconfig_start_us": 0.0,
+              "reconfig_end_us": 0.0,
+              "transmit_start_us": 0.0,
+              "transmit_end_us": 0.0
+            },
+            {
+              "step": 4,
+              "config": 4,
+              "plane": 1,
+              "message_mb": 1e-06,
+              "reconfigured": 0,
+              "reconfig_start_us": 0.0,
+              "reconfig_end_us": 0.0,
+              "transmit_start_us": 0.0,
+              "transmit_end_us": 0.0
+            },
+            {
+              "step": 4,
+              "config": 4,
+              "plane": 2,
+              "message_mb": 1e-06,
+              "reconfigured": 0,
+              "reconfig_start_us": 0.0,
+              "reconfig_end_us": 0.0,
+              "transmit_start_us": 0.0,
+              "transmit_end_us": 0.0
+            },
+            {
+              "step": 5,
+              "config": 5,
+              "plane": 3,
+              "message_mb": 1.0,
+              "reconfigured": 0,
+              "reconfig_start_us": 0.0,
+              "reconfig_end_us": 0.0,
+              "transmit_start_us": 0.0,
+              "transmit_end_us": 0.0
+            },
+            {
+              "step": 6,
+              "config": 6,
+              "plane": 2,
+              "message_mb": 0.5,
+              "reconfigured": 0,
+              "reconfig_start_us": 0.0,
+              "reconfig_end_us": 0.0,
+              "transmit_start_us": 0.0,
+              "transmit_end_us": 0.0
+            },
+            {
+              "step": 7,
+              "config": 7,
+              "plane": 1,
+              "message_mb": 0.25,
+              "reconfigured": 0,
+              "reconfig_start_us": 0.0,
+              "reconfig_end_us": 0.0,
+              "transmit_start_us": 0.0,
+              "transmit_end_us": 0.0
+            },
+            {
+              "step": 8,
+              "config": 8,
+              "plane": 2,
+              "message_mb": 0.125,
+              "reconfigured": 0,
+              "reconfig_start_us": 0.0,
+              "reconfig_end_us": 0.0,
+              "transmit_start_us": 0.0,
+              "transmit_end_us": 0.0
+            },
+            {
+              "step": 9,
+              "config": 9,
+              "plane": 0,
+              "message_mb": 0.0625,
+              "reconfigured": 0,
+              "reconfig_start_us": 0.0,
+              "reconfig_end_us": 0.0,
+              "transmit_start_us": 0.0,
+              "transmit_end_us": 0.0
+            },
+            {
+              "step": 10,
+              "config": 9,
+              "plane": 0,
+              "message_mb": 0.0625,
+              "reconfigured": 0,
+              "reconfig_start_us": 0.0,
+              "reconfig_end_us": 0.0,
+              "transmit_start_us": 0.0,
+              "transmit_end_us": 0.0
+            },
+            {
+              "step": 11,
+              "config": 8,
+              "plane": 2,
+              "message_mb": 0.125,
+              "reconfigured": 0,
+              "reconfig_start_us": 0.0,
+              "reconfig_end_us": 0.0,
+              "transmit_start_us": 0.0,
+              "transmit_end_us": 0.0
+            },
+            {
+              "step": 12,
+              "config": 7,
+              "plane": 0,
+              "message_mb": 0.25,
+              "reconfigured": 0,
+              "reconfig_start_us": 0.0,
+              "reconfig_end_us": 0.0,
+              "transmit_start_us": 0.0,
+              "transmit_end_us": 0.0
+            },
+            {
+              "step": 13,
+              "config": 6,
+              "plane": 2,
+              "message_mb": 0.5,
+              "reconfigured": 0,
+              "reconfig_start_us": 0.0,
+              "reconfig_end_us": 0.0,
+              "transmit_start_us": 0.0,
+              "transmit_end_us": 0.0
+            },
+            {
+              "step": 14,
+              "config": 5,
+              "plane": 3,
+              "message_mb": 1.0,
+              "reconfigured": 0,
+              "reconfig_start_us": 0.0,
+              "reconfig_end_us": 0.0,
+              "transmit_start_us": 0.0,
+              "transmit_end_us": 0.0
+            },
+            {
+              "step": 15,
+              "config": 4,
+              "plane": 1,
+              "message_mb": 2.0,
+              "reconfigured": 0,
+              "reconfig_start_us": 0.0,
+              "reconfig_end_us": 0.0,
+              "transmit_start_us": 0.0,
+              "transmit_end_us": 0.0
+            },
+            {
+              "step": 16,
+              "config": 3,
+              "plane": 2,
+              "message_mb": 0.75,
+              "reconfigured": 0,
+              "reconfig_start_us": 0.0,
+              "reconfig_end_us": 0.0,
+              "transmit_start_us": 0.0,
+              "transmit_end_us": 0.0
+            },
+            {
+              "step": 16,
+              "config": 3,
+              "plane": 3,
+              "message_mb": 3.25,
+              "reconfigured": 0,
+              "reconfig_start_us": 0.0,
+              "reconfig_end_us": 0.0,
+              "transmit_start_us": 0.0,
+              "transmit_end_us": 0.0
+            },
+            {
+              "step": 17,
+              "config": 2,
+              "plane": 0,
+              "message_mb": 4.5,
+              "reconfigured": 0,
+              "reconfig_start_us": 0.0,
+              "reconfig_end_us": 0.0,
+              "transmit_start_us": 0.0,
+              "transmit_end_us": 0.0
+            },
+            {
+              "step": 17,
+              "config": 2,
+              "plane": 2,
+              "message_mb": 3.5,
+              "reconfigured": 0,
+              "reconfig_start_us": 0.0,
+              "reconfig_end_us": 0.0,
+              "transmit_start_us": 0.0,
+              "transmit_end_us": 0.0
+            },
+            {
+              "step": 18,
+              "config": 1,
+              "plane": 0,
+              "message_mb": 2.0,
+              "reconfigured": 0,
+              "reconfig_start_us": 0.0,
+              "reconfig_end_us": 0.0,
+              "transmit_start_us": 0.0,
+              "transmit_end_us": 0.0
+            },
+            {
+              "step": 18,
+              "config": 1,
+              "plane": 1,
+              "message_mb": 7.0,
+              "reconfigured": 0,
+              "reconfig_start_us": 0.0,
+              "reconfig_end_us": 0.0,
+              "transmit_start_us": 0.0,
+              "transmit_end_us": 0.0
+            },
+            {
+              "step": 18,
+              "config": 1,
+              "plane": 3,
+              "message_mb": 7.0,
+              "reconfigured": 0,
+              "reconfig_start_us": 0.0,
+              "reconfig_end_us": 0.0,
+              "transmit_start_us": 0.0,
+              "transmit_end_us": 0.0
+            }
+          ]
+        }
+      }
+    }
+  }
+}

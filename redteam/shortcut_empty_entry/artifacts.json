@@ -1,0 +1,232 @@
+{
+  "experiments": {
+    "fig5_rabenseifner_allreduce_8node": {
+      "spec": {
+        "name": "fig5_rabenseifner_allreduce_8node",
+        "description": "8-node Rabenseifner AllReduce timeline from the paper's design-intuition example.",
+        "nodes": 8,
+        "optical_degree": 2,
+        "per_link_gbps": 400.0,
+        "base_latency_us": 0.0,
+        "reconfig_latency_us": 200.0,
+        "steps": [
+          {
+            "step": 1,
+            "config": 1,
+            "message_mb": 20.0
+          },
+          {
+            "step": 2,
+            "config": 2,
+            "message_mb": 10.0
+          },
+          {
+            "step": 3,
+            "config": 3,
+            "message_mb": 5.0
+          },
+          {
+            "step": 4,
+            "config": 3,
+            "message_mb": 5.0
+          },
+          {
+            "step": 5,
+            "config": 2,
+            "message_mb": 10.0
+          },
+          {
+            "step": 6,
+            "config": 1,
+            "message_mb": 20.0
+          }
+        ]
+      },
+      "results": {
+        "swot": {}
+      }
+    },
+    "fig8_rabenseifner_allreduce_64node_k4": {
+      "spec": {
+        "name": "fig8_rabenseifner_allreduce_64node_k4",
+        "description": "Paper Fig. 8 Rabenseifner AllReduce scalability point at 64 nodes.",
+        "nodes": 64,
+        "optical_degree": 4,
+        "per_link_gbps": 200.0,
+        "base_latency_us": 20.0,
+        "reconfig_latency_us": 200.0,
+        "steps": [
+          {
+            "step": 1,
+            "config": 1,
+            "message_mb": 16.0
+          },
+          {
+            "step": 2,
+            "config": 2,
+            "message_mb": 8.0
+          },
+          {
+            "step": 3,
+            "config": 3,
+            "message_mb": 4.0
+          },
+          {
+            "step": 4,
+            "config": 4,
+            "message_mb": 2.0
+          },
+          {
+            "step": 5,
+            "config": 5,
+            "message_mb": 1.0
+          },
+          {
+            "step": 6,
+            "config": 6,
+            "message_mb": 0.5
+          },
+          {
+            "step": 7,
+            "config": 6,
+            "message_mb": 0.5
+          },
+          {
+            "step": 8,
+            "config": 5,
+            "message_mb": 1.0
+          },
+          {
+            "step": 9,
+            "config": 4,
+            "message_mb": 2.0
+          },
+          {
+            "step": 10,
+            "config": 3,
+            "message_mb": 4.0
+          },
+          {
+            "step": 11,
+            "config": 2,
+            "message_mb": 8.0
+          },
+          {
+            "step": 12,
+            "config": 1,
+            "message_mb": 16.0
+          }
+        ]
+      },
+      "results": {
+        "swot": {}
+      }
+    },
+    "fig8_rabenseifner_allreduce_512node_k4": {
+      "spec": {
+        "name": "fig8_rabenseifner_allreduce_512node_k4",
+        "description": "Paper Fig. 8 Rabenseifner AllReduce scalability point at 512 nodes.",
+        "nodes": 512,
+        "optical_degree": 4,
+        "per_link_gbps": 200.0,
+        "base_latency_us": 20.0,
+        "reconfig_latency_us": 200.0,
+        "steps": [
+          {
+            "step": 1,
+            "config": 1,
+            "message_mb": 16.0
+          },
+          {
+            "step": 2,
+            "config": 2,
+            "message_mb": 8.0
+          },
+          {
+            "step": 3,
+            "config": 3,
+            "message_mb": 4.0
+          },
+          {
+            "step": 4,
+            "config": 4,
+            "message_mb": 2.0
+          },
+          {
+            "step": 5,
+            "config": 5,
+            "message_mb": 1.0
+          },
+          {
+            "step": 6,
+            "config": 6,
+            "message_mb": 0.5
+          },
+          {
+            "step": 7,
+            "config": 7,
+            "message_mb": 0.25
+          },
+          {
+            "step": 8,
+            "config": 8,
+            "message_mb": 0.125
+          },
+          {
+            "step": 9,
+            "config": 9,
+            "message_mb": 0.0625
+          },
+          {
+            "step": 10,
+            "config": 9,
+            "message_mb": 0.0625
+          },
+          {
+            "step": 11,
+            "config": 8,
+            "message_mb": 0.125
+          },
+          {
+            "step": 12,
+            "config": 7,
+            "message_mb": 0.25
+          },
+          {
+            "step": 13,
+            "config": 6,
+            "message_mb": 0.5
+          },
+          {
+            "step": 14,
+            "config": 5,
+            "message_mb": 1.0
+          },
+          {
+            "step": 15,
+            "config": 4,
+            "message_mb": 2.0
+          },
+          {
+            "step": 16,
+            "config": 3,
+            "message_mb": 4.0
+          },
+          {
+            "step": 17,
+            "config": 2,
+            "message_mb": 8.0
+          },
+          {
+            "step": 18,
+            "config": 1,
+            "message_mb": 16.0
+          }
+        ]
+      },
+      "results": {
+        "swot": {}
+      }
+    }
+  }
+}

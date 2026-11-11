@@ -1,0 +1,26 @@
+{
+  "fig5_rabenseifner_allreduce_8node": {
+    "has_schedule": true,
+    "visible_validator_valid": true,
+    "full_completion_us": 1500.0,
+    "max_duration_error_us": 0.0,
+    "illegal_plane_entries": 0,
+    "actual_distinct_planes": 2
+  },
+  "fig8_rabenseifner_allreduce_64node_k4": {
+    "has_schedule": true,
+    "visible_validator_valid": true,
+    "full_completion_us": 2870.0,
+    "max_duration_error_us": 0.0,
+    "illegal_plane_entries": 0,
+    "actual_distinct_planes": 4
+  },
+  "fig8_rabenseifner_allreduce_512node_k4": {
+    "has_schedule": true,
+    "visible_validator_valid": true,
+    "full_completion_us": 4198.75,
+    "max_duration_error_us": 0.0,
+    "illegal_plane_entries": 0,
+    "actual_distinct_planes": 4
+  }
+}

@@ -1,0 +1,126 @@
+{
+  "_metadata": {
+    "slice": "train",
+    "split": "prefix_collective_steps",
+    "artifacts": "checkpoints"
+  },
+  "experiments": {
+    "fig5_rabenseifner_allreduce_8node": {
+      "slice": "train",
+      "step_split": {
+        "selected_steps": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "held_out_steps": [
+          5,
+          6
+        ]
+      },
+      "results": {
+        "strawman_icr": {
+          "cct_us": 800.0,
+          "valid_schedule": 1.0,
+          "reconfiguration_events": 2.0,
+          "step_volume_error_mb": 0.0,
+          "max_plane_overlap_us": 0.0,
+          "cct_reduction_vs_strawman_pct": 0.0
+        },
+        "swot": {
+          "cct_us": 0.0,
+          "valid_schedule": 1.0,
+          "reconfiguration_events": 0.0,
+          "step_volume_error_mb": 0.0,
+          "max_plane_overlap_us": 0.0,
+          "cct_reduction_vs_strawman_pct": 100.0
+        }
+      }
+    },
+    "fig8_rabenseifner_allreduce_64node_k4": {
+      "slice": "train",
+      "step_split": {
+        "selected_steps": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "held_out_steps": [
+          7,
+          8,
+          9,
+          10,
+          11,
+          12
+        ]
+      },
+      "results": {
+        "strawman_icr": {
+          "cct_us": 1435.0,
+          "valid_schedule": 1.0,
+          "reconfiguration_events": 5.0,
+          "step_volume_error_mb": 0.0,
+          "max_plane_overlap_us": 0.0,
+          "cct_reduction_vs_strawman_pct": 0.0
+        },
+        "swot": {
+          "cct_us": 0.0,
+          "valid_schedule": 1.0,
+          "reconfiguration_events": 0.0,
+          "step_volume_error_mb": 0.0,
+          "max_plane_overlap_us": 0.0,
+          "cct_reduction_vs_strawman_pct": 100.0
+        }
+      }
+    },
+    "fig8_rabenseifner_allreduce_512node_k4": {
+      "slice": "train",
+      "step_split": {
+        "selected_steps": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "held_out_steps": [
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18
+        ]
+      },
+      "results": {
+        "strawman_icr": {
+          "cct_us": 2099.375,
+          "valid_schedule": 1.0,
+          "reconfiguration_events": 8.0,
+          "step_volume_error_mb": 0.0,
+          "max_plane_overlap_us": 0.0,
+          "cct_reduction_vs_strawman_pct": 0.0
+        },
+        "swot": {
+          "cct_us": 0.0,
+          "valid_schedule": 1.0,
+          "reconfiguration_events": 0.0,
+          "step_volume_error_mb": 0.0,
+          "max_plane_overlap_us": 0.0,
+          "cct_reduction_vs_strawman_pct": 100.0
+        }
+      }
+    }
+  }
+}

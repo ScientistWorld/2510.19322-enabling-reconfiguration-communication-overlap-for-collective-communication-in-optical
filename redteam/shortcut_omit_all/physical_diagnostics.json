@@ -1,0 +1,11 @@
+{
+  "fig5_rabenseifner_allreduce_8node": {
+    "has_schedule": false
+  },
+  "fig8_rabenseifner_allreduce_64node_k4": {
+    "has_schedule": false
+  },
+  "fig8_rabenseifner_allreduce_512node_k4": {
+    "has_schedule": false
+  }
+}
