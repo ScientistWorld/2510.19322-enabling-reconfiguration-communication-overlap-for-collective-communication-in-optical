@@ -5,4 +5,4 @@ action: submit
 gpus: 0
 test: false
 milestone: core_claim_plus
-notes: "Hardening check part 2 (resumable, per-instance cached): reference SWOT MILP with tight valid big-M on hidden test, weaker 10 s variant, MILP+LNS positive control, train+paper reference (scores_train/scores.json), seed-2 noise rerun, private-search/brute-force probe, LNS on train; fast shortcut runs reused; analysis + validate."
+notes: "Resume hardening check (previous job preempted, per-instance cache kept): finish MILP+LNS positive control on test, train+paper reference (scores_train/scores.json), seed-2 noise rerun, private-search probe, LNS on train; analysis + validate."
