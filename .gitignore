@@ -234,3 +234,4 @@ core.[0-9]*
 # Hardening harness scratch (results under hardening/runs/ are tracked)
 hardening/_runtime/
 hardening/replay_cache.json
+!hardening/runs/

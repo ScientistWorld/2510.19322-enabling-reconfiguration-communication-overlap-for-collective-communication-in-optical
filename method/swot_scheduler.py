@@ -52,12 +52,15 @@ def lockstep_cct_us(spec: ExperimentSpec) -> float:
     )
 
 
-def build_model(spec: ExperimentSpec, big_m: str = "horizon") -> Dict:
+def build_model(spec: ExperimentSpec, big_m: str = "lockstep") -> Dict:
     """The SWOT MILP (paper Eqs. 1-11) with big-M linearization.
 
-    ``big_m="horizon"`` (default) uses a loose horizon; ``"lockstep"`` uses the
-    lockstep schedule's CCT, which is a valid bound for every schedule that is
-    no slower than lockstep (the lockstep schedule itself stays feasible).
+    The paper leaves the big-M constant unspecified. ``big_m="lockstep"``
+    (default) sets M to the lockstep (Strawman-ICR) completion time and bounds
+    CCT by it: the lockstep schedule is a feasible point of the MILP, so the
+    optimum is unchanged, while the time-limited solver never returns a
+    schedule slower than lockstep. ``"horizon"`` is the loose sum-of-everything
+    horizon used by earlier iterations (kept for comparison).
     """
     steps = spec.steps
     n_steps = len(steps)
@@ -126,6 +129,8 @@ def build_model(spec: ExperimentSpec, big_m: str = "horizon") -> Dict:
         if i > 0:
             model += step_end[i] >= step_end[i - 1]
     model += cct >= step_end[n_steps - 1]
+    if big_m == "lockstep":
+        model += cct <= horizon
 
     return {
         "model": model,
@@ -228,7 +233,7 @@ def schedule_cct(schedule: List[Dict]) -> float:
     return max(item["transmit_end_us"] for item in schedule)
 
 
-def solve_swot(spec: ExperimentSpec, time_limit_s: float = 120, seed: int = 1, big_m: str = "horizon") -> Dict:
+def solve_swot(spec: ExperimentSpec, time_limit_s: float = 120, seed: int = 1, big_m: str = "lockstep") -> Dict:
     started = time.monotonic()
     milp = build_model(spec, big_m=big_m)
     remaining = time_limit_s - (time.monotonic() - started)
@@ -260,7 +265,7 @@ def solve_swot(spec: ExperimentSpec, time_limit_s: float = 120, seed: int = 1, b
     }
 
 
-def solve_instance_file(instance: Path, output: Path, time_limit_s: float, seed: int, big_m: str = "horizon") -> None:
+def solve_instance_file(instance: Path, output: Path, time_limit_s: float, seed: int, big_m: str = "lockstep") -> None:
     spec = load_instance(instance)
     budget = time_limit_s - (time.monotonic() - _PROCESS_START)
     result = solve_swot(spec, time_limit_s=budget, seed=seed, big_m=big_m)
@@ -287,7 +292,7 @@ def main() -> None:
     parser.add_argument("--output-dir", default="checkpoints/swot", help="batch mode output directory")
     parser.add_argument("--time-limit-s", type=float, default=120)
     parser.add_argument("--seed", type=int, default=1)
-    parser.add_argument("--big-m", choices=["horizon", "lockstep"], default="horizon")
+    parser.add_argument("--big-m", choices=["horizon", "lockstep"], default="lockstep")
     args = parser.parse_args()
     if args.instance:
         if not args.output:
