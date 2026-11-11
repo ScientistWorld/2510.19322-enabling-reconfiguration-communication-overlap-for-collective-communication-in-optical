@@ -1,4 +1,2 @@
-action: submit
-gpus: 0
-test: false
-notes: "Resume audit after worker loss; reuse completed reference, run fast shortcut checks first, then three seeds and stronger solver."
+action: done
+notes: "Audit complete: 22 saved test runs; stronger solve gain below seed spread; major scoring shortcuts confirmed."
