@@ -1,2 +1,8 @@
-action: done
-notes: "Audit complete: 22 saved test runs; stronger solve gain below seed spread; major scoring shortcuts confirmed."
+# Once you set action to 'submit' or 'done', STOP immediately.
+# Do NOT sleep, poll, or wait for jobs. The system reads this file
+# only after your turn ends.
+action: pending
+gpus: 0
+test: false
+milestone: core_claim_plus
+notes: ""
