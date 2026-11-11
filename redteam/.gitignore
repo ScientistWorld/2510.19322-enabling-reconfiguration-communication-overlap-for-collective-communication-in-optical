@@ -1,0 +1,6 @@
+__pycache__/
+_runtime/
+*.log
+*.lp
+*.mps
+*.sol

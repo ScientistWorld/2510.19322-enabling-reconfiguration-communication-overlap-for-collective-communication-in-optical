@@ -1,0 +1,81 @@
+{
+  "experiments": {
+    "fig5_rabenseifner_allreduce_8node": {
+      "description": "Paper Fig. 5 design-intuition example: 8-node Rabenseifner AllReduce with two 400 Gbps optical planes and 200 us reconfiguration latency.",
+      "weight": 0.5,
+      "primary_metric": "cct_reduction_vs_strawman_pct",
+      "metrics": {
+        "cct_us": {"higher_is_better": false, "coefficient": -1.0, "description": "Completion time of the scored collective slice in microseconds."},
+        "cct_reduction_vs_strawman_pct": {"higher_is_better": true, "coefficient": 0.5, "description": "Percent CCT reduction relative to the lockstep ICR strawman on the same slice."},
+        "reconfiguration_events": {"higher_is_better": false, "coefficient": -0.25, "description": "Number of optical-plane reconfigurations paid inside the scored slice."},
+        "valid_schedule": {"higher_is_better": true, "coefficient": 1.0, "description": "Binary check that the full serialized schedule respects step order, topology, volume, and reconfiguration constraints."},
+        "step_volume_error_mb": {"higher_is_better": false, "coefficient": -0.5, "description": "Absolute message-volume mismatch across the scored steps in MB."},
+        "max_plane_overlap_us": {"higher_is_better": false, "coefficient": -0.5, "description": "Largest illegal overlap between activities assigned to the same optical plane in microseconds."}
+      },
+      "results": {
+        "strawman_icr": {
+          "type": "baseline",
+          "cct_us": 1500.0,
+          "cct_reduction_vs_strawman_pct": 0.0,
+          "valid_schedule": 1.0
+        },
+        "swot": {
+          "type": "proposed",
+          "cct_us": 1200.0,
+          "cct_reduction_vs_strawman_pct": 20.0,
+          "valid_schedule": 1.0
+        }
+      }
+    },
+    "fig8_rabenseifner_allreduce_64node_k4": {
+      "description": "Paper Fig. 8 scalability point: Rabenseifner AllReduce at 64 nodes, k=4, 32 MB message, 200 us reconfiguration latency.",
+      "weight": 0.25,
+      "primary_metric": "cct_reduction_vs_strawman_pct",
+      "metrics": {
+        "cct_us": {"higher_is_better": false, "coefficient": -0.5, "description": "Completion time of the scored collective slice in microseconds."},
+        "cct_reduction_vs_strawman_pct": {"higher_is_better": true, "coefficient": 1.0, "description": "Percent CCT reduction relative to the lockstep ICR strawman on the same slice."},
+        "reconfiguration_events": {"higher_is_better": false, "coefficient": -0.25, "description": "Number of optical-plane reconfigurations paid inside the scored slice."},
+        "valid_schedule": {"higher_is_better": true, "coefficient": 1.0, "description": "Binary check that the full serialized schedule respects step order, topology, volume, and reconfiguration constraints."},
+        "step_volume_error_mb": {"higher_is_better": false, "coefficient": -0.5, "description": "Absolute message-volume mismatch across the scored steps in MB."},
+        "max_plane_overlap_us": {"higher_is_better": false, "coefficient": -0.5, "description": "Largest illegal overlap between activities assigned to the same optical plane in microseconds."}
+      },
+      "results": {
+        "strawman_icr": {
+          "type": "baseline",
+          "cct_reduction_vs_strawman_pct": 0.0,
+          "valid_schedule": 1.0
+        },
+        "swot": {
+          "type": "proposed",
+          "cct_reduction_vs_strawman_pct": 39.6,
+          "valid_schedule": 1.0
+        }
+      }
+    },
+    "fig8_rabenseifner_allreduce_512node_k4": {
+      "description": "Paper Fig. 8 scalability point: Rabenseifner AllReduce at 512 nodes, k=4, 32 MB message, 200 us reconfiguration latency.",
+      "weight": 0.25,
+      "primary_metric": "cct_reduction_vs_strawman_pct",
+      "metrics": {
+        "cct_us": {"higher_is_better": false, "coefficient": -0.5, "description": "Completion time of the scored collective slice in microseconds."},
+        "cct_reduction_vs_strawman_pct": {"higher_is_better": true, "coefficient": 1.0, "description": "Percent CCT reduction relative to the lockstep ICR strawman on the same slice."},
+        "reconfiguration_events": {"higher_is_better": false, "coefficient": -0.25, "description": "Number of optical-plane reconfigurations paid inside the scored slice."},
+        "valid_schedule": {"higher_is_better": true, "coefficient": 1.0, "description": "Binary check that the full serialized schedule respects step order, topology, volume, and reconfiguration constraints."},
+        "step_volume_error_mb": {"higher_is_better": false, "coefficient": -0.5, "description": "Absolute message-volume mismatch across the scored steps in MB."},
+        "max_plane_overlap_us": {"higher_is_better": false, "coefficient": -0.5, "description": "Largest illegal overlap between activities assigned to the same optical plane in microseconds."}
+      },
+      "results": {
+        "strawman_icr": {
+          "type": "baseline",
+          "cct_reduction_vs_strawman_pct": 0.0,
+          "valid_schedule": 1.0
+        },
+        "swot": {
+          "type": "proposed",
+          "cct_reduction_vs_strawman_pct": 46.9,
+          "valid_schedule": 1.0
+        }
+      }
+    }
+  }
+}

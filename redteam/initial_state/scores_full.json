@@ -1,0 +1,64 @@
+{
+  "experiments": {
+    "fig5_rabenseifner_allreduce_8node": {
+      "results": {
+        "strawman_icr": {
+          "cct_us": 1500.0,
+          "valid_schedule": 1.0,
+          "reconfiguration_events": 4.0,
+          "step_volume_error_mb": 0.0,
+          "max_plane_overlap_us": 0.0,
+          "cct_reduction_vs_strawman_pct": 0.0
+        },
+        "swot": {
+          "cct_us": 1200.0,
+          "valid_schedule": 1.0,
+          "reconfiguration_events": 4.0,
+          "step_volume_error_mb": 0.0,
+          "max_plane_overlap_us": 0.0,
+          "cct_reduction_vs_strawman_pct": 20.0
+        }
+      }
+    },
+    "fig8_rabenseifner_allreduce_64node_k4": {
+      "results": {
+        "strawman_icr": {
+          "cct_us": 2870.0,
+          "valid_schedule": 1.0,
+          "reconfiguration_events": 10.0,
+          "step_volume_error_mb": 0.0,
+          "max_plane_overlap_us": 0.0,
+          "cct_reduction_vs_strawman_pct": 0.0
+        },
+        "swot": {
+          "cct_us": 1840.0,
+          "valid_schedule": 1.0,
+          "reconfiguration_events": 16.0,
+          "step_volume_error_mb": 1.600000010260061e-07,
+          "max_plane_overlap_us": 0.0,
+          "cct_reduction_vs_strawman_pct": 35.88850174216028
+        }
+      }
+    },
+    "fig8_rabenseifner_allreduce_512node_k4": {
+      "results": {
+        "strawman_icr": {
+          "cct_us": 4198.75,
+          "valid_schedule": 1.0,
+          "reconfiguration_events": 16.0,
+          "step_volume_error_mb": 0.0,
+          "max_plane_overlap_us": 0.0,
+          "cct_reduction_vs_strawman_pct": 0.0
+        },
+        "swot": {
+          "cct_us": 2431.6667,
+          "valid_schedule": 1.0,
+          "reconfiguration_events": 21.0,
+          "step_volume_error_mb": 2.0000000056086265e-07,
+          "max_plane_overlap_us": 0.0,
+          "cct_reduction_vs_strawman_pct": 42.085937481393266
+        }
+      }
+    }
+  }
+}
