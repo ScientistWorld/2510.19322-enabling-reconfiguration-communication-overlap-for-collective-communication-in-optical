@@ -1,8 +1,8 @@
 # Once you set action to 'submit' or 'done', STOP immediately.
 # Do NOT sleep, poll, or wait for jobs. The system reads this file
 # only after your turn ends.
-action: pending
+action: submit
 gpus: 0
 test: false
 milestone: core_claim_plus
-notes: ""
+notes: "Hardening check part 2 (resumable, per-instance cached): reference SWOT MILP with tight valid big-M on hidden test, weaker 10 s variant, MILP+LNS positive control, train+paper reference (scores_train/scores.json), seed-2 noise rerun, private-search/brute-force probe, LNS on train; fast shortcut runs reused; analysis + validate."

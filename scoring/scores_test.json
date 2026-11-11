@@ -1,124 +1,71 @@
 {
   "_metadata": {
     "slice": "test",
-    "split": "held_out_suffix_collective_steps",
-    "artifacts": "checkpoints"
+    "instance_suite_sha256_16": "13159ecc8b9e68f0",
+    "instances_per_experiment": {
+      "allreduce_scaling": 6,
+      "collective_algorithms": 6,
+      "hardware_sensitivity": 6
+    },
+    "solver_time_limit_s": 120,
+    "hard_wall_clock_limit_s": 150,
+    "methods": [
+      "swot"
+    ],
+    "failure_rule": "any missing/late/invalid instance fails the whole run: worst value in every metric of every experiment"
   },
   "experiments": {
-    "fig5_rabenseifner_allreduce_8node": {
-      "slice": "test",
-      "step_split": {
-        "selected_steps": [
-          5,
-          6
-        ],
-        "held_out_steps": [
-          1,
-          2,
-          3,
-          4
-        ]
-      },
+    "allreduce_scaling": {
       "results": {
         "strawman_icr": {
-          "cct_us": 700.0,
-          "valid_schedule": 1.0,
-          "reconfiguration_events": 2.0,
-          "step_volume_error_mb": 0.0,
-          "max_plane_overlap_us": 0.0,
-          "cct_reduction_vs_strawman_pct": 0.0
+          "cct_reduction_vs_strawman_pct": 0.0,
+          "valid_schedule": 1.0
         },
         "swot": {
-          "cct_us": 500.0,
-          "reconfiguration_events": 2.0,
-          "step_volume_error_mb": 0.0,
-          "max_plane_overlap_us": 0.0,
-          "valid_schedule": 1.0,
-          "cct_reduction_vs_strawman_pct": 28.571428571428573
+          "cct_reduction_vs_strawman_pct": 37.46690631381999,
+          "valid_schedule": 1.0
+        }
+      },
+      "_status": {
+        "swot": {
+          "run_failed": false,
+          "failure": null
         }
       }
     },
-    "fig8_rabenseifner_allreduce_64node_k4": {
-      "slice": "test",
-      "step_split": {
-        "selected_steps": [
-          7,
-          8,
-          9,
-          10,
-          11,
-          12
-        ],
-        "held_out_steps": [
-          1,
-          2,
-          3,
-          4,
-          5,
-          6
-        ]
-      },
+    "collective_algorithms": {
       "results": {
         "strawman_icr": {
-          "cct_us": 1435.0,
-          "valid_schedule": 1.0,
-          "reconfiguration_events": 5.0,
-          "step_volume_error_mb": 0.0,
-          "max_plane_overlap_us": 0.0,
-          "cct_reduction_vs_strawman_pct": 0.0
+          "cct_reduction_vs_strawman_pct": 0.0,
+          "valid_schedule": 1.0
         },
         "swot": {
-          "cct_us": 1106.6666599999999,
-          "reconfiguration_events": 8.0,
-          "step_volume_error_mb": 0.0,
-          "max_plane_overlap_us": 0.0,
-          "valid_schedule": 1.0,
-          "cct_reduction_vs_strawman_pct": 22.880372125435553
+          "cct_reduction_vs_strawman_pct": 37.849489029134595,
+          "valid_schedule": 1.0
+        }
+      },
+      "_status": {
+        "swot": {
+          "run_failed": false,
+          "failure": null
         }
       }
     },
-    "fig8_rabenseifner_allreduce_512node_k4": {
-      "slice": "test",
-      "step_split": {
-        "selected_steps": [
-          10,
-          11,
-          12,
-          13,
-          14,
-          15,
-          16,
-          17,
-          18
-        ],
-        "held_out_steps": [
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7,
-          8,
-          9
-        ]
-      },
+    "hardware_sensitivity": {
       "results": {
         "strawman_icr": {
-          "cct_us": 2099.375,
-          "valid_schedule": 1.0,
-          "reconfiguration_events": 8.0,
-          "step_volume_error_mb": 0.0,
-          "max_plane_overlap_us": 0.0,
-          "cct_reduction_vs_strawman_pct": 0.0
+          "cct_reduction_vs_strawman_pct": 0.0,
+          "valid_schedule": 1.0
         },
         "swot": {
-          "cct_us": 1202.5000000000002,
-          "reconfiguration_events": 10.0,
-          "step_volume_error_mb": 0.0,
-          "max_plane_overlap_us": 0.0,
-          "valid_schedule": 1.0,
-          "cct_reduction_vs_strawman_pct": 42.72104793093181
+          "cct_reduction_vs_strawman_pct": 40.52335369750625,
+          "valid_schedule": 1.0
+        }
+      },
+      "_status": {
+        "swot": {
+          "run_failed": false,
+          "failure": null
         }
       }
     }
