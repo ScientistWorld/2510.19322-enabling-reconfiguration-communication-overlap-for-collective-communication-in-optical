@@ -29,6 +29,7 @@
     "better_solver": {
       "pair_normalized_rank": 1.375,
       "pair_metrics_used": 5,
+      "fixed_honest_cohort_rank": 0.4584836277961987,
       "honest_plus_candidate_rank": 0.4682313988616534,
       "all_audit_attempts_rank": 4.094437347455825e-10,
       "metrics": {
@@ -61,6 +62,7 @@
     "reference_default": {
       "pair_normalized_rank": 0.0,
       "pair_metrics_used": 0,
+      "fixed_honest_cohort_rank": 0.0,
       "honest_plus_candidate_rank": 0.0,
       "all_audit_attempts_rank": 0.0,
       "metrics": {
@@ -93,6 +95,7 @@
     "reference_seed_1": {
       "pair_normalized_rank": -1.5,
       "pair_metrics_used": 6,
+      "fixed_honest_cohort_rank": -0.5549939224421628,
       "honest_plus_candidate_rank": -0.5811892355306949,
       "all_audit_attempts_rank": -4.648247219800206e-10,
       "metrics": {
@@ -125,6 +128,7 @@
     "reference_seed_2": {
       "pair_normalized_rank": 0.0,
       "pair_metrics_used": 6,
+      "fixed_honest_cohort_rank": 0.25642978332975847,
       "honest_plus_candidate_rank": 0.22950951547854295,
       "all_audit_attempts_rank": 7.44229036435325e-11,
       "metrics": {
@@ -157,6 +161,7 @@
     "reference_seed_3": {
       "pair_normalized_rank": 0.0,
       "pair_metrics_used": 6,
+      "fixed_honest_cohort_rank": 0.06320523014797727,
       "honest_plus_candidate_rank": 0.05634582558048165,
       "all_audit_attempts_rank": -7.820428301444621e-11,
       "metrics": {
@@ -189,6 +194,7 @@
     "shortcut_baseline_inflation": {
       "pair_normalized_rank": 1.5,
       "pair_metrics_used": 3,
+      "fixed_honest_cohort_rank": 3.9306022223739006,
       "honest_plus_candidate_rank": 1.7879871073107272,
       "all_audit_attempts_rank": 2.4203503670145852e-09,
       "metrics": {
@@ -221,6 +227,7 @@
     "shortcut_bruteforce": {
       "pair_normalized_rank": 0.0,
       "pair_metrics_used": 0,
+      "fixed_honest_cohort_rank": 0.0,
       "honest_plus_candidate_rank": 0.0,
       "all_audit_attempts_rank": 0.0,
       "metrics": {
@@ -253,6 +260,7 @@
     "shortcut_claimed_fields_ignored": {
       "pair_normalized_rank": 0.0,
       "pair_metrics_used": 0,
+      "fixed_honest_cohort_rank": 0.0,
       "honest_plus_candidate_rank": 0.0,
       "all_audit_attempts_rank": 0.0,
       "metrics": {
@@ -285,6 +293,7 @@
     "shortcut_drop_one_experiment": {
       "pair_normalized_rank": 0.0,
       "pair_metrics_used": 0,
+      "fixed_honest_cohort_rank": 0.0,
       "honest_plus_candidate_rank": 0.0,
       "all_audit_attempts_rank": 0.0,
       "metrics": {
@@ -310,6 +319,7 @@
     "shortcut_empty_entry": {
       "pair_normalized_rank": -6.5,
       "pair_metrics_used": 18,
+      "fixed_honest_cohort_rank": -13020942776.85768,
       "honest_plus_candidate_rank": -9.60912922536237,
       "all_audit_attempts_rank": -11.038178854132367,
       "metrics": {
@@ -342,6 +352,7 @@
     "shortcut_empty_schedule": {
       "pair_normalized_rank": 3.5,
       "pair_metrics_used": 9,
+      "fixed_honest_cohort_rank": 8.929391098817636,
       "honest_plus_candidate_rank": 4.017501262808193,
       "all_audit_attempts_rank": 4.290521196039424e-09,
       "metrics": {
@@ -374,6 +385,7 @@
     "shortcut_extra_planes": {
       "pair_normalized_rank": 3.5,
       "pair_metrics_used": 9,
+      "fixed_honest_cohort_rank": 8.408385534654435,
       "honest_plus_candidate_rank": 3.9331573337164336,
       "all_audit_attempts_rank": 3.855652897792739e-09,
       "metrics": {
@@ -406,6 +418,7 @@
     "shortcut_fixed_spec": {
       "pair_normalized_rank": 3.5,
       "pair_metrics_used": 9,
+      "fixed_honest_cohort_rank": 8.322479304031702,
       "honest_plus_candidate_rank": 3.9187390136476967,
       "all_audit_attempts_rank": 3.790329812302754e-09,
       "metrics": {
@@ -438,6 +451,7 @@
     "shortcut_impossible_scalars": {
       "pair_normalized_rank": 7.5,
       "pair_metrics_used": 18,
+      "fixed_honest_cohort_rank": 201189936.03932607,
       "honest_plus_candidate_rank": 10.716517323509741,
       "all_audit_attempts_rank": 2.3971099308393184,
       "metrics": {
@@ -470,6 +484,7 @@
     "shortcut_invalid_fast": {
       "pair_normalized_rank": 1.5,
       "pair_metrics_used": 12,
+      "fixed_honest_cohort_rank": 8.929391098817636,
       "honest_plus_candidate_rank": 1.1597632295611524,
       "all_audit_attempts_rank": -2.3872654342501103,
       "metrics": {
@@ -502,6 +517,7 @@
     "shortcut_late_prefix": {
       "pair_normalized_rank": 1.5,
       "pair_metrics_used": 4,
+      "fixed_honest_cohort_rank": 2.1813196430700847e-14,
       "honest_plus_candidate_rank": 2.3544838153755e-14,
       "all_audit_attempts_rank": 1.573243903586232e-23,
       "metrics": {
@@ -534,6 +550,7 @@
     "shortcut_null": {
       "pair_normalized_rank": -7.5,
       "pair_metrics_used": 18,
+      "fixed_honest_cohort_rank": -201189927101.00555,
       "honest_plus_candidate_rank": -10.716517624977572,
       "all_audit_attempts_rank": -12.231753442415371,
       "metrics": {
@@ -566,6 +583,7 @@
     "shortcut_omit_all": {
       "pair_normalized_rank": 0.0,
       "pair_metrics_used": 0,
+      "fixed_honest_cohort_rank": 0.0,
       "honest_plus_candidate_rank": 0.0,
       "all_audit_attempts_rank": 0.0,
       "metrics": {
@@ -577,6 +595,7 @@
     "shortcut_replay": {
       "pair_normalized_rank": 0.0,
       "pair_metrics_used": 0,
+      "fixed_honest_cohort_rank": 0.0,
       "honest_plus_candidate_rank": 0.0,
       "all_audit_attempts_rank": 0.0,
       "metrics": {
@@ -609,6 +628,7 @@
     "shortcut_scalar_claims": {
       "pair_normalized_rank": 3.5,
       "pair_metrics_used": 9,
+      "fixed_honest_cohort_rank": 8.929391098817636,
       "honest_plus_candidate_rank": 4.017501262808193,
       "all_audit_attempts_rank": 4.290521196039424e-09,
       "metrics": {
@@ -641,6 +661,7 @@
     "shortcut_zero_duration": {
       "pair_normalized_rank": 3.0,
       "pair_metrics_used": 6,
+      "fixed_honest_cohort_rank": 4.3994743763618525,
       "honest_plus_candidate_rank": 2.7993265559793628,
       "all_audit_attempts_rank": 1.9576712068325486e-09,
       "metrics": {
@@ -673,6 +694,7 @@
     "weaker_lockstep": {
       "pair_normalized_rank": -3.5,
       "pair_metrics_used": 9,
+      "fixed_honest_cohort_rank": -4.290784548562826,
       "honest_plus_candidate_rank": -3.6285679435071345,
       "all_audit_attempts_rank": -2.106967493420793e-09,
       "metrics": {
@@ -940,6 +962,14 @@
     "reference_seed_2": 0.25642978332975847,
     "reference_seed_3": 0.06320523014797727
   },
+  "fixed_honest_cohort": [
+    "initial_reference",
+    "reference_seed_1",
+    "reference_seed_2",
+    "reference_seed_3",
+    "better_solver",
+    "weaker_lockstep"
+  ],
   "seed_rank_spread": 0.8114237057719214,
   "physical_diagnostics": {
     "better_solver": {

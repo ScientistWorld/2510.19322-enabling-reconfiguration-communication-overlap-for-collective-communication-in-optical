@@ -55,9 +55,11 @@ def main():
     scores = {}
     for name, attempt in attempts.items():
         pair_score, pair_used = rank(attempt, reference, [reference, attempt], rubric)
+        fixed_honest_score, _ = rank(attempt, reference, honest, rubric)
         honest_score, _ = rank(attempt, reference, honest + [attempt], rubric)
         all_score, _ = rank(attempt, reference, cohort, rubric)
         scores[name] = dict(pair_normalized_rank=pair_score, pair_metrics_used=pair_used,
+                            fixed_honest_cohort_rank=fixed_honest_score,
                             honest_plus_candidate_rank=honest_score, all_audit_attempts_rank=all_score,
                             metrics=attempt)
     seed_rows = {n: attempts[n] for n in honest_names[:3] if n in attempts}
@@ -76,16 +78,18 @@ def main():
             full_rows[name] = json.loads(path.read_text())
     summary = dict(reference=reference, scores=scores, statuses=statuses,
                    seed_spread=seed_spread, seed_ranks=seed_ranks,
+                   fixed_honest_cohort=['initial_reference'] + [n for n in honest_names if n in attempts],
                    seed_rank_spread=max(seed_ranks.values())-min(seed_ranks.values()) if seed_ranks else None,
                    physical_diagnostics=full_rows,
                    normalization='population standard deviation; abs coefficient; stated direction; experiment weight; missing skipped')
     (ROOT / 'summary.json').write_text(json.dumps(summary, indent=2))
-    lines = ['| Candidate | Test CCT us (8 / 64 / 512 nodes) | Valid | Pair rank | Honest + candidate rank |',
+    lines = ['| Candidate | Test CCT us (8 / 64 / 512 nodes) | Valid | Fixed quality cohort rank | Honest + candidate rank |',
              '|---|---|---|---:|---:|']
     for name, s in scores.items():
         ccts = ' / '.join(f"{s['metrics'].get(e, {}).get('cct_us', float('nan')):.6g}" for e in reference)
         valid = ' / '.join(str(s['metrics'].get(e, {}).get('valid_schedule', 'missing')) for e in reference)
-        lines.append(f"| {name} | {ccts} | {valid} | {s['pair_normalized_rank']:.6g} | {s['honest_plus_candidate_rank']:.6g} |")
+        quality = f"{s['fixed_honest_cohort_rank']:.6g}" if not name.startswith('shortcut_') else '—'
+        lines.append(f"| {name} | {ccts} | {valid} | {quality} | {s['honest_plus_candidate_rank']:.6g} |")
     (ROOT / 'results.md').write_text('\n'.join(lines)+'\n')
     print('\n'.join(lines), flush=True)
     print('Seed rank spread:', summary['seed_rank_spread'], flush=True)
