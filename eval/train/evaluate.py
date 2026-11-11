@@ -1,298 +1,382 @@
-"""Score the visible train slice from serialized scheduler artifacts.
+"""Visible-train evaluator: runs every solver on disk on the train instances.
 
-The split is by collective stage: train scores the first half of each
-Rabenseifner workload. It reads method outputs under checkpoints/ and never
-imports method code.
+The train instances are public in ``eval/train/instances.json`` and are drawn
+from the same families, parameter ranges and size floor as the hidden test. For each method
+``scripts/solvers/<method>.sh`` the evaluator writes one instance at a time to
+a private temporary directory, runs
+
+    bash scripts/solvers/<method>.sh INSTANCE.json OUTPUT.json TIME_LIMIT_S
+
+with a hard wall-clock limit, and scores only the serialized schedule. Every
+number is recomputed here from the schedule against the frozen instance; any
+scalar, flag or specification the solver writes is ignored. The comparison
+baseline (lockstep Strawman-ICR) is computed here from the frozen instance.
+
+A run fails as a whole if any instance is missing, late, malformed or physically
+infeasible; a failed run receives the worst value of every scored metric in
+every experiment. The method key ``swot`` is always reported (missing solver =
+failed run). This module never imports method code.
 """
 
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import math
+import os
+import shutil
+import signal
+import subprocess
+import sys
+import tempfile
+import time
 from pathlib import Path
 from typing import Any
 
-
+HERE = Path(__file__).resolve().parent
+ROOT = HERE.parents[1]
 SLICE_NAME = "train"
-MISSING_CCT_US = 1_000_000_000_000.0
+INSTANCES_PATH = HERE / "instances.json"
+SOLVERS_DIR = ROOT / "scripts" / "solvers"
+TIME_LIMIT_S = 120
+GRACE_S = 30
+REQUIRED_METHODS = ("swot",)
+BASELINE_METHOD = "strawman_icr"
+PRIMARY = "cct_reduction_vs_strawman_pct"
+WORST_ROW = {PRIMARY: -100.0, "valid_schedule": 0.0}
+REDUCTION_FLOOR = -100.0
+REDUCTION_CEIL = 100.0
+MAX_OUTPUT_BYTES = 64 * 1024 * 1024
+SAVE_DIR: Path | None = ROOT / "checkpoints" / "train"
 
 
-def load_results(artifacts: Path) -> dict[str, Any]:
-    merged: dict[str, Any] = {"experiments": {}}
-    if not artifacts.exists():
-        return merged
+class InvalidSchedule(Exception):
+    pass
 
-    for path in sorted(artifacts.rglob("*.json")):
+
+# ---------------------------------------------------------------------------
+# Frozen instances and the fixed comparison side.
+# ---------------------------------------------------------------------------
+
+
+def load_suite() -> dict[str, list[dict[str, Any]]]:
+    payload = json.loads(INSTANCES_PATH.read_text())
+    return {name: list(items) for name, items in payload["experiments"].items()}
+
+
+def bandwidth_mb_per_us(instance: dict[str, Any]) -> float:
+    return float(instance["per_link_gbps"]) / 8000.0
+
+
+def strawman_cct_us(instance: dict[str, Any]) -> float:
+    """Lockstep ICR: all planes per step, even split, one global switch per topology change."""
+    k = int(instance["optical_degree"])
+    bw = bandwidth_mb_per_us(instance)
+    lat = float(instance["base_latency_us"])
+    recfg = float(instance["reconfig_latency_us"])
+    total = 0.0
+    previous = None
+    for step in instance["steps"]:
+        volume = float(step["message_mb"])
+        if previous is not None and int(step["config"]) != previous:
+            total += recfg
+        total += volume / (k * bw) + (lat if volume > 0 else 0.0)
+        previous = int(step["config"])
+    return total
+
+
+def lower_bound_cct_us(instance: dict[str, Any]) -> float:
+    """No schedule can beat all k planes per step with no switching at all."""
+    k = int(instance["optical_degree"])
+    bw = bandwidth_mb_per_us(instance)
+    lat = float(instance["base_latency_us"])
+    return sum(float(s["message_mb"]) / (k * bw) + lat for s in instance["steps"])
+
+
+# ---------------------------------------------------------------------------
+# Physical validation of a serialized schedule.
+# ---------------------------------------------------------------------------
+
+
+def _number(value: Any, what: str) -> float:
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        raise InvalidSchedule(f"{what} is not a number")
+    number = float(value)
+    if not math.isfinite(number):
+        raise InvalidSchedule(f"{what} is not finite")
+    return number
+
+
+def _integer(value: Any, what: str) -> int:
+    number = _number(value, what)
+    if number != int(number):
+        raise InvalidSchedule(f"{what} is not an integer")
+    return int(number)
+
+
+def schedule_cct_us(instance: dict[str, Any], output: Any) -> float:
+    """Return the completion time of a physically valid schedule, else raise."""
+    if not isinstance(output, dict):
+        raise InvalidSchedule("output is not a JSON object")
+    schedule = output.get("schedule")
+    if not isinstance(schedule, list) or not schedule:
+        raise InvalidSchedule("missing or empty schedule")
+
+    k = int(instance["optical_degree"])
+    bw = bandwidth_mb_per_us(instance)
+    lat = float(instance["base_latency_us"])
+    recfg = float(instance["reconfig_latency_us"])
+    steps = instance["steps"]
+    position = {int(step["step"]): idx for idx, step in enumerate(steps)}
+    scale = strawman_cct_us(instance)
+    tol = 1e-3 + 1e-6 * scale
+
+    per_step: list[list[dict[str, Any]]] = [[] for _ in steps]
+    seen: set[tuple[int, int]] = set()
+    for raw in schedule:
+        if not isinstance(raw, dict):
+            raise InvalidSchedule("schedule entry is not an object")
         try:
-            payload = json.loads(path.read_text())
-        except json.JSONDecodeError:
-            continue
-        for exp_name, exp_payload in payload.get("experiments", {}).items():
-            slot = merged["experiments"].setdefault(exp_name, {"results": {}})
-            if "spec" in exp_payload and "spec" not in slot:
-                slot["spec"] = exp_payload["spec"]
-            slot["results"].update(exp_payload.get("results", {}))
-    return merged
-
-
-def selected_steps(spec: dict[str, Any]) -> set[int]:
-    steps = sorted(int(step["step"]) for step in spec.get("steps", []))
-    split_at = split_index(steps)
-    return set(steps[:split_at])
-
-
-def split_index(steps: list[int]) -> int:
-    if len(steps) <= 6:
-        return max(1, math.ceil(2 * len(steps) / 3))
-    return max(1, len(steps) // 2)
-
-
-def score_slice(exp_payload: dict[str, Any], selected: set[int]) -> dict[str, dict[str, float]]:
-    spec = exp_payload.get("spec")
-    results = exp_payload.get("results", {})
-    raw_scores: dict[str, dict[str, float]] = {}
-
-    for method_name, result in results.items():
-        raw_scores[method_name] = score_method(spec, result, selected)
-
-    strawman_cct = raw_scores.get("strawman_icr", {}).get("cct_us")
-    if strawman_cct and math.isfinite(strawman_cct) and strawman_cct > 0:
-        for method_name, row in raw_scores.items():
-            if method_name == "strawman_icr":
-                row["cct_reduction_vs_strawman_pct"] = 0.0
-            else:
-                row["cct_reduction_vs_strawman_pct"] = 100.0 * (
-                    strawman_cct - row["cct_us"]
-                ) / strawman_cct
-    else:
-        for row in raw_scores.values():
-            row["cct_reduction_vs_strawman_pct"] = 0.0
-
-    return raw_scores
-
-
-def score_method(
-    spec: dict[str, Any] | None, result: dict[str, Any], selected: set[int]
-) -> dict[str, float]:
-    if spec and result.get("schedule"):
-        valid = validate_schedule(spec, result["schedule"])
-        row = schedule_slice_metrics(spec, result["schedule"], selected)
-        row["valid_schedule"] = 1.0 if valid and row["cct_us"] < MISSING_CCT_US else 0.0
-        return row
-
-    if spec and result.get("method") == "strawman_icr":
-        return lockstep_slice_score(spec, selected, float(result.get("valid_schedule", 1.0)))
-
-    return {
-        "cct_us": float(result.get("cct_us", MISSING_CCT_US)),
-        "valid_schedule": float(result.get("valid_schedule", 0.0)),
-        "reconfiguration_events": float(result.get("reconfiguration_events", 0.0)),
-        "step_volume_error_mb": float(result.get("step_volume_error_mb", MISSING_CCT_US)),
-        "max_plane_overlap_us": float(result.get("max_plane_overlap_us", MISSING_CCT_US)),
-    }
-
-
-def schedule_slice_metrics(
-    spec: dict[str, Any], schedule: list[dict[str, Any]], selected: set[int]
-) -> dict[str, float]:
-    items = [item for item in schedule if int(item["step"]) in selected]
-    if not items:
-        return missing_score()
-
-    starts = []
-    ends = []
-    activities_by_plane: dict[int, list[tuple[float, float]]] = {}
-    reconfiguration_events = 0
-    for item in items:
-        plane = int(item["plane"])
-        if int(item.get("reconfigured", 0)):
-            reconfiguration_events += 1
-            starts.append(float(item.get("reconfig_start_us", item["transmit_start_us"])))
-            activities_by_plane.setdefault(plane, []).append(
-                (float(item["reconfig_start_us"]), float(item["reconfig_end_us"]))
-            )
-        else:
-            starts.append(float(item["transmit_start_us"]))
-        activities_by_plane.setdefault(plane, []).append(
-            (float(item["transmit_start_us"]), float(item["transmit_end_us"]))
+            step_id = _integer(raw["step"], "step")
+            plane = _integer(raw["plane"], "plane")
+            volume = _number(raw["message_mb"], "message_mb")
+            t_start = _number(raw["transmit_start_us"], "transmit_start_us")
+            t_end = _number(raw["transmit_end_us"], "transmit_end_us")
+        except KeyError as exc:
+            raise InvalidSchedule(f"schedule entry lacks {exc}") from None
+        if step_id not in position:
+            raise InvalidSchedule("unknown step")
+        if not 0 <= plane < k:
+            raise InvalidSchedule("plane index outside the fixed optical degree")
+        if (step_id, plane) in seen:
+            raise InvalidSchedule("duplicate (step, plane) entry")
+        seen.add((step_id, plane))
+        if volume <= 0.0:
+            raise InvalidSchedule("non-positive message volume")
+        if t_start < -tol:
+            raise InvalidSchedule("activity before the collective starts")
+        idx = position[step_id]
+        config = int(steps[idx]["config"])
+        if "config" in raw and raw["config"] is not None and _integer(raw["config"], "config") != config:
+            raise InvalidSchedule("entry topology differs from the step's required topology")
+        if t_end - t_start < volume / bw + lat - tol:
+            raise InvalidSchedule("transmission shorter than message/bandwidth + base latency")
+        per_step[idx].append(
+            {"plane": plane, "volume": volume, "start": t_start, "end": t_end, "raw": raw}
         )
-        ends.append(float(item["transmit_end_us"]))
-
-    return {
-        "cct_us": max(ends) - min(starts),
-        "reconfiguration_events": float(reconfiguration_events),
-        "step_volume_error_mb": slice_volume_error_mb(spec, items, selected),
-        "max_plane_overlap_us": max_plane_overlap_us(activities_by_plane),
-    }
-
-
-def missing_score() -> dict[str, float]:
-    return {
-        "cct_us": MISSING_CCT_US,
-        "valid_schedule": 0.0,
-        "reconfiguration_events": MISSING_CCT_US,
-        "step_volume_error_mb": MISSING_CCT_US,
-        "max_plane_overlap_us": MISSING_CCT_US,
-    }
-
-
-def slice_volume_error_mb(
-    spec: dict[str, Any], items: list[dict[str, Any]], selected: set[int]
-) -> float:
-    tolerance = 1e-4
-    observed: dict[int, float] = {}
-    for item in items:
-        observed[int(item["step"])] = observed.get(int(item["step"]), 0.0) + float(item["message_mb"])
-    error = 0.0
-    for step in spec.get("steps", []):
-        step_id = int(step["step"])
-        if step_id in selected:
-            delta = abs(observed.get(step_id, 0.0) - float(step["message_mb"]))
-            if delta > tolerance:
-                error += delta
-    return error
-
-
-def max_plane_overlap_us(activities_by_plane: dict[int, list[tuple[float, float]]]) -> float:
-    worst = 0.0
-    for activities in activities_by_plane.values():
-        activities.sort()
-        for (_, prev_end), (cur_start, _) in zip(activities, activities[1:]):
-            worst = max(worst, prev_end - cur_start)
-    return max(0.0, worst)
-
-
-def lockstep_slice_score(
-    spec: dict[str, Any], selected: set[int], valid_schedule: float
-) -> dict[str, float]:
-    bandwidth = float(spec["per_link_gbps"]) / 8_000.0
-    optical_degree = float(spec["optical_degree"])
-    base_latency_us = float(spec.get("base_latency_us", 0.0))
-    reconfig_latency_us = float(spec["reconfig_latency_us"])
-    all_steps = sorted(spec.get("steps", []), key=lambda item: int(item["step"]))
-    steps = [step for step in all_steps if int(step["step"]) in selected]
-    if not steps:
-        return missing_score()
-
-    cct = 0.0
-    first_selected_index = all_steps.index(steps[0])
-    previous_config = (
-        int(all_steps[first_selected_index - 1]["config"]) if first_selected_index > 0 else None
-    )
-    reconfiguration_events = 0
-    for step in steps:
-        message_mb = float(step["message_mb"])
-        cct += message_mb / (optical_degree * bandwidth)
-        if message_mb > 0:
-            cct += base_latency_us
-        current_config = int(step["config"])
-        if previous_config is not None and current_config != previous_config:
-            cct += reconfig_latency_us
-            reconfiguration_events += 1
-        previous_config = current_config
-    return {
-        "cct_us": cct,
-        "valid_schedule": valid_schedule,
-        "reconfiguration_events": float(reconfiguration_events),
-        "step_volume_error_mb": 0.0,
-        "max_plane_overlap_us": 0.0,
-    }
-
-
-def validate_schedule(spec: dict[str, Any], schedule: list[dict[str, Any]]) -> bool:
-    steps = spec.get("steps", [])
-    if not steps or not schedule:
-        return False
-    tolerance = 1e-4
-    by_step: dict[int, list[dict[str, Any]]] = {}
-    by_plane: dict[int, list[dict[str, Any]]] = {}
-    for item in schedule:
-        by_step.setdefault(int(item["step"]), []).append(item)
-        by_plane.setdefault(int(item["plane"]), []).append(item)
-        if float(item["transmit_start_us"]) + tolerance < float(item["reconfig_end_us"]):
-            return False
-        if int(item.get("reconfigured", 0)):
-            duration = float(item["reconfig_end_us"]) - float(item["reconfig_start_us"])
-            if abs(duration - float(spec["reconfig_latency_us"])) > tolerance:
-                return False
 
     previous_step_end = 0.0
-    for step in steps:
-        step_id = int(step["step"])
-        items = by_step.get(step_id, [])
+    for idx, step in enumerate(steps):
+        items = per_step[idx]
+        required = float(step["message_mb"])
         if not items:
-            return False
-        if any(int(item["config"]) != int(step["config"]) for item in items):
-            return False
-        volume = sum(float(item["message_mb"]) for item in items)
-        if abs(volume - float(step["message_mb"])) > tolerance:
-            return False
-        if any(float(item["transmit_start_us"]) + tolerance < previous_step_end for item in items):
-            return False
-        previous_step_end = max(float(item["transmit_end_us"]) for item in items)
+            raise InvalidSchedule("a step has no transmissions")
+        delivered = sum(item["volume"] for item in items)
+        if abs(delivered - required) > 1e-6 * max(1.0, required):
+            raise InvalidSchedule("step volume not conserved")
+        if min(item["start"] for item in items) < previous_step_end - tol:
+            raise InvalidSchedule("step starts before the previous step finished")
+        previous_step_end = max(item["end"] for item in items)
 
-    for items in by_plane.values():
-        items.sort(key=lambda item: (int(item["step"]), float(item["transmit_start_us"])))
-        previous_config = None
-        activities = []
-        for item in items:
-            current_config = int(item["config"])
-            reconfigured = int(item.get("reconfigured", 0))
-            if previous_config is not None:
-                if current_config == previous_config and reconfigured:
-                    return False
-                if current_config != previous_config and not reconfigured:
-                    return False
-            previous_config = current_config
-            if reconfigured:
-                activities.append((float(item["reconfig_start_us"]), float(item["reconfig_end_us"])))
-            activities.append((float(item["transmit_start_us"]), float(item["transmit_end_us"])))
-        activities.sort()
-        for (_, prev_end), (cur_start, _) in zip(activities, activities[1:]):
-            if cur_start + tolerance < prev_end:
-                return False
-    return True
+    plane_config: dict[int, int] = {}
+    plane_free: dict[int, float] = {}
+    for idx, step in enumerate(steps):
+        config = int(step["config"])
+        for item in sorted(per_step[idx], key=lambda entry: entry["plane"]):
+            plane = item["plane"]
+            raw = item["raw"]
+            needs_switch = plane in plane_config and plane_config[plane] != config
+            flag = raw.get("reconfigured")
+            if flag is not None:
+                if isinstance(flag, bool):
+                    flag_value = int(flag)
+                else:
+                    flag_value = _integer(flag, "reconfigured")
+                if flag_value not in (0, 1) or bool(flag_value) != needs_switch:
+                    raise InvalidSchedule("reconfiguration flag inconsistent with the plane's topology sequence")
+            if needs_switch:
+                try:
+                    r_start = _number(raw["reconfig_start_us"], "reconfig_start_us")
+                    r_end = _number(raw["reconfig_end_us"], "reconfig_end_us")
+                except KeyError as exc:
+                    raise InvalidSchedule(f"required reconfiguration lacks {exc}") from None
+                if r_start < plane_free[plane] - tol:
+                    raise InvalidSchedule("plane switches while still transmitting")
+                if r_end - r_start < recfg - tol:
+                    raise InvalidSchedule("reconfiguration shorter than the switching latency")
+                if item["start"] < r_end - tol:
+                    raise InvalidSchedule("transmission before the circuit is ready")
+            elif plane in plane_free and item["start"] < plane_free[plane] - tol:
+                raise InvalidSchedule("overlapping activities on one plane")
+            plane_config[plane] = config
+            plane_free[plane] = item["end"]
+
+    cct = max(item["end"] for items in per_step for item in items)
+    if cct < lower_bound_cct_us(instance) - tol:
+        raise InvalidSchedule("completion time below the physical lower bound")
+    return cct
 
 
-def evaluate(artifacts: Path, output: Path) -> dict[str, Any]:
-    payload = load_results(artifacts)
+def reduction_pct(strawman: float, cct: float) -> float:
+    value = 100.0 * (strawman - cct) / strawman
+    return min(REDUCTION_CEIL, max(REDUCTION_FLOOR, value))
+
+
+# ---------------------------------------------------------------------------
+# Running solvers.
+# ---------------------------------------------------------------------------
+
+
+def discover_methods() -> list[str]:
+    names = set(REQUIRED_METHODS)
+    if SOLVERS_DIR.is_dir():
+        for path in SOLVERS_DIR.glob("*.sh"):
+            if path.is_file():
+                names.add(path.stem)
+    names.discard(BASELINE_METHOD)
+    return sorted(names)
+
+
+def _kill_group(process: subprocess.Popen) -> None:
+    try:
+        os.killpg(process.pid, signal.SIGKILL)
+    except (ProcessLookupError, PermissionError, OSError):
+        pass
+
+
+def run_solver(script: Path, instance: dict[str, Any], workdir: Path) -> tuple[Any, str, float]:
+    """Run one solver on one instance. Returns (parsed output or None, status, seconds)."""
+    public = {key: value for key, value in instance.items() if key not in ("experiment",)}
+    instance_path = workdir / "instance.json"
+    output_path = workdir / "schedule.json"
+    log_path = workdir / "solver.log"
+    instance_path.write_text(json.dumps(public))
+    started = time.monotonic()
+    with log_path.open("wb") as log:
+        process = subprocess.Popen(
+            ["bash", str(script), str(instance_path), str(output_path), str(TIME_LIMIT_S)],
+            cwd=str(ROOT),
+            stdin=subprocess.DEVNULL,
+            stdout=log,
+            stderr=subprocess.STDOUT,
+            start_new_session=True,
+        )
+        try:
+            returncode = process.wait(timeout=TIME_LIMIT_S + GRACE_S)
+        except subprocess.TimeoutExpired:
+            _kill_group(process)
+            process.wait()
+            return None, "timeout", time.monotonic() - started
+        finally:
+            _kill_group(process)
+    elapsed = time.monotonic() - started
+    if returncode != 0:
+        tail = log_path.read_bytes()[-400:].decode("utf-8", "replace").strip().splitlines()[-3:]
+        return None, f"exit code {returncode}: {' | '.join(tail)}", elapsed
+    if not output_path.is_file():
+        return None, "no output file", elapsed
+    if output_path.stat().st_size > MAX_OUTPUT_BYTES:
+        return None, "output too large", elapsed
+    try:
+        return json.loads(output_path.read_text()), "ok", elapsed
+    except (json.JSONDecodeError, UnicodeDecodeError, OSError):
+        return None, "unparseable output", elapsed
+
+
+def evaluate_method(method: str, suite: dict[str, list[dict[str, Any]]]) -> dict[str, Any]:
+    script = SOLVERS_DIR / f"{method}.sh"
+    reductions: dict[str, list[float]] = {name: [] for name in suite}
+    details: dict[str, dict[str, float]] = {}
+    failure = None
+    if not script.is_file():
+        failure = {"instance": None, "reason": "solver script missing"}
+    for experiment, instances in suite.items():
+        for instance in instances:
+            if failure is not None:
+                break
+            workdir = Path(tempfile.mkdtemp(prefix="optsched_train_"))
+            elapsed = 0.0
+            try:
+                try:
+                    output, status, elapsed = run_solver(script, instance, workdir)
+                except OSError as exc:
+                    output, status = None, f"could not run solver: {type(exc).__name__}"
+                if status == "ok" and SAVE_DIR is not None:
+                    target = SAVE_DIR / method / f"{instance['id']}.json"
+                    target.parent.mkdir(parents=True, exist_ok=True)
+                    target.write_text(json.dumps(output))
+                if status == "ok":
+                    try:
+                        cct = schedule_cct_us(instance, output)
+                    except InvalidSchedule as exc:
+                        status = f"invalid schedule: {exc}"
+                    except (TypeError, ValueError, KeyError, AttributeError) as exc:
+                        status = f"invalid schedule: {type(exc).__name__}"
+            finally:
+                shutil.rmtree(workdir, ignore_errors=True)
+            if status != "ok":
+                failure = {"instance": instance["id"], "reason": status}
+                print(f"[eval-{SLICE_NAME}] method={method} instance={instance['id']} status=FAILED "
+                      f"elapsed={elapsed:.1f} reason={status}", flush=True)
+                break
+            value = reduction_pct(strawman_cct_us(instance), cct)
+            reductions[experiment].append(value)
+            details[instance["id"]] = {"cct_us": cct, PRIMARY: value}
+            print(f"[eval-{SLICE_NAME}] method={method} instance={instance['id']} status=ok "
+                  f"reduction={value:.6f} elapsed={elapsed:.1f}", flush=True)
+    rows = {}
+    for experiment, instances in suite.items():
+        if failure is not None:
+            rows[experiment] = dict(WORST_ROW)
+        else:
+            values = reductions[experiment]
+            rows[experiment] = {PRIMARY: sum(values) / len(values), "valid_schedule": 1.0}
+    return {"rows": rows, "failure": failure, "details": details}
+
+
+def evaluate(output: Path) -> dict[str, Any]:
+    suite = load_suite()
+    if output.exists():
+        output.unlink()
+    methods = discover_methods()
+    digest = hashlib.sha256(INSTANCES_PATH.read_bytes()).hexdigest()[:16]
     scores: dict[str, Any] = {
         "_metadata": {
             "slice": SLICE_NAME,
-            "split": "prefix_collective_steps",
-            "artifacts": str(artifacts),
+            "instance_suite_sha256_16": digest,
+            "instances_per_experiment": {name: len(items) for name, items in suite.items()},
+            "solver_time_limit_s": TIME_LIMIT_S,
+            "hard_wall_clock_limit_s": TIME_LIMIT_S + GRACE_S,
+            "methods": methods,
+            "failure_rule": "any missing/late/invalid instance fails the whole run: worst value in every metric of every experiment",
         },
-        "experiments": {},
+        "experiments": {
+            name: {"results": {BASELINE_METHOD: {PRIMARY: 0.0, "valid_schedule": 1.0}}, "_status": {}}
+            for name in suite
+        },
     }
-
-    for exp_name, exp_payload in payload["experiments"].items():
-        spec = exp_payload.get("spec")
-        if not spec:
-            continue
-        selected = selected_steps(spec)
-        all_steps = sorted(int(step["step"]) for step in spec.get("steps", []))
-        scores["experiments"][exp_name] = {
-            "slice": SLICE_NAME,
-            "step_split": {
-                "selected_steps": sorted(selected),
-                "held_out_steps": [step for step in all_steps if step not in selected],
-            },
-            "results": score_slice(exp_payload, selected),
-        }
-
+    for method in methods:
+        result = evaluate_method(method, suite)
+        for experiment, row in result["rows"].items():
+            scores["experiments"][experiment]["results"][method] = row
+            scores["experiments"][experiment]["_status"][method] = {
+                "run_failed": result["failure"] is not None,
+                "failure": result["failure"],
+            }
     output.parent.mkdir(parents=True, exist_ok=True)
-    output.write_text(json.dumps(scores, indent=2))
+    tmp = output.with_suffix(".tmp")
+    tmp.write_text(json.dumps(scores, indent=2))
+    tmp.replace(output)
     return scores
 
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--artifacts", default="checkpoints")
-    parser.add_argument("--output", default="scoring/scores_train.json")
+    parser.add_argument("--output", default=str(ROOT / "scoring" / "scores_train.json"))
     args = parser.parse_args()
-    evaluate(Path(args.artifacts), Path(args.output))
+    evaluate(Path(args.output))
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

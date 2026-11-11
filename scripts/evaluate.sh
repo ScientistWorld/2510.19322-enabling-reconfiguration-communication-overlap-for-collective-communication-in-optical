@@ -1,28 +1,18 @@
 #!/bin/bash
-# Evaluation script — the standard way to evaluate work in this environment.
+# Visible evaluation — the standard way to evaluate work in this environment.
 #
-# This script must be SELF-CONTAINED using only code in eval/.
-# Do NOT import from method/ — evaluate.sh must work even when the
-# paper's method code is hidden from a scientist agent.
-#
-# Design it so that anyone following the same output format can run
-# this script to evaluate their results.
-#
-# OUTPUT CONTRACT: This script writes scoring/scores.json in the benchmark
-# structure:
+# Uses only code in eval/ (never method/). Runs every solver registered in
+# scripts/solvers/<method>.sh on the visible train instances and on the
+# paper's three named instances, then writes
+#   scoring/scores_train.json  (the scored experiments, train slice)
+#   scoring/scores.json        (the same experiments + unscored paper-instance checks)
+# in the benchmark structure
 #   {"experiments": {"experiment_name": {"results": {"method": {"metric": value}}}}}
-# Experiment, method, and metric names should match scoring/reference.json
-# when reproducing a paper-reported target.
-#
-# Example usage:
-#   bash scripts/evaluate.sh
-#
-# Called from run.sh after training, or independently.
 
-set -e
+set -euo pipefail
 
 cd /home/user
 
 mkdir -p scoring
 
-python -m eval.evaluate_results --artifacts checkpoints --output scoring/scores.json
+python -m eval.evaluate_results --output scoring/scores.json --train-output scoring/scores_train.json

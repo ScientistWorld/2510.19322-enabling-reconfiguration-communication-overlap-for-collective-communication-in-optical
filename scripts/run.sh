@@ -1,19 +1,18 @@
 #!/bin/bash
-# Example job script submitted via the end-of-turn YAML block.
+# Hardening verification job (iteration 11). Runs inside the compute container
+# with the workspace at /home/user and no internet.
 #
-# This runs inside the compute container with:
-#   - Your workspace mounted at /home/user
-#   - GPU(s) available
-#   - No internet access
-#
-# Make sure all data, code, and dependencies are already in the
-# workspace or baked into the container before submitting.
+# 1. smoke-tests both MILP solvers, then runs the reference, the stronger and
+#    weaker variants and every shortcut probe through the real evaluators
+#    (hardening/harness.py; resumable), leaving the reference scores in
+#    scoring/scores_test.json, scoring/scores_train.json and scoring/scores.json;
+# 2. writes the paper-instance inspection artifacts and validates the workspace.
 
-set -e
+set -euo pipefail
 
 cd /home/user
 
-bash scripts/reproduce.sh
+python -c "import pulp, sys; print('python', sys.version.split()[0], 'pulp', pulp.__version__)"
+python -m hardening.harness all
+bash scripts/baseline.sh
 python validate.py --compare
-bash scripts/evaluate_train.sh /home/user/checkpoints
-bash scripts/evaluate_test.sh /home/user/checkpoints

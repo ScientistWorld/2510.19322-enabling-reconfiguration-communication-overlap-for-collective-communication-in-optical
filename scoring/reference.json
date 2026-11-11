@@ -1,43 +1,21 @@
 {
+  "_note": "Scored experiments are families of workload instances drawn from the paper's own evaluation settings (Sections 4.2-4.3). Each method is run as a solver on every instance under the paper's 120 s solver limit; train instances are public (eval/train/instances.json), test instances are held out. The family means are not quantities the paper reports, so the paper's numbers are kept under '_' keys (per experiment and in '_paper_reported') rather than as results the gym must match. Setup scaling: 6 instances per family per slice instead of the paper's full sweeps; otherwise node counts, optical degrees, bandwidths (800/k Gbps), base latency (20 us) and switching latencies follow the paper.",
   "experiments": {
-    "fig5_rabenseifner_allreduce_8node": {
-      "description": "Paper Fig. 5 design-intuition example: 8-node Rabenseifner AllReduce with two 400 Gbps optical planes and 200 us reconfiguration latency.",
-      "weight": 0.5,
+    "allreduce_scaling": {
+      "description": "Paper Fig. 8(a) setting: Rabenseifner AllReduce on 64-1024 nodes, k=4 optical planes at 200 Gbps, 16-64 MB payloads, 20 us base latency, 200 us reconfiguration latency.",
+      "weight": 0.35,
       "primary_metric": "cct_reduction_vs_strawman_pct",
       "metrics": {
-        "cct_us": {"higher_is_better": false, "coefficient": -1.0, "description": "Completion time of the scored collective slice in microseconds."},
-        "cct_reduction_vs_strawman_pct": {"higher_is_better": true, "coefficient": 0.5, "description": "Percent CCT reduction relative to the lockstep ICR strawman on the same slice."},
-        "reconfiguration_events": {"higher_is_better": false, "coefficient": -0.25, "description": "Number of optical-plane reconfigurations paid inside the scored slice."},
-        "valid_schedule": {"higher_is_better": true, "coefficient": 1.0, "description": "Binary check that the full serialized schedule respects step order, topology, volume, and reconfiguration constraints."},
-        "step_volume_error_mb": {"higher_is_better": false, "coefficient": -0.5, "description": "Absolute message-volume mismatch across the scored steps in MB."},
-        "max_plane_overlap_us": {"higher_is_better": false, "coefficient": -0.5, "description": "Largest illegal overlap between activities assigned to the same optical plane in microseconds."}
-      },
-      "results": {
-        "strawman_icr": {
-          "type": "baseline",
-          "cct_us": 1500.0,
-          "cct_reduction_vs_strawman_pct": 0.0,
-          "valid_schedule": 1.0
+        "cct_reduction_vs_strawman_pct": {
+          "higher_is_better": true,
+          "coefficient": 1.0,
+          "description": "Mean over the family's instances of the percent full-collective completion-time reduction versus the lockstep Strawman-ICR schedule computed by the evaluator (per instance clipped to [-100, 100]). A failed run scores -100."
         },
-        "swot": {
-          "type": "proposed",
-          "cct_us": 1200.0,
-          "cct_reduction_vs_strawman_pct": 20.0,
-          "valid_schedule": 1.0
+        "valid_schedule": {
+          "higher_is_better": true,
+          "coefficient": 1.0,
+          "description": "1 if every instance of every experiment got a physically valid schedule within the time limit (traffic conservation, plane indices < k, alpha-beta transmission time, switching latency, per-plane serial use, step barriers); 0 for a failed run."
         }
-      }
-    },
-    "fig8_rabenseifner_allreduce_64node_k4": {
-      "description": "Paper Fig. 8 scalability point: Rabenseifner AllReduce at 64 nodes, k=4, 32 MB message, 200 us reconfiguration latency.",
-      "weight": 0.25,
-      "primary_metric": "cct_reduction_vs_strawman_pct",
-      "metrics": {
-        "cct_us": {"higher_is_better": false, "coefficient": -0.5, "description": "Completion time of the scored collective slice in microseconds."},
-        "cct_reduction_vs_strawman_pct": {"higher_is_better": true, "coefficient": 1.0, "description": "Percent CCT reduction relative to the lockstep ICR strawman on the same slice."},
-        "reconfiguration_events": {"higher_is_better": false, "coefficient": -0.25, "description": "Number of optical-plane reconfigurations paid inside the scored slice."},
-        "valid_schedule": {"higher_is_better": true, "coefficient": 1.0, "description": "Binary check that the full serialized schedule respects step order, topology, volume, and reconfiguration constraints."},
-        "step_volume_error_mb": {"higher_is_better": false, "coefficient": -0.5, "description": "Absolute message-volume mismatch across the scored steps in MB."},
-        "max_plane_overlap_us": {"higher_is_better": false, "coefficient": -0.5, "description": "Largest illegal overlap between activities assigned to the same optical plane in microseconds."}
       },
       "results": {
         "strawman_icr": {
@@ -49,20 +27,30 @@
           "type": "proposed",
           "cct_reduction_vs_strawman_pct": 39.6,
           "valid_schedule": 1.0
+        },
+        "_paper_fig8_512node": {
+          "type": "proposed",
+          "cct_reduction_vs_strawman_pct": 46.9,
+          "valid_schedule": 1.0
         }
-      }
+      },
+      "_paper_note": "Anchor: the paper's Fig. 8(a) reduction over Strawman-ICR at 64 nodes (32 MB, k=4), 39.6%, growing to 46.9% at 512 nodes. The scored value is a mean over 64-1024 nodes and 16-64 MB payloads, which the paper does not report; the anchor is a paper point, not a target."
     },
-    "fig8_rabenseifner_allreduce_512node_k4": {
-      "description": "Paper Fig. 8 scalability point: Rabenseifner AllReduce at 512 nodes, k=4, 32 MB message, 200 us reconfiguration latency.",
-      "weight": 0.25,
+    "collective_algorithms": {
+      "description": "Paper Fig. 7 setting: Rabenseifner ReduceScatter and AllReduce, Bruck All-to-All (128-512 nodes) and Pairwise All-to-All (9-12 nodes) on k=8 optical planes at 100 Gbps, 1-512 MB payloads, 200 us reconfiguration latency.",
+      "weight": 0.35,
       "primary_metric": "cct_reduction_vs_strawman_pct",
       "metrics": {
-        "cct_us": {"higher_is_better": false, "coefficient": -0.5, "description": "Completion time of the scored collective slice in microseconds."},
-        "cct_reduction_vs_strawman_pct": {"higher_is_better": true, "coefficient": 1.0, "description": "Percent CCT reduction relative to the lockstep ICR strawman on the same slice."},
-        "reconfiguration_events": {"higher_is_better": false, "coefficient": -0.25, "description": "Number of optical-plane reconfigurations paid inside the scored slice."},
-        "valid_schedule": {"higher_is_better": true, "coefficient": 1.0, "description": "Binary check that the full serialized schedule respects step order, topology, volume, and reconfiguration constraints."},
-        "step_volume_error_mb": {"higher_is_better": false, "coefficient": -0.5, "description": "Absolute message-volume mismatch across the scored steps in MB."},
-        "max_plane_overlap_us": {"higher_is_better": false, "coefficient": -0.5, "description": "Largest illegal overlap between activities assigned to the same optical plane in microseconds."}
+        "cct_reduction_vs_strawman_pct": {
+          "higher_is_better": true,
+          "coefficient": 1.0,
+          "description": "Mean over the family's instances of the percent full-collective completion-time reduction versus the lockstep Strawman-ICR schedule computed by the evaluator (per instance clipped to [-100, 100]). A failed run scores -100."
+        },
+        "valid_schedule": {
+          "higher_is_better": true,
+          "coefficient": 1.0,
+          "description": "1 if every instance of every experiment got a physically valid schedule within the time limit; 0 for a failed run."
+        }
       },
       "results": {
         "strawman_icr": {
@@ -72,10 +60,105 @@
         },
         "swot": {
           "type": "proposed",
-          "cct_reduction_vs_strawman_pct": 46.9,
+          "cct_reduction_vs_strawman_pct": 87.1,
+          "valid_schedule": 1.0
+        },
+        "_paper_fig7_peak_rabenseifner_reducescatter": {
+          "type": "proposed",
+          "cct_reduction_vs_strawman_pct": 89.1
+        },
+        "_paper_fig7_peak_pairwise_alltoall": {
+          "type": "proposed",
+          "cct_reduction_vs_strawman_pct": 89.1
+        },
+        "_paper_fig7_peak_bruck_alltoall": {
+          "type": "proposed",
+          "cct_reduction_vs_strawman_pct": 85.4
+        }
+      },
+      "_paper_note": "Anchor: the paper's Fig. 7(b) peak ('up to') AllReduce reduction over Strawman-ICR, 87.1% (256 nodes, k=8, B=100 Gbps); other algorithms' peaks under '_paper_fig7_peak_*'. Peaks over a message-size sweep, not means: the scored family mean over 1-512 MB is expected to be lower. Not a target."
+    },
+    "hardware_sensitivity": {
+      "description": "Paper Section 4.3 setting: 256-node Rabenseifner/Bruck (9 or 17 node Pairwise) collectives with optical degree k in {2,4,8} at 800/k Gbps and reconfiguration latency in {0.02, 0.2, 2, 20} ms, 1-256 MB payloads.",
+      "weight": 0.3,
+      "primary_metric": "cct_reduction_vs_strawman_pct",
+      "metrics": {
+        "cct_reduction_vs_strawman_pct": {
+          "higher_is_better": true,
+          "coefficient": 1.0,
+          "description": "Mean over the family's instances of the percent full-collective completion-time reduction versus the lockstep Strawman-ICR schedule computed by the evaluator (per instance clipped to [-100, 100]). A failed run scores -100."
+        },
+        "valid_schedule": {
+          "higher_is_better": true,
+          "coefficient": 1.0,
+          "description": "1 if every instance of every experiment got a physically valid schedule within the time limit; 0 for a failed run."
+        }
+      },
+      "results": {
+        "strawman_icr": {
+          "type": "baseline",
+          "cct_reduction_vs_strawman_pct": 0.0,
+          "valid_schedule": 1.0
+        },
+        "swot": {
+          "type": "proposed",
+          "cct_reduction_vs_strawman_pct": 20.0,
           "valid_schedule": 1.0
         }
-      }
+      },
+      "_paper_note": "Section 4.3 reports robustness only graphically (Figs. 10-11), noting that at k=8 the 120 s solver limit can give sub-optimal schedules. Anchor: the paper's only numeric k=2 result, the Fig. 5 example (1500 -> 1200 us, 20%). The scored family (k in {2,4,8}, 0.02-20 ms switching) is not on that scale; not a target."
     }
+  },
+  "_paper_reported": {
+    "_note": "The paper's reported numbers, unchanged from earlier iterations. The three named instances are reproduced as unscored experiments in scoring/scores.json.",
+    "paper_fig5_rabenseifner_allreduce_8node": {
+      "strawman_icr": {
+        "cct_us": 1500.0,
+        "cct_reduction_vs_strawman_pct": 0.0,
+        "valid_schedule": 1.0
+      },
+      "swot": {
+        "cct_us": 1200.0,
+        "cct_reduction_vs_strawman_pct": 20.0,
+        "valid_schedule": 1.0
+      }
+    },
+    "paper_fig8_rabenseifner_allreduce_64node_k4": {
+      "strawman_icr": {
+        "cct_reduction_vs_strawman_pct": 0.0,
+        "valid_schedule": 1.0
+      },
+      "swot": {
+        "cct_reduction_vs_strawman_pct": 39.6,
+        "valid_schedule": 1.0
+      }
+    },
+    "paper_fig8_rabenseifner_allreduce_512node_k4": {
+      "strawman_icr": {
+        "cct_reduction_vs_strawman_pct": 0.0,
+        "valid_schedule": 1.0
+      },
+      "swot": {
+        "cct_reduction_vs_strawman_pct": 46.9,
+        "valid_schedule": 1.0
+      }
+    },
+    "fig7_peak_reduction_vs_strawman_pct": {
+      "rabenseifner_reducescatter": 89.1,
+      "rabenseifner_allreduce": 87.1,
+      "pairwise_alltoall": 89.1,
+      "bruck_alltoall": 85.4
+    },
+    "fig7_peak_reduction_vs_one_shot_pct": {
+      "rabenseifner_reducescatter": 84.0,
+      "rabenseifner_allreduce": 83.7,
+      "pairwise_alltoall": 72.7,
+      "bruck_alltoall": 89.7
+    },
+    "fig8b_pairwise_alltoall_reduction_vs_strawman_pct": {
+      "5_nodes": 26.0,
+      "10_nodes": 45.5
+    },
+    "solver_time_limit_s": 120
   }
 }

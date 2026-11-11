@@ -1,14 +1,15 @@
 #!/bin/bash
-# Run the paper's proposed method.
+# Run the paper's proposed method (SWOT MILP) through the solver interface.
 #
-# This script trains/runs the paper's method using code in method/.
+# The method is exposed to every evaluator as scripts/solvers/swot.sh; this
+# script runs it on all visible instances (train families + paper examples)
+# via scripts/evaluate.sh. Schedules are kept under checkpoints/train/swot/.
 #
 # Usage:
 #   bash scripts/method.sh
 
-set -e
+set -euo pipefail
 
 cd /home/user
 
-python -m method.swot_scheduler --output-dir checkpoints/swot --time-limit-s "${SWOT_SOLVER_TIME_LIMIT:-120}"
 bash scripts/evaluate.sh
