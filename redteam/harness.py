@@ -15,13 +15,13 @@ from pathlib import Path
 
 ROOT = Path('/home/user')
 RUNS = [
-    'reference_default', 'reference_seed_1', 'reference_seed_2', 'reference_seed_3',
-    'better_solver', 'weaker_lockstep', 'shortcut_replay', 'shortcut_scalar_claims',
+    'reference_default', 'weaker_lockstep', 'shortcut_replay', 'shortcut_scalar_claims',
     'shortcut_empty_schedule', 'shortcut_impossible_scalars', 'shortcut_invalid_fast',
     'shortcut_zero_duration', 'shortcut_extra_planes', 'shortcut_fixed_spec',
     'shortcut_baseline_inflation', 'shortcut_late_prefix', 'shortcut_bruteforce',
     'shortcut_empty_entry', 'shortcut_null', 'shortcut_omit_all',
     'shortcut_drop_one_experiment', 'shortcut_claimed_fields_ignored',
+    'reference_seed_1', 'reference_seed_2', 'reference_seed_3', 'better_solver',
 ]
 
 
@@ -68,6 +68,7 @@ def run_one(name):
     previous_method = installed.read_bytes() if installed.exists() else None
     start = time.monotonic()
     status = {'name': name}
+    print('Starting audit trial: ' + name, flush=True)
     try:
         if checkpoint.exists():
             shutil.rmtree(checkpoint)
@@ -125,6 +126,13 @@ def run_one(name):
 if __name__ == '__main__':
     if sys.argv[1] == 'all':
         for name in RUNS:
+            status_path = ROOT / 'redteam' / name / 'status.json'
+            score_path = ROOT / 'redteam' / name / 'scores_test.json'
+            if status_path.exists() and score_path.exists():
+                previous = json.loads(status_path.read_text())
+                if 'error' not in previous and previous.get('test_returncode') == 0:
+                    print('Reusing completed audit trial: ' + name, flush=True)
+                    continue
             run_one(name)
     else:
         sys.exit(0 if run_one(sys.argv[1]) else 1)
