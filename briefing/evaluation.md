@@ -31,9 +31,9 @@ The baseline is computed by the evaluator from the frozen instance: **Strawman-I
 
 Three families from the source paper's evaluation, 6 instances each per slice (see `scoring/EXPERIMENTS.md`):
 
-- `allreduce_scaling` (weight 0.35): Rabenseifner AllReduce, 64-1024 nodes, k=4.
-- `collective_algorithms` (weight 0.35): four collective algorithms, k=8.
-- `hardware_sensitivity` (weight 0.30): k in {2,4,8} and switching latency 0.02-20 ms.
+- `allreduce_scaling` (weight 0.40): Rabenseifner AllReduce, 64-1024 nodes, k=4.
+- `collective_algorithms` (weight 0.40): four collective algorithms, k=8.
+- `hardware_sensitivity` (weight 0.20): k in {2,4,8} and switching latency 0.02-20 ms.
 
 Every instance is too large to enumerate plane-usage patterns within the budget.
 

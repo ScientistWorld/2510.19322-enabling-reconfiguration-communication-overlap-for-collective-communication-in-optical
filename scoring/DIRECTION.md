@@ -2,19 +2,29 @@
 
 ## Research Problem
 
-This benchmark concerns scheduling collective communication over reconfigurable optical networks. The research question is how to reduce communication completion time when collective algorithms require time-varying communication topologies and optical reconfiguration has non-negligible latency.
+This benchmark concerns scheduling collective communication over reconfigurable optical networks. The question is how to minimize communication completion time when collective algorithms need time-varying communication topologies, optical reconfiguration has non-negligible latency, and the schedule must be computed within a fixed per-instance budget.
 
 ## Core Contribution
 
-The paper's contribution is schedule-level coordination of data movement and optical topology changes inside a collective operation. Future improvements should work on better scheduling, optimization, or collective/network co-design within this same problem.
+The source paper contributes schedule-level coordination of data movement and optical topology changes inside one collective operation. Future work should improve the schedules produced for this same problem: better completion times on unseen workloads, under the same physical model, resources and compute budget.
 
 ## Approach Scope
 
-In-scope work includes alternative exact or heuristic schedulers, improved MILP formulations, decomposition methods, better initialization, additional valid bypass choices, or collective step designs that explicitly target reconfigurable optical networks. Methods may change the scheduler internals as long as they produce valid schedules under the fixed experiment resources.
+In scope:
+- exact or heuristic schedulers, including improved mathematical-programming formulations;
+- decomposition or neighbourhood search, and better initial solutions;
+- learned or rule-based guidance that runs inside the solver budget;
+- step-structure-aware strategies that apply across collective algorithms, cluster sizes, optical degrees and switching latencies.
+
+Where the reference is weakest:
+- many-step collectives (large clusters);
+- high optical degree (k=8);
+- large messages, where a time-limited solver's incumbent stays close to the lockstep baseline.
 
 ## Out of Bounds
 
-- Replacing the optical scheduling problem with a different networking model.
-- Improving scores by adding optical degree, bandwidth, or faster switching hardware for the same experiment.
-- Ignoring collective step barriers or circuit readiness constraints.
-- Evaluating by regenerating method outputs inside `eval/` instead of scoring submitted artifacts.
+- Changing the network model, the collective's steps or the instance parameters.
+- Adding optical planes or bandwidth, or shortening switching.
+- Ignoring step barriers, circuit readiness or serial plane use.
+- Exceeding the per-instance time limit, or using answers computed outside the solver call for the evaluated instance.
+- Reporting numbers instead of schedules: the evaluator recomputes everything.

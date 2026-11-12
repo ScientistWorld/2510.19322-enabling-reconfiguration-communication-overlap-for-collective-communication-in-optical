@@ -3,7 +3,7 @@
   "experiments": {
     "allreduce_scaling": {
       "description": "Paper Fig. 8(a) setting: Rabenseifner AllReduce on 64-1024 nodes, k=4 optical planes at 200 Gbps, 16-64 MB payloads, 20 us base latency, 200 us reconfiguration latency.",
-      "weight": 0.35,
+      "weight": 0.4,
       "primary_metric": "cct_reduction_vs_strawman_pct",
       "metrics": {
         "cct_reduction_vs_strawman_pct": {
@@ -38,7 +38,7 @@
     },
     "collective_algorithms": {
       "description": "Paper Fig. 7 setting: Rabenseifner ReduceScatter and AllReduce, Bruck All-to-All (128-512 nodes) and Pairwise All-to-All (9-12 nodes) on k=8 optical planes at 100 Gbps, 1-512 MB payloads, 200 us reconfiguration latency.",
-      "weight": 0.35,
+      "weight": 0.4,
       "primary_metric": "cct_reduction_vs_strawman_pct",
       "metrics": {
         "cct_reduction_vs_strawman_pct": {
@@ -80,7 +80,7 @@
     },
     "hardware_sensitivity": {
       "description": "Paper Section 4.3 setting: 256-node Rabenseifner/Bruck (9 or 17 node Pairwise) collectives with optical degree k in {2,4,8} at 800/k Gbps and reconfiguration latency in {0.02, 0.2, 2, 20} ms, 1-256 MB payloads.",
-      "weight": 0.3,
+      "weight": 0.2,
       "primary_metric": "cct_reduction_vs_strawman_pct",
       "metrics": {
         "cct_reduction_vs_strawman_pct": {
@@ -160,5 +160,6 @@
       "10_nodes": 45.5
     },
     "solver_time_limit_s": 120
-  }
+  },
+  "_weights_note": "Weights 0.4/0.4/0.2 (iteration 11): the paper's headline quantitative claims are algorithm-level efficiency (Fig. 7) and cluster scalability (Fig. 8); Section 4.3 robustness is reported only graphically, and on the hidden test several hardware-sensitivity instances are solved to proven optimality by every MILP run, so that experiment separates methods least (positive-control gain 1.2 points vs 1.4 points of seed noise)."
 }

@@ -1,26 +1,32 @@
 # Scientist Constraints
 
-## Workload
+## Interface
 
-Scientists must evaluate on the provided collective step definitions in `data/collectives.py` unless they add a new experiment with a clearly named score entry. For the core target, the 8-node Rabenseifner AllReduce step sequence, message volumes, optical degree, bandwidth, and reconfiguration latency must remain unchanged. For the Fig. 8 expansion targets, the node count, 32 MB message size, `k=4`, 200 Gbps per-link bandwidth, 20 us base latency, and 200 us reconfiguration latency must remain unchanged.
+A method is a solver script `scripts/solvers/<method>.sh INSTANCE_JSON OUTPUT_JSON TIME_LIMIT_S` that writes `{"schedule": [...]}` (format in `briefing/evaluation.md`). The scored key is `swot` (`scripts/solvers/swot.sh`). The solver receives one instance at a time and the paper's 120 s limit; it is killed 150 s after it starts.
 
-## Resources
+## Workload and resources are fixed by the evaluator
 
-The optical degree, per-link bandwidth, base latency, and reconfiguration latency are fixed per experiment. Increasing `k`, aggregate bandwidth, or reducing latency is resource scaling rather than a scheduling improvement.
+Instances, optical degree `k`, per-plane bandwidth (800/k Gbps), base latency, switching latency and the baseline are all taken from the evaluator's frozen copies (`eval/train/`, `eval/test/`). Anything the solver writes besides the schedule (specs, CCTs, validity flags, baselines, files under `checkpoints/`) is ignored. Using more planes, more bandwidth or faster switching is resource scaling, not scheduling, and is rejected as an invalid schedule.
 
-## Correctness
+## Correctness (checked on every instance)
 
-Schedules must preserve collective step barriers and may not transmit on an optical plane before the required circuit is configured. Evaluation must report `valid_schedule`; CCT improvements from invalid schedules are not acceptable.
+- Per-step volume conservation, with a positive volume on every listed transmission.
+- Plane indices in `[0, k)`, at most one entry per (step, plane).
+- Transmission time of at least `d/B + T_lat`.
+- Topology switching of at least `T_recfg` whenever a plane's topology changes. A plane's first use needs no switch.
+- No switching while transmitting, and no transmission before the circuit is ready.
+- Step barriers.
+- CCT is measured from time 0.
 
-## Evaluation Interface
+One violation, timeout, crash or missing output on any instance fails the whole run, which gets the worst value in every metric of every experiment.
 
-Methods must write scheduler artifacts under `checkpoints/` in the same structure consumed by `eval/evaluate_results.py`, or extend the evaluator in a method-agnostic way. `eval/` must not import from `method/`.
+## Budget
+
+Search is allowed only inside the per-instance time limit, on the instance given. Precomputing answers for the public train or paper instances does not help on the held-out instances.
 
 ## Compliance Checklist
 
-- [ ] Core workload parameters in `data/collectives.py` are unchanged for `fig5_rabenseifner_allreduce_8node`
-- [ ] Fig. 8 workload parameters are unchanged for `fig8_rabenseifner_allreduce_64node_k4` and `fig8_rabenseifner_allreduce_512node_k4`
-- [ ] No additional optical planes or bandwidth are used for the same experiment
-- [ ] Reconfiguration latency is not reduced for the same experiment
-- [ ] `valid_schedule` is reported and equals 1 for claimed improvements
+- [ ] `scripts/solvers/swot.sh` produces a valid schedule for every train instance within 120 s (`bash scripts/evaluate_train.sh` shows `valid_schedule = 1` everywhere)
+- [ ] No change to `eval/`, the instance files, or the timing model
+- [ ] No additional optical planes, bandwidth or faster switching
 - [ ] Evaluation code remains independent of `method/`
