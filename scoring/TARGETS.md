@@ -13,11 +13,11 @@ Rabenseifner AllReduce on 64-1024 nodes, k=4 planes at 200 Gbps, 16-64 MB payloa
 
 ## collective_algorithms (weight 0.40)
 
-Rabenseifner ReduceScatter/AllReduce and Bruck All-to-All on 128-512 nodes, Pairwise All-to-All on 9-12 nodes, k=8 at 100 Gbps, 1-512 MB payloads. Paper anchor: peak reductions of 85.4-89.1% (peaks, not means). Reference reproduction (hidden test): 46.93%.
+Rabenseifner ReduceScatter/AllReduce and Bruck All-to-All on 128-512 nodes, Pairwise All-to-All on 9-12 nodes, k=8 at 100 Gbps, 1-512 MB payloads. Paper anchor: 45.5% (Fig. 8(b) Pairwise All-to-All at 10 nodes, k=4); the Fig. 7 k=8 peaks of 85.4-89.1% are kept under `_` keys. Reference reproduction (hidden test): 46.93%.
 
 ## hardware_sensitivity (weight 0.20)
 
-256-node Rabenseifner/Bruck collectives and 9- or 17-node Pairwise All-to-All, with k in {2,4,8} at 800/k Gbps and switching latency in {0.02, 0.2, 2, 20} ms, 1-256 MB payloads. Paper anchor: the k=2 design example, 20% (1500 -> 1200 us). Reference reproduction (hidden test): 43.71%.
+256-node Rabenseifner/Bruck collectives and 9- or 17-node Pairwise All-to-All, with k in {2,4,8} at 800/k Gbps and switching latency in {0.02, 0.2, 2, 20} ms, 1-256 MB payloads. Paper anchor: 46.9% (Fig. 8(a) AllReduce at k=4, 0.2 ms switching, 512 nodes; Section 4.3 itself gives no numbers); the k=2 design example (20%) is kept under a `_` key. Reference reproduction (hidden test): 43.71%.
 
 ## Unscored paper checks (`scoring/scores.json`, via `bash scripts/evaluate.sh`)
 

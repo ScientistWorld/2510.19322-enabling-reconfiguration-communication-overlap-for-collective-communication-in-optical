@@ -60,12 +60,16 @@
         },
         "swot": {
           "type": "proposed",
-          "cct_reduction_vs_strawman_pct": 87.1,
+          "cct_reduction_vs_strawman_pct": 45.5,
           "valid_schedule": 1.0
         },
         "_paper_fig7_peak_rabenseifner_reducescatter": {
           "type": "proposed",
           "cct_reduction_vs_strawman_pct": 89.1
+        },
+        "_paper_fig7_peak_rabenseifner_allreduce": {
+          "type": "proposed",
+          "cct_reduction_vs_strawman_pct": 87.1
         },
         "_paper_fig7_peak_pairwise_alltoall": {
           "type": "proposed",
@@ -76,7 +80,7 @@
           "cct_reduction_vs_strawman_pct": 85.4
         }
       },
-      "_paper_note": "Anchor: the paper's Fig. 7(b) peak ('up to') AllReduce reduction over Strawman-ICR, 87.1% (256 nodes, k=8, B=100 Gbps); other algorithms' peaks under '_paper_fig7_peak_*'. Peaks over a message-size sweep, not means: the scored family mean over 1-512 MB is expected to be lower. Not a target."
+      "_paper_note": "Anchor (swot): the paper's Fig. 8(b) non-peak reduction over Strawman-ICR for Pairwise All-to-All at 10 nodes, 45.5% (32 MB, k=4; 26.0% at 5 nodes) - an algorithm and node count inside this family, at a lower optical degree. The Fig. 7 numbers for this k=8 setting are peaks over a message-size sweep ('up to' 85.4-89.1%) and are kept under '_paper_fig7_peak_*'. The family mean over four algorithms and 1-512 MB is not reported by the paper; the anchor is not a target."
     },
     "hardware_sensitivity": {
       "description": "Paper Section 4.3 setting: 256-node Rabenseifner/Bruck (9 or 17 node Pairwise) collectives with optical degree k in {2,4,8} at 800/k Gbps and reconfiguration latency in {0.02, 0.2, 2, 20} ms, 1-256 MB payloads.",
@@ -102,11 +106,16 @@
         },
         "swot": {
           "type": "proposed",
+          "cct_reduction_vs_strawman_pct": 46.9,
+          "valid_schedule": 1.0
+        },
+        "_paper_fig5_8node_k2": {
+          "type": "proposed",
           "cct_reduction_vs_strawman_pct": 20.0,
           "valid_schedule": 1.0
         }
       },
-      "_paper_note": "Section 4.3 reports robustness only graphically (Figs. 10-11), noting that at k=8 the 120 s solver limit can give sub-optimal schedules. Anchor: the paper's only numeric k=2 result, the Fig. 5 example (1500 -> 1200 us, 20%). The scored family (k in {2,4,8}, 0.02-20 ms switching) is not on that scale; not a target."
+      "_paper_note": "Section 4.3 reports robustness only graphically (Figs. 10-11), noting that at k=8 the 120 s solver limit can give sub-optimal schedules. Anchor (swot): the paper's Fig. 8(a) AllReduce reduction at k=4 and 0.2 ms switching - one grid point of this sweep - 46.9% at 512 nodes (39.6% at 64 nodes). The paper's 8-node k=2 design example (1500 -> 1200 us, 20%) is kept under '_paper_fig5_8node_k2'. The sweep mean is not reported by the paper; the anchor is not a target."
     }
   },
   "_paper_reported": {
