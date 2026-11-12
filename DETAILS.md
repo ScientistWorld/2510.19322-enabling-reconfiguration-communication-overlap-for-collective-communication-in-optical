@@ -21,17 +21,40 @@ The paper studies collective communication in distributed ML clusters connected 
 
 ## Research Question
 
-How can a scheduler minimize collective-communication completion time in an optical circuit switched cluster when collective algorithms require a sequence of changing pairwise communication topologies?
+How can a scheduler minimize collective-communication completion time (CCT) in an optical circuit switched cluster when the collective algorithm requires a sequence of changing pairwise communication topologies and switching a topology takes non-negligible time?
 
-The benchmark considers `p` compute nodes connected by `k` optical planes. A collective operation is represented as ordered communication steps. Each step has a required topology/configuration and a message volume. A valid schedule must transfer every step's full message volume while respecting optical circuit setup time, per-plane serial resource use, and the sequential barriers of the collective algorithm.
+## Setting
+
+`p` compute nodes are connected by `k` parallel optical planes (one optical circuit switch per plane). Every node has one interface per plane; the per-node bandwidth is fixed at 800 Gbps, so each plane runs at `B = 800/k` Gbps. A collective operation (AllReduce, ReduceScatter, All-to-All, ...) implemented by a given algorithm is an ordered list of communication steps. Each step has
+
+- a required topology (an integer ID; equal IDs within one collective mean the same pairing), and
+- a per-node message volume in MB.
+
+Steps are sequential: step `i+1` relies on data produced by step `i`.
+
+## What a schedule decides
+
+For every step, which planes carry part of that step's volume and how much each carries, when each plane switches topology, and when each transmission starts. The physical rules every schedule must satisfy:
+
+1. **Traffic conservation.** The volumes carried in a step sum to the step's volume; every listed transmission carries a positive volume on a plane index in `[0, k)`.
+2. **Transmission time (alpha-beta model).** A plane carrying `d` MB in a step is busy for at least `d / B + T_lat`, with `B` in MB/us (`Gbps / 8000`) and base latency `T_lat`.
+3. **Circuit readiness.** A plane carries a step only if it is configured for that step's topology. Changing a plane's topology takes `T_recfg`; the plane cannot transmit while switching and only starts switching after its previous transmission ends. A plane's first use needs no switch (planes are configured before the collective starts); a later use with the same topology as that plane's previous use needs no switch.
+4. **Serial use.** A plane does one thing at a time.
+5. **Step barrier.** No transmission of step `i+1` starts before every transmission of step `i` has ended.
+
+The collective starts at time 0; its CCT is the end of the last transmission.
+
+## Workloads
+
+Instances come from the collective algorithms and network settings of the source paper's evaluation (see `data/collectives.py` for generators): Rabenseifner ReduceScatter / AllReduce (recursive halving/doubling), Bruck All-to-All and Pairwise-exchange All-to-All, on 9-1024 nodes, with `k` in {2, 4, 8}, payloads of 1-512 MB, `T_lat` = 20 us and `T_recfg` from 20 us to 20 ms. Public train instances are in `eval/train/instances.json`; held-out test instances are drawn from the same families and ranges.
 
 ## Why It Matters
 
-Distributed ML training spends substantial time in collective communication. Optical circuit switches can provide high bandwidth, but static topologies underuse links for dynamic communication patterns and naive per-step reconfiguration can add prohibitive switching delay.
+Distributed ML training spends substantial time in collective communication. Optical circuit switches provide high bandwidth, but a fixed topology cannot serve dynamic communication patterns with limited optical degree, and naively switching every plane at every step adds the switching delay to the critical path.
 
 ## Success Criteria
 
-A successful system produces valid execution schedules with lower communication completion time than static or naive dynamic baselines under fixed optical resources, bandwidth, latency, and collective workload.
+Valid schedules with lower CCT than the naive lockstep reconfiguration baseline (all planes serve every step with an even split and switch together whenever the topology changes), under fixed optical resources, bandwidth, latencies and collective workload, produced within a fixed per-instance compute budget.
 
 ---
 
@@ -53,6 +76,13 @@ The scheduler implements three coupled mechanisms:
 
 The constraints enforce traffic conservation, transmission duration under an alpha-beta model, reconfiguration duration, circuit readiness before transmission, serial resource use per OCS plane, and global step barriers required by collective algorithms.
 
+## Reproduction (`method/swot_scheduler.py`, exposed as `scripts/solvers/swot.sh`)
+
+- The paper's MILP (Eqs. 1-11): the `last_cfg`/`s_ij` logic is linearized with pairwise "most recent previous use" implications. A plane's first use is free (planes are pre-configured), as in the paper's Fig. 5.
+- Solved with CBC via PuLP under the paper's 120 s limit, single thread, fixed CBC seeds.
+- The paper leaves the big-M constant unspecified. The reproduction uses the lockstep (Strawman-ICR) completion time as M and bounds the CCT by it. The lockstep schedule is feasible, so the MILP optimum is unchanged. Earlier iterations used a loose horizon M, which let the time-limited incumbent end up worse than lockstep on some large k=8 instances (`--big-m horizon` keeps that variant).
+- The MILP's plane-use/split decisions are written with exact earliest-start timing. If CBC returns no incumbent, the lockstep schedule is written.
+
 ## Main Claims
 
 The primary claim is that demand-aware overlapping schedules reduce CCT compared with naive intra-collective reconfiguration and static optical scheduling while preserving collective correctness. The paper reports a 20% reduction in its 8-node design-intuition example and peak reductions up to 89.7% across larger simulated collective workloads.
@@ -61,26 +91,58 @@ The primary claim is that demand-aware overlapping schedules reduce CCT compared
 
 # Evaluation
 
-## Metrics
+## Interface: methods are solvers
 
-- `cct_us`: communication completion time in microseconds. Lower is better.
-- `cct_reduction_vs_strawman_pct`: percent CCT reduction relative to the naive intra-collective reconfiguration baseline. Higher is better.
-- `valid_schedule`: 1 if the schedule satisfies traffic conservation, circuit readiness, per-plane serial use, and collective step barriers; 0 otherwise. Higher is better.
-- `reconfiguration_events`: number of topology reconfigurations scheduled across optical planes. Lower is better when CCT is comparable.
+A method is a script `scripts/solvers/<method>.sh`. Every evaluator calls it from the workspace root, once per workload instance:
 
-## Baselines and Targets
+```
+bash scripts/solvers/<method>.sh INSTANCE_JSON OUTPUT_JSON TIME_LIMIT_S
+```
 
-The primary baseline is naive intra-collective reconfiguration: all optical planes serve each collective step in lockstep with an even message split, and the system pays one global reconfiguration delay between adjacent steps requiring different topologies.
+- `INSTANCE_JSON` holds `optical_degree` (k), `per_link_gbps`, `base_latency_us`, `reconfig_latency_us`, `nodes`, `algorithm`, `payload_mb` and the ordered `steps` (`step`, `config`, `message_mb`).
+- `TIME_LIMIT_S` is 120 (the source paper's solver limit). The process group is killed 150 s after it starts; a killed or non-zero exit counts as a failure.
+- The solver writes `{"schedule": [...]}` to `OUTPUT_JSON`. One entry per (step, plane) that carries data, with numeric fields `step`, `plane`, `message_mb`, `transmit_start_us`, `transmit_end_us`, and, when that plane must switch topology before this transmission, `reconfig_start_us` and `reconfig_end_us`. Optional `reconfigured` (0/1) and `config` must agree with the instance if present. Anything else in the file is ignored.
 
-The core target is the paper's 8-node Rabenseifner AllReduce example with two 400 Gbps optical planes, 200 us reconfiguration latency, 40 MB payload, and no base latency in the illustrated timing model. The paper reports 1500 us CCT for the naive baseline, 1200 us CCT for the optimized schedule, and 20% CCT reduction.
+The scored method key is **`swot`**; it is always reported (a missing `scripts/solvers/swot.sh` is a failed run). Every other `scripts/solvers/*.sh` on disk is scored too. `scripts/solvers/swot.sh` currently runs the reproduced paper method; replace it with your own solver.
 
-The expanded scalability targets use the paper's Fig. 8 AllReduce setup with `k=4`, 200 Gbps per link, 32 MB messages, 20 us base latency, and 200 us reconfiguration latency. The paper reports CCT reductions over the naive baseline of 39.6% and 46.9% for Rabenseifner AllReduce at 64 and 512 nodes.
+## What is computed
 
-## Evaluation Protocol
+For every instance the evaluator re-derives everything from the schedule and its own frozen copy of the instance (`problem.md` lists the rules): plane indices, per-step volume conservation, transmission time `>= d/B + T_lat`, switching duration `>= T_recfg` whenever a plane's topology changes, no switching while transmitting, transmission only after the circuit is ready, and step barriers. CCT is the latest transmission end measured from time 0. Times have a tolerance of `1e-3 us + 1e-6 x` the baseline CCT.
 
-Run `scripts/reproduce.sh` to generate baseline and scheduler artifacts under `checkpoints/`, then run `scripts/evaluate.sh` to write `scoring/scores.json`. Evaluation code reads only artifacts and code under `eval/`; it does not import any candidate method implementation.
+The baseline is computed by the evaluator from the frozen instance: **Strawman-ICR (lockstep)** - every plane serves every step with an even split, and all planes switch together whenever consecutive steps need different topologies.
 
-All comparisons must use the same collective step sequence, optical degree, per-link bandwidth, base latency, and reconfiguration latency. Do not compare methods that alter the collective semantics or add optical planes/bandwidth.
+## Metrics (per experiment)
+
+- `cct_reduction_vs_strawman_pct` (primary, higher is better): mean over the experiment's instances of `100 * (CCT_strawman - CCT) / CCT_strawman`, each instance clipped to [-100, 100].
+- `valid_schedule` (constraint, higher is better): 1 when the run produced a valid schedule for every instance of every experiment.
+
+**Failure rule.** If any instance (in any experiment) is missing, late, non-zero exit, unparseable or physically invalid, the whole run fails: every metric of every experiment gets its worst value (`-100` and `0`). Numbers the solver writes itself (CCTs, validity flags, specs, baselines) are never read.
+
+## Experiments
+
+Three families from the source paper's evaluation, 6 instances each per slice (see `scoring/EXPERIMENTS.md`):
+
+- `allreduce_scaling` (weight 0.40): Rabenseifner AllReduce, 64-1024 nodes, k=4.
+- `collective_algorithms` (weight 0.40): four collective algorithms, k=8.
+- `hardware_sensitivity` (weight 0.20): k in {2,4,8} and switching latency 0.02-20 ms.
+
+Every instance is too large to enumerate plane-usage patterns within the budget.
+
+## Train and test
+
+- `bash scripts/evaluate_train.sh` -> `scoring/scores_train.json`: public instances in `eval/train/instances.json` (includes the paper's Fig. 8 64- and 512-node AllReduce points). Train schedules are kept in `checkpoints/train/<method>/`.
+- `bash scripts/evaluate_test.sh` -> `scoring/scores_test.json`: held-out instances of the same families and ranges; scored the same way. Takes no arguments.
+- `bash scripts/evaluate.sh` -> `scoring/scores_train.json` and `scoring/scores.json` (train experiments plus unscored `_paper_*` checks on the paper's own Fig. 5 and Fig. 8 instances, with `cct_us`).
+
+Each run costs up to ~2.5 min per instance per method (18 train + 3 paper instances for `evaluate.sh`, 18 test instances for the hidden test).
+
+## Paper reference points
+
+Strawman-ICR vs the paper's scheduler: 1500 -> 1200 us (20%) on the 8-node, k=2 example; 39.6% at 64 nodes and 46.9% at 512 nodes for AllReduce with k=4; peaks of 85-89% across algorithms with k=8. They are kept in `scoring/reference.json` under `_` keys and as labelled anchors; they are single points or peaks, not the family means the gym scores.
+
+## Rules
+
+All comparisons use the frozen instance: same steps, optical degree, bandwidth, base latency and switching latency. Do not add planes or bandwidth, shorten switching, skip barriers, or change the collective's steps.
 
 ---
 
@@ -357,6 +419,40 @@ All comparisons must use the same collective step sequence, optical degree, per-
 - Final verification removed unscored Pairwise All-to-All target entries from the official rubric, keeping `TARGETS.md`, `EXPERIMENTS.md`, `reference.json`, and `scores.json` aligned.
 - Generalized the main evaluator to discover result artifacts under `checkpoints/` instead of loading only fixed baseline/SWOT paths.
 - Re-ran standalone evaluation and validation after the cleanup; both passed.
+
+</details>
+
+### Iteration 11: claude-opus-5-5 (hardener)
+- **Milestone**: `core_claim_plus` | **Status**: done
+- **Working time**: 41m | **GPU**: 0.0h
+- **Jobs**: 9 total (6 completed, 0 failed)
+
+<details>
+<summary>Progress Log</summary>
+
+### [2026-06-06 01:35] - core_claim
+- Managed CPU job ran `scripts/reproduce.sh` successfully.
+- Reproduced the paper's Fig. 5 Rabenseifner AllReduce example: Strawman-ICR 1500 us, SWOT 1200 us, 20% CCT reduction, valid schedule.
+
+### [2026-06-06 05:48] - core_claim
+- Added two paper Fig. 8 AllReduce scalability targets to the benchmark plan.
+- Fixed evaluator artifact merging so `eval/` independently validates generated schedules from their workload specs.
+- Tightened topology-bypass consistency so repeated use of the same plane/configuration cannot report a redundant reconfiguration.
+
+### [2026-06-06 05:58] - core_claim_plus
+- Managed CPU job `f4fb2013-489` regenerated all registered baseline and SWOT artifacts in the container.
+- Reproduced Fig. 5 exactly: Strawman-ICR 1500 us, SWOT 1200 us, 20.0% CCT reduction, valid schedule.
+- Reproduced the same claim on two Fig. 8 scalability settings with valid schedules: 64-node AllReduce reduction 35.89% versus the paper's 39.6%, and 512-node AllReduce reduction 42.09% versus the paper's 46.9%.
+- `python validate.py --compare` passed, including evaluation/method import separation and checks that evaluation reads generated artifacts.
+
+### [2026-06-06 06:35] - core_claim_plus
+- Final verification removed unscored Pairwise All-to-All target entries from the official rubric, keeping `TARGETS.md`, `EXPERIMENTS.md`, `reference.json`, and `scores.json` aligned.
+- Generalized the main evaluator to discover result artifacts under `checkpoints/` instead of loading only fixed baseline/SWOT paths.
+- Re-ran standalone evaluation and validation after the cleanup; both passed.
+
+### [2026-11-12] - core_claim_plus
+- Hardening: the hidden test now runs solvers on held-out instances from the paper's Figs. 7-8 and Section 4.3 settings. It validates schedules physically and rewards better schedulers above seed noise.
+- The reference (the paper's MILP, tight valid big-M, 120 s CBC) beats Strawman-ICR in every family. Fig. 5 reproduces exactly (1500 -> 1200 us).
 
 </details>
 

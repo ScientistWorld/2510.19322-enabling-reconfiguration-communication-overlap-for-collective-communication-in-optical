@@ -1,8 +1,6 @@
 # Once you set action to 'submit' or 'done', STOP immediately.
 # Do NOT sleep, poll, or wait for jobs. The system reads this file
 # only after your turn ends.
-action: submit
-gpus: 0
-test: false
+action: done
 milestone: core_claim_plus
-notes: "Resume hardening check (previous job preempted, per-instance cache kept): finish MILP+LNS positive control on test, train+paper reference (scores_train/scores.json), seed-2 noise rerun, private-search probe, LNS on train; analysis + validate."
+notes: "Hardened: hidden test runs solvers on held-out instances (paper Figs 7-8, Sec 4.3) with strict physical validation, evaluator-computed baseline, full-collective CCT, run-level failure; all redteam shortcuts fail or score lockstep; better MILP+LNS beats reference +5.7±1.7 pts (rank +0.36 vs seed noise 0.07). Anchors now the paper's non-peak in-family numbers; validate.py passes in default and post-design modes. Left: a local search also outranks the paper's 120 s MILP; see HARDENING.md."
