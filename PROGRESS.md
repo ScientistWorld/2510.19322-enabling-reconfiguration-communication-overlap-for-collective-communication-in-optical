@@ -48,3 +48,14 @@
 
 - The core reference experiment exactly follows the paper's Fig. 5 illustrative timing setup.
 - The Fig. 8 scalability targets reproduce the paper's Rabenseifner AllReduce node-count settings, but this reproduction still uses the aggregate per-step configuration model rather than explicit per-node OCS permutation matrices.
+
+## Iteration 11 (hardening)
+
+- **Problem found.** The hidden test trusted method-written numbers, a mutable baseline and a mutable spec, and scored a public suffix slice. Shortcuts outranked the reference, and a genuinely better solver was within seed noise (`REDTEAM.md`).
+- **Redesign.** Methods are solvers run by the evaluator on held-out instances, with strict physical validation, an evaluator-computed baseline, full-collective CCT, and failure of the whole run on any bad instance. Scored experiments are three families from the paper's Figs. 7-8 and Section 4.3.
+- **Reference fix.** The paper's MILP now uses a valid tight big-M (the lockstep CCT); the loose horizon M had produced worse-than-lockstep schedules.
+- **Hidden-test reference.** 37.93 / 46.93 / 43.71% reduction vs Strawman-ICR.
+  - The MILP+LNS positive control scores +5.7 ± 1.7 points paired (rank +0.36 vs seed noise 0.07).
+  - Every redteam shortcut now fails or scores its true lockstep value.
+  - A pure-Python local search outranks the reference about as much as the positive control does (see `HARDENING.md` §3).
+- **Paper instances.** Fig. 5 1500 → 1200 us (exact); Fig. 8 38.4% at 64 nodes (paper 39.6%); 25.2% at 512 nodes in this run (paper 46.9%; time-limit variance, 41.6% on the identical train instance).

@@ -1,3 +1,5 @@
+> Superseded by `HARDENING.md` (iteration 11): experiments, interface and scoring were redesigned; the notes below describe the earlier gym.
+
 # Verification Report
 
 ## Initial Assessment

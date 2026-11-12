@@ -23,3 +23,7 @@
 - Final verification removed unscored Pairwise All-to-All target entries from the official rubric, keeping `TARGETS.md`, `EXPERIMENTS.md`, `reference.json`, and `scores.json` aligned.
 - Generalized the main evaluator to discover result artifacts under `checkpoints/` instead of loading only fixed baseline/SWOT paths.
 - Re-ran standalone evaluation and validation after the cleanup; both passed.
+
+### [2026-11-12] - core_claim_plus
+- Hardening: the hidden test now runs solvers on held-out instances from the paper's Figs. 7-8 and Section 4.3 settings. It validates schedules physically and rewards better schedulers above seed noise.
+- The reference (the paper's MILP, tight valid big-M, 120 s CBC) beats Strawman-ICR in every family. Fig. 5 reproduces exactly (1500 -> 1200 us).
