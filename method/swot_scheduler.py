@@ -7,13 +7,16 @@ u_ij) to minimize the collective completion time, solved with CBC via PuLP.
 
 Solver budget. The paper gives CBC a 120 s time limit. A time limit makes the
 returned schedule depend on the machine and its load, so the reproduction
-gives CBC a deterministic work budget instead: a fixed number of
-branch-and-bound nodes (``method/budget.json``), single thread, fixed seeds.
-The node count was calibrated once so that CBC uses at most about 70 of the
-evaluator's 120 CPU-seconds on the reference compute node (CBC's node rate was
-nearly independent of instance size there); the schedule is then identical on
-any machine. The evaluator's CPU budget (the third solver argument) is only a
-safety stop here (CBC ``sec`` in CPU mode).
+gives CBC a deterministic work budget instead: a number of branch-and-bound
+nodes per instance (``method/budget.json``: ``cbc_max_nodes`` for collectives
+of up to ``full_budget_max_steps`` steps, scaled by (max_steps / steps)^2
+beyond that, because CBC's node rate falls about that fast with the number of
+steps), CBC's default single-threaded search, fixed seeds. The budget was
+calibrated once on the reference compute node so that CBC uses roughly 70-95
+of the evaluator's 120 CPU-seconds; the schedule is then identical on any
+machine. The evaluator's CPU budget (the third solver argument) is only a
+safety stop here (CBC ``sec``). CBC's ``timeMode cpu`` is not used: when CBC
+stops on a time limit in that mode, the solution it writes is unusable.
 
 Solver interface (used by every evaluator through scripts/solvers/swot.sh):
 
@@ -47,11 +50,16 @@ Volumes = Dict[Tuple[int, int], float]
 
 
 def default_max_nodes(spec: ExperimentSpec | None = None) -> int:
-    """The calibrated deterministic CBC node budget (same for every instance; 0 = time limit only)."""
+    """The calibrated deterministic CBC node budget for ``spec`` (0 = time limit only)."""
     try:
-        return int(json.loads(BUDGET_FILE.read_text())["cbc_max_nodes"])
+        budget = json.loads(BUDGET_FILE.read_text())
+        nodes = int(budget["cbc_max_nodes"])
+        max_steps = int(budget.get("full_budget_max_steps", 0))
     except (OSError, ValueError, KeyError, TypeError):
         return 0
+    if spec is None or not max_steps or len(spec.steps) <= max_steps:
+        return nodes
+    return max(100, int(nodes * (max_steps / len(spec.steps)) ** 2))
 
 
 def cpu_used_s() -> float:
@@ -199,12 +207,10 @@ def build_model(spec: ExperimentSpec, big_m: str = "lockstep", formulation: str 
 
 def cbc(time_limit_s: float, seed: int, warm_start: bool = False, max_nodes: int | None = None,
         log_path: str | None = None) -> pulp.PULP_CBC_CMD:
-    """CBC with fixed seeds, one thread, a CPU-time safety limit and an optional node budget."""
+    """CBC (default single-threaded search) with fixed seeds, a safety time limit and an optional node budget."""
     kwargs = {
         "msg": False,
         "timeLimit": max(1.0, float(time_limit_s)),
-        "timeMode": "cpu",
-        "threads": 1,
         "options": [f"randomSeed {seed}", f"randomCbcSeed {seed}"],
     }
     if max_nodes:
