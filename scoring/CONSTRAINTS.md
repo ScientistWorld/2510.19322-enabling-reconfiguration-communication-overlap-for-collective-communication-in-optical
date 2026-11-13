@@ -2,7 +2,7 @@
 
 ## Interface
 
-A method is a solver script `scripts/solvers/<method>.sh INSTANCE_JSON OUTPUT_JSON TIME_LIMIT_S` that writes `{"schedule": [...]}` (format in `briefing/evaluation.md`). The scored key is `swot` (`scripts/solvers/swot.sh`). The solver receives one instance at a time and the paper's 120 s limit; it is killed 150 s after it starts.
+A method is a solver script `scripts/solvers/<method>.sh INSTANCE_JSON OUTPUT_JSON CPU_BUDGET_S` that writes `{"schedule": [...]}` (format in `briefing/evaluation.md`). The scored key is `swot` (`scripts/solvers/swot.sh`). The solver receives one instance at a time and a budget of 120 CPU-seconds (the paper's 120 s solver limit), counted by the evaluator over every process the solver starts; more than that on any instance fails the run. A 300 s wall-clock cap stops hung solvers.
 
 ## Workload and resources are fixed by the evaluator
 
@@ -18,15 +18,15 @@ Instances, optical degree `k`, per-plane bandwidth (800/k Gbps), base latency, s
 - Step barriers.
 - CCT is measured from time 0.
 
-One violation, timeout, crash or missing output on any instance fails the whole run, which gets the worst value in every metric of every experiment.
+One violation, budget overrun, crash or missing output on any instance fails the whole run, which gets the worst value in every metric of every experiment.
 
 ## Budget
 
-Search is allowed only inside the per-instance time limit, on the instance given. Precomputing answers for the public train or paper instances does not help on the held-out instances.
+Search is allowed only inside the per-instance CPU budget, on the instance given; work done in detached or background processes is counted too. Precomputing answers for the public train or paper instances does not help on the held-out instances.
 
 ## Compliance Checklist
 
-- [ ] `scripts/solvers/swot.sh` produces a valid schedule for every train instance within 120 s (`bash scripts/evaluate_train.sh` shows `valid_schedule = 1` everywhere)
+- [ ] `scripts/solvers/swot.sh` produces a valid schedule for every train instance within 120 CPU-seconds (`bash scripts/evaluate_train.sh` shows `valid_schedule = 1` everywhere; `_status` lists the CPU-seconds used)
 - [ ] No change to `eval/`, the instance files, or the timing model
 - [ ] No additional optical planes, bandwidth or faster switching
 - [ ] Evaluation code remains independent of `method/`

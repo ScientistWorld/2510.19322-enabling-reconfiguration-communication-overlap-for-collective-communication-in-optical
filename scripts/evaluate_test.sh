@@ -2,7 +2,8 @@
 # Score every method on disk on the held-out test instances.
 #
 # Runs each scripts/solvers/<method>.sh (plus the required `swot`) on every
-# instance in eval/test/ under the fixed time limit, validates each schedule
+# instance in eval/test/ under a 120 CPU-second budget per instance (counted by
+# the evaluator over the solver's process tree), validates each schedule
 # against the frozen instance and the physical model, and writes
 # scoring/scores_test.json:
 #   {"experiments": {"experiment_name": {"results": {"method": {"metric": value}}}}}

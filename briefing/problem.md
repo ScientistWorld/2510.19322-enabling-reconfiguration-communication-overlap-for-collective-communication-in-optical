@@ -27,7 +27,7 @@ The collective starts at time 0; its CCT is the end of the last transmission.
 
 ## Workloads
 
-Instances come from the collective algorithms and network settings of the source paper's evaluation (see `data/collectives.py` for generators): Rabenseifner ReduceScatter / AllReduce (recursive halving/doubling), Bruck All-to-All and Pairwise-exchange All-to-All, on 9-1024 nodes, with `k` in {2, 4, 8}, payloads of 1-512 MB, `T_lat` = 20 us and `T_recfg` from 20 us to 20 ms. Public train instances are in `eval/train/instances.json`; held-out test instances are drawn from the same families and ranges.
+Instances come from the collective algorithms and network settings of the source paper's evaluation (see `data/collectives.py` for generators and family settings): Rabenseifner ReduceScatter / AllReduce (recursive halving/doubling), Bruck All-to-All and Pairwise-exchange All-to-All, on 9-1024 nodes (7-20 steps), with `k` in {2, 4, 8}, `T_lat` = 20 us and `T_recfg` from 20 us to 20 ms. Payloads are chosen per instance so that switching is a material but not total share of the lockstep schedule's time (between 35% and 80-92% of it), which is where schedules differ. Public train instances are in `eval/train/instances.json`; held-out test instances are drawn from the same families and ranges.
 
 ## Why It Matters
 
@@ -35,4 +35,4 @@ Distributed ML training spends substantial time in collective communication. Opt
 
 ## Success Criteria
 
-Valid schedules with lower CCT than the naive lockstep reconfiguration baseline (all planes serve every step with an even split and switch together whenever the topology changes), under fixed optical resources, bandwidth, latencies and collective workload, produced within a fixed per-instance compute budget.
+Valid schedules with lower CCT than the naive lockstep reconfiguration baseline (all planes serve every step with an even split and switch together whenever the topology changes), under fixed optical resources, bandwidth, latencies and collective workload, produced within a fixed per-instance compute budget (120 CPU-seconds, counted by the evaluator).

@@ -18,13 +18,13 @@ In scope:
 
 Where the reference is weakest:
 - many-step collectives (large clusters);
-- high optical degree (k=8);
-- large messages, where a time-limited solver's incumbent stays close to the lockstep baseline.
+- high optical degree (k=8), especially at moderate switching share, where its budget-limited incumbent often stays at the lockstep baseline;
+- larger messages relative to the switching delay, where the best schedules split traffic unevenly across planes.
 
 ## Out of Bounds
 
 - Changing the network model, the collective's steps or the instance parameters.
 - Adding optical planes or bandwidth, or shortening switching.
 - Ignoring step barriers, circuit readiness or serial plane use.
-- Exceeding the per-instance time limit, or using answers computed outside the solver call for the evaluated instance.
+- Exceeding the per-instance CPU budget (including work in helper processes), or using answers computed outside the solver call for the evaluated instance.
 - Reporting numbers instead of schedules: the evaluator recomputes everything.

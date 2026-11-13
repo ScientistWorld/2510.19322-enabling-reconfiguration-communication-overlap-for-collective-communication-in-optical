@@ -18,9 +18,10 @@ The constraints enforce traffic conservation, transmission duration under an alp
 
 ## Reproduction (`method/swot_scheduler.py`, exposed as `scripts/solvers/swot.sh`)
 
-- The paper's MILP (Eqs. 1-11): the `last_cfg`/`s_ij` logic is linearized with pairwise "most recent previous use" implications. A plane's first use is free (planes are pre-configured), as in the paper's Fig. 5.
-- Solved with CBC via PuLP under the paper's 120 s limit, single thread, fixed CBC seeds.
-- The paper leaves the big-M constant unspecified. The reproduction uses the lockstep (Strawman-ICR) completion time as M and bounds the CCT by it. The lockstep schedule is feasible, so the MILP optimum is unchanged. Earlier iterations used a loose horizon M, which let the time-limited incumbent end up worse than lockstep on some large k=8 instances (`--big-m horizon` keeps that variant).
+- The paper's MILP (Eqs. 1-11). The `last_cfg`/`s_ij` bypass logic is linearized with pairwise "most recent previous use" implications; the paper's own `last_cfg` encoding is available (`build_model(..., formulation="paper")`), has the same optimum, and was about twice as slow per CBC node with no better incumbents in a probe, so it is not the default. A plane's first use is free (planes are pre-configured), as in the paper's Fig. 5.
+- Solved with CBC via PuLP, CBC's default single-threaded search, fixed CBC seeds.
+- **Budget.** The paper uses a 120 s CBC time limit. A time limit makes the schedule depend on the machine and its load, so the reproduction stops CBC after a fixed number of branch-and-bound nodes instead (`method/budget.json`): 5800 nodes for collectives of up to 14 steps, scaled by (14 / steps)^2 for longer ones (CBC's node rate fell about that fast with the number of steps). The budget was calibrated once on the compute node so that CBC uses roughly 50-110 of the 120 CPU-seconds; the schedule is then the same on any machine. The evaluator's CPU budget is only a safety stop (CBC `sec`). CBC's `timeMode cpu` is not used: a time-limited stop in that mode wrote unusable solutions.
+- The paper leaves the big-M constant unspecified. The reproduction uses the lockstep (Strawman-ICR) completion time as M and bounds the CCT by it. The lockstep schedule is feasible, so the MILP optimum is unchanged (`--big-m horizon` keeps the loose variant of earlier iterations).
 - The MILP's plane-use/split decisions are written with exact earliest-start timing. If CBC returns no incumbent, the lockstep schedule is written.
 
 ## Main Claims
