@@ -7,14 +7,13 @@ u_ij) to minimize the collective completion time, solved with CBC via PuLP.
 
 Solver budget. The paper gives CBC a 120 s time limit. A time limit makes the
 returned schedule depend on the machine and its load, so the reproduction
-gives CBC a deterministic work budget instead: a number of branch-and-bound
-nodes per instance, ``N = C / (n^2 k)`` for n steps and k planes (CBC's cost
-per node grows about linearly with the model's n^2 k pairwise constraints),
-single thread, fixed seeds. ``C`` (``method/budget.json``) was calibrated once
-so that CBC uses about 70 of the evaluator's 120 CPU-seconds on the reference
-compute node; the schedule is then identical on any machine. The evaluator's
-CPU budget (the third solver argument) is only a safety stop here (CBC
-``sec`` in CPU mode).
+gives CBC a deterministic work budget instead: a fixed number of
+branch-and-bound nodes (``method/budget.json``), single thread, fixed seeds.
+The node count was calibrated once so that CBC uses at most about 70 of the
+evaluator's 120 CPU-seconds on the reference compute node (CBC's node rate was
+nearly independent of instance size there); the schedule is then identical on
+any machine. The evaluator's CPU budget (the third solver argument) is only a
+safety stop here (CBC ``sec`` in CPU mode).
 
 Solver interface (used by every evaluator through scripts/solvers/swot.sh):
 
@@ -48,17 +47,11 @@ Volumes = Dict[Tuple[int, int], float]
 
 
 def default_max_nodes(spec: ExperimentSpec | None = None) -> int:
-    """The calibrated deterministic CBC node budget for ``spec`` (0 = time limit only)."""
+    """The calibrated deterministic CBC node budget (same for every instance; 0 = time limit only)."""
     try:
-        budget = json.loads(BUDGET_FILE.read_text())
-        constant = float(budget["node_constant"])
-        floor_nodes = int(budget.get("min_nodes", 100))
+        return int(json.loads(BUDGET_FILE.read_text())["cbc_max_nodes"])
     except (OSError, ValueError, KeyError, TypeError):
         return 0
-    if spec is None:
-        return floor_nodes
-    size = len(spec.steps) ** 2 * spec.optical_degree
-    return max(floor_nodes, int(constant // size))
 
 
 def cpu_used_s() -> float:
@@ -369,7 +362,7 @@ def main() -> None:
     parser.add_argument("--time-limit-s", type=float, default=120,
                         help="CPU-seconds budget for this call (safety stop; the evaluator passes its budget)")
     parser.add_argument("--max-nodes", type=int, default=None,
-                        help="CBC node budget (default: C/(n^2 k) from method/budget.json; 0 = time limit only)")
+                        help="CBC node budget (default: method/budget.json; 0 = time limit only)")
     parser.add_argument("--node-scale", type=float, default=1.0,
                         help="multiply the default node budget (budget-sensitivity variants)")
     parser.add_argument("--seed", type=int, default=1)
