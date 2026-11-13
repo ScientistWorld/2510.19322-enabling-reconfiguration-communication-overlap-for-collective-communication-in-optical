@@ -1,23 +1,16 @@
 #!/bin/bash
-# Reproduce the reference end to end inside the compute container
-# (workspace at /home/user, no internet, 1 CPU is enough).
-#
-# 1. scripts/reproduce.sh: Strawman-ICR schedules for the paper instances, then
-#    the SWOT MILP (scripts/solvers/swot.sh, 120 s per instance) on every
-#    visible instance -> scoring/scores_train.json and scoring/scores.json
-#    (~45 min);
-# 2. scripts/evaluate_test.sh: the same solver on the held-out instances ->
-#    scoring/scores_test.json (~35 min);
-# 3. workspace validation.
-#
-# The iteration-11 hardening check (variants and shortcut probes) is
-# `python -m hardening.harness all`; its results are in hardening/runs/.
+# Hardening exploration job (iteration 12, step 1 of 2):
+#   1. calibrate the reference's deterministic CBC node budget (method/budget.json);
+#   2. smoke-test the reference, the positive control and the relay rule;
+#   3. run reference / relay rule / positive control / 30 s annealing / reference seed 2
+#      on the exploration instances (hardening/explore/instances.json) -> results.jsonl.
+# The final scripts/run.sh reproduces the reference end to end.
 
 set -euo pipefail
 
 cd /home/user
 
-python -c "import pulp, sys; print('python', sys.version.split()[0], 'pulp', pulp.__version__)"
-bash scripts/reproduce.sh
-bash scripts/evaluate_test.sh
-python validate.py --compare
+python -c "import pulp, sys, os; print('python', sys.version.split()[0], 'pulp', pulp.__version__, 'cpus', len(os.sched_getaffinity(0)))"
+python -m hardening.calibrate
+python -c "from hardening import harness; import sys; sys.exit(0 if harness.smoke() else 2)"
+python -m hardening.explore

@@ -4,12 +4,16 @@ The instances live only in ``eval/test/instances.json``. For each method
 ``scripts/solvers/<method>.sh`` the evaluator writes one instance at a time to
 a private temporary directory, runs
 
-    bash scripts/solvers/<method>.sh INSTANCE.json OUTPUT.json TIME_LIMIT_S
+    bash scripts/solvers/<method>.sh INSTANCE.json OUTPUT.json CPU_BUDGET_S
 
-with a hard wall-clock limit, and scores only the serialized schedule. Every
-number is recomputed here from the schedule against the frozen instance; any
-scalar, flag or specification the solver writes is ignored. The comparison
-baseline (lockstep Strawman-ICR) is computed here from the frozen instance.
+and scores only the serialized schedule. The budget is CPU time counted by
+this evaluator over the solver's whole process tree (every descendant is
+reaped here, including ones that leave the process group), not wall-clock
+time: a solver that uses more than ``CPU_BUDGET_S`` CPU-seconds on an instance
+fails. A wall-clock cap only stops hung or sleeping solvers. Every number is
+recomputed here from the schedule against the frozen instance; any scalar,
+flag or specification the solver writes is ignored. The comparison baseline
+(lockstep Strawman-ICR) is computed here from the frozen instance.
 
 A run fails as a whole if any instance is missing, late, malformed or physically
 infeasible; a failed run receives the worst value of every scored metric in
@@ -20,10 +24,12 @@ failed run). This module never imports method code.
 from __future__ import annotations
 
 import argparse
+import ctypes
 import hashlib
 import json
 import math
 import os
+import resource
 import shutil
 import signal
 import subprocess
@@ -38,8 +44,9 @@ ROOT = HERE.parents[1]
 SLICE_NAME = "test"
 INSTANCES_PATH = HERE / "instances.json"
 SOLVERS_DIR = ROOT / "scripts" / "solvers"
-TIME_LIMIT_S = 120
-GRACE_S = 30
+CPU_BUDGET_S = 120  # the source paper's per-instance solver budget, as counted CPU-seconds
+CPU_TOLERANCE_S = 1.0
+WALL_CAP_S = 2 * CPU_BUDGET_S + 60  # only stops hung or sleeping solvers
 REQUIRED_METHODS = ("swot",)
 BASELINE_METHOD = "strawman_icr"
 PRIMARY = "cct_reduction_vs_strawman_pct"
@@ -236,6 +243,15 @@ def discover_methods() -> list[str]:
     return sorted(names)
 
 
+def _become_subreaper() -> None:
+    """Orphaned solver descendants are re-parented to (and reaped by) this process."""
+    try:
+        libc = ctypes.CDLL(None, use_errno=True)
+        libc.prctl(36, 1, 0, 0, 0)  # PR_SET_CHILD_SUBREAPER
+    except (OSError, AttributeError):
+        pass
+
+
 def _kill_group(process: subprocess.Popen) -> None:
     try:
         os.killpg(process.pid, signal.SIGKILL)
@@ -243,48 +259,107 @@ def _kill_group(process: subprocess.Popen) -> None:
         pass
 
 
+def _children_of_self() -> list[int]:
+    me = os.getpid()
+    kids = []
+    for entry in os.listdir("/proc"):
+        if not entry.isdigit():
+            continue
+        try:
+            with open(f"/proc/{entry}/stat") as handle:
+                fields = handle.read().rsplit(")", 1)[1].split()
+        except (OSError, IndexError):
+            continue
+        if len(fields) > 1 and fields[1] == str(me):
+            kids.append(int(entry))
+    return kids
+
+
+def _reap_strays() -> None:
+    """Kill and reap every remaining descendant so its CPU time is counted."""
+    for _ in range(200):
+        kids = _children_of_self()
+        for pid in kids:
+            try:
+                os.kill(pid, signal.SIGKILL)
+            except OSError:
+                pass
+        reaped = False
+        while True:
+            try:
+                pid, _ = os.waitpid(-1, os.WNOHANG)
+            except ChildProcessError:
+                break
+            if pid == 0:
+                break
+            reaped = True
+        if not kids and not reaped:
+            return
+        time.sleep(0.02)
+
+
+def _children_cpu_s() -> float:
+    usage = resource.getrusage(resource.RUSAGE_CHILDREN)
+    return usage.ru_utime + usage.ru_stime
+
+
+def _limit_cpu() -> None:
+    # Per-process backstop; the budget itself is the counted total below.
+    soft = int(CPU_BUDGET_S + CPU_TOLERANCE_S) + 2
+    resource.setrlimit(resource.RLIMIT_CPU, (soft, soft + 3))
+
+
 def run_solver(script: Path, instance: dict[str, Any], workdir: Path) -> tuple[Any, str, float]:
-    """Run one solver on one instance. Returns (parsed output or None, status, seconds)."""
+    """Run one solver on one instance. Returns (parsed output or None, status, counted CPU-seconds)."""
     public = {key: value for key, value in instance.items() if key not in ("experiment",)}
     instance_path = workdir / "instance.json"
     output_path = workdir / "schedule.json"
     log_path = workdir / "solver.log"
     instance_path.write_text(json.dumps(public))
-    started = time.monotonic()
+    _reap_strays()
+    cpu_before = _children_cpu_s()
+    timed_out = False
     with log_path.open("wb") as log:
         process = subprocess.Popen(
-            ["bash", str(script), str(instance_path), str(output_path), str(TIME_LIMIT_S)],
+            ["bash", str(script), str(instance_path), str(output_path), str(CPU_BUDGET_S)],
             cwd=str(ROOT),
             stdin=subprocess.DEVNULL,
             stdout=log,
             stderr=subprocess.STDOUT,
             start_new_session=True,
+            preexec_fn=_limit_cpu,
         )
         try:
-            returncode = process.wait(timeout=TIME_LIMIT_S + GRACE_S)
+            returncode = process.wait(timeout=WALL_CAP_S)
         except subprocess.TimeoutExpired:
+            timed_out = True
             _kill_group(process)
-            process.wait()
-            return None, "timeout", time.monotonic() - started
+            returncode = process.wait()
         finally:
             _kill_group(process)
-    elapsed = time.monotonic() - started
+            _reap_strays()
+    cpu = _children_cpu_s() - cpu_before
+    if timed_out:
+        return None, f"wall-clock cap of {WALL_CAP_S} s exceeded (hung or sleeping solver)", cpu
+    if cpu > CPU_BUDGET_S + CPU_TOLERANCE_S:
+        return None, f"CPU budget exceeded: {cpu:.1f} s > {CPU_BUDGET_S} s", cpu
     if returncode != 0:
         tail = log_path.read_bytes()[-400:].decode("utf-8", "replace").strip().splitlines()[-3:]
-        return None, f"exit code {returncode}: {' | '.join(tail)}", elapsed
+        return None, f"exit code {returncode}: {' | '.join(tail)}", cpu
     if not output_path.is_file():
-        return None, "no output file", elapsed
+        return None, "no output file", cpu
     if output_path.stat().st_size > MAX_OUTPUT_BYTES:
-        return None, "output too large", elapsed
+        return None, "output too large", cpu
     try:
-        return json.loads(output_path.read_text()), "ok", elapsed
+        return json.loads(output_path.read_text()), "ok", cpu
     except (json.JSONDecodeError, UnicodeDecodeError, OSError):
-        return None, "unparseable output", elapsed
+        return None, "unparseable output", cpu
 
 
 def evaluate_method(method: str, suite: dict[str, list[dict[str, Any]]]) -> dict[str, Any]:
     script = SOLVERS_DIR / f"{method}.sh"
     reductions: dict[str, list[float]] = {name: [] for name in suite}
+    cpu_used: dict[str, float] = {}
     failure = None
     if not script.is_file():
         failure = {"instance": None, "reason": "solver script missing"}
@@ -293,10 +368,10 @@ def evaluate_method(method: str, suite: dict[str, list[dict[str, Any]]]) -> dict
             if failure is not None:
                 break
             workdir = Path(tempfile.mkdtemp(prefix="optsched_eval_"))
-            elapsed = 0.0
+            cpu = 0.0
             try:
                 try:
-                    output, status, elapsed = run_solver(script, instance, workdir)
+                    output, status, cpu = run_solver(script, instance, workdir)
                 except OSError as exc:
                     output, status = None, f"could not run solver: {type(exc).__name__}"
                 if status == "ok":
@@ -311,12 +386,13 @@ def evaluate_method(method: str, suite: dict[str, list[dict[str, Any]]]) -> dict
             if status != "ok":
                 failure = {"instance": instance["id"], "reason": status}
                 print(f"[eval-{SLICE_NAME}] method={method} instance={instance['id']} status=FAILED "
-                      f"elapsed={elapsed:.1f} reason={status}", flush=True)
+                      f"cpu_s={cpu:.1f} reason={status}", flush=True)
                 break
             value = reduction_pct(strawman_cct_us(instance), cct)
             reductions[experiment].append(value)
+            cpu_used[instance["id"]] = round(cpu, 2)
             print(f"[eval-{SLICE_NAME}] method={method} instance={instance['id']} status=ok "
-                  f"reduction={value:.6f} elapsed={elapsed:.1f}", flush=True)
+                  f"reduction={value:.6f} cpu_s={cpu:.1f}", flush=True)
     rows = {}
     for experiment, instances in suite.items():
         if failure is not None:
@@ -324,10 +400,11 @@ def evaluate_method(method: str, suite: dict[str, list[dict[str, Any]]]) -> dict
         else:
             values = reductions[experiment]
             rows[experiment] = {PRIMARY: sum(values) / len(values), "valid_schedule": 1.0}
-    return {"rows": rows, "failure": failure}
+    return {"rows": rows, "failure": failure, "cpu_s": cpu_used}
 
 
 def evaluate(output: Path) -> dict[str, Any]:
+    _become_subreaper()
     suite = load_suite()
     if output.exists():
         output.unlink()
@@ -338,10 +415,11 @@ def evaluate(output: Path) -> dict[str, Any]:
             "slice": SLICE_NAME,
             "instance_suite_sha256_16": digest,
             "instances_per_experiment": {name: len(items) for name, items in suite.items()},
-            "solver_time_limit_s": TIME_LIMIT_S,
-            "hard_wall_clock_limit_s": TIME_LIMIT_S + GRACE_S,
+            "solver_cpu_budget_s": CPU_BUDGET_S,
+            "budget_rule": "CPU-seconds of the solver's whole process tree, counted by the evaluator; over budget = failed instance",
+            "wall_clock_cap_s": WALL_CAP_S,
             "methods": methods,
-            "failure_rule": "any missing/late/invalid instance fails the whole run: worst value in every metric of every experiment",
+            "failure_rule": "any missing/over-budget/invalid instance fails the whole run: worst value in every metric of every experiment",
         },
         "experiments": {
             name: {"results": {BASELINE_METHOD: {PRIMARY: 0.0, "valid_schedule": 1.0}}, "_status": {}}
@@ -355,6 +433,8 @@ def evaluate(output: Path) -> dict[str, Any]:
             scores["experiments"][experiment]["_status"][method] = {
                 "run_failed": result["failure"] is not None,
                 "failure": result["failure"],
+                "cpu_s": {iid: result["cpu_s"][iid] for iid in
+                          (item["id"] for item in suite[experiment]) if iid in result["cpu_s"]},
             }
     output.parent.mkdir(parents=True, exist_ok=True)
     tmp = output.with_suffix(".tmp")

@@ -3,8 +3,18 @@
 This implements the paper's core computation (Section 3.2): a mixed-integer
 linear program that jointly chooses heterogeneous message splits (d_ij),
 per-plane asynchronous reconfiguration times, and topology bypassing (r_ij,
-u_ij) to minimize the collective completion time, solved with CBC via PuLP
-under the paper's 120 s time limit.
+u_ij) to minimize the collective completion time, solved with CBC via PuLP.
+
+Solver budget. The paper gives CBC a 120 s time limit. A time limit makes the
+returned schedule depend on the machine and its load, so the reproduction
+gives CBC a deterministic work budget instead: a number of branch-and-bound
+nodes per instance, ``N = C / (n^2 k)`` for n steps and k planes (CBC's cost
+per node grows about linearly with the model's n^2 k pairwise constraints),
+single thread, fixed seeds. ``C`` (``method/budget.json``) was calibrated once
+so that CBC uses about 70 of the evaluator's 120 CPU-seconds on the reference
+compute node; the schedule is then identical on any machine. The evaluator's
+CPU budget (the third solver argument) is only a safety stop here (CBC
+``sec`` in CPU mode).
 
 Solver interface (used by every evaluator through scripts/solvers/swot.sh):
 
@@ -21,6 +31,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import resource
 import time
 from pathlib import Path
 from typing import Dict, List, Tuple
@@ -30,8 +41,31 @@ import pulp
 from data.collectives import EXPERIMENTS, ExperimentSpec, load_instance, mb_per_us
 
 _PROCESS_START = time.monotonic()
+BUDGET_FILE = Path(__file__).resolve().parent / "budget.json"
+SAFETY_MARGIN_S = 8.0
 
 Volumes = Dict[Tuple[int, int], float]
+
+
+def default_max_nodes(spec: ExperimentSpec | None = None) -> int:
+    """The calibrated deterministic CBC node budget for ``spec`` (0 = time limit only)."""
+    try:
+        budget = json.loads(BUDGET_FILE.read_text())
+        constant = float(budget["node_constant"])
+        floor_nodes = int(budget.get("min_nodes", 100))
+    except (OSError, ValueError, KeyError, TypeError):
+        return 0
+    if spec is None:
+        return floor_nodes
+    size = len(spec.steps) ** 2 * spec.optical_degree
+    return max(floor_nodes, int(constant // size))
+
+
+def cpu_used_s() -> float:
+    """CPU-seconds used so far by this process and its finished children."""
+    me = resource.getrusage(resource.RUSAGE_SELF)
+    kids = resource.getrusage(resource.RUSAGE_CHILDREN)
+    return me.ru_utime + me.ru_stime + kids.ru_utime + kids.ru_stime
 
 
 def horizon_us(spec: ExperimentSpec) -> float:
@@ -52,8 +86,18 @@ def lockstep_cct_us(spec: ExperimentSpec) -> float:
     )
 
 
-def build_model(spec: ExperimentSpec, big_m: str = "lockstep") -> Dict:
+def build_model(spec: ExperimentSpec, big_m: str = "lockstep", formulation: str = "pairwise") -> Dict:
     """The SWOT MILP (paper Eqs. 1-11) with big-M linearization.
+
+    ``formulation="pairwise"`` (default) encodes topology bypassing (Eqs. 4-5)
+    as "the most recent previous use of a plane fixes its topology", an
+    O(n^2 k) set of implications. ``"paper"`` uses the paper's own variables:
+    ``last_cfg_ij`` (the topology plane j holds before step i, carried forward
+    and set to ``cfg_i`` when the plane is used) and ``s_ij`` (it matches step
+    i), with each plane's initial topology free (planes are configured before
+    the collective starts, as in Fig. 5). Both have the same optimum; with
+    CBC the paper's encoding was about 2x slower per node and found no better
+    incumbents in a node-limited probe, so the pairwise one is the default.
 
     The paper leaves the big-M constant unspecified. ``big_m="lockstep"``
     (default) sets M to the lockstep (Strawman-ICR) completion time and bounds
@@ -73,6 +117,11 @@ def build_model(spec: ExperimentSpec, big_m: str = "lockstep") -> Dict:
     model = pulp.LpProblem(f"SWOT_{spec.name}", pulp.LpMinimize)
     use = pulp.LpVariable.dicts("u", (idxs, planes), 0, 1, cat="Binary")
     reconfig = pulp.LpVariable.dicts("r", (idxs, planes), 0, 1, cat="Binary")
+    if formulation == "paper":
+        max_cfg = max(step.config for step in steps)
+        cfg_m = float(max_cfg + 1)
+        last_cfg = pulp.LpVariable.dicts("last_cfg", (idxs, planes), 0, max_cfg)
+        same = pulp.LpVariable.dicts("s", (idxs, planes), 0, 1, cat="Binary")
     data = pulp.LpVariable.dicts("d", (idxs, planes), 0, None, cat="Continuous")
     t_start = pulp.LpVariable.dicts("t_start", (idxs, planes), 0, None)
     t_end = pulp.LpVariable.dicts("t_end", (idxs, planes), 0, None)
@@ -92,6 +141,18 @@ def build_model(spec: ExperimentSpec, big_m: str = "lockstep") -> Dict:
             model += data[i][j] <= step.message_mb * use[i][j]
             model += data[i][j] >= 1e-6 * use[i][j]
             model += reconfig[i][j] <= use[i][j]
+            if formulation == "paper":
+                # Eq. 4: a used plane whose topology does not match must reconfigure.
+                model += reconfig[i][j] >= use[i][j] - same[i][j]
+                # Eq. 5: |cfg_i - last_cfg_ij| <= M (1 - s_ij).
+                model += step.config - last_cfg[i][j] <= cfg_m * (1 - same[i][j])
+                model += last_cfg[i][j] - step.config <= cfg_m * (1 - same[i][j])
+                # last_cfg after step i: cfg_i if the plane is used, else unchanged.
+                if i + 1 < n_steps:
+                    model += last_cfg[i + 1][j] - step.config <= cfg_m * (1 - use[i][j])
+                    model += step.config - last_cfg[i + 1][j] <= cfg_m * (1 - use[i][j])
+                    model += last_cfg[i + 1][j] - last_cfg[i][j] <= cfg_m * use[i][j]
+                    model += last_cfg[i][j] - last_cfg[i + 1][j] <= cfg_m * use[i][j]
             # Eq. 2: alpha-beta transmission time.
             model += t_end[i][j] - t_start[i][j] == data[i][j] / bandwidth + spec.base_latency_us * use[i][j]
             # Eq. 3: reconfiguration duration.
@@ -115,11 +176,11 @@ def build_model(spec: ExperimentSpec, big_m: str = "lockstep") -> Dict:
                 model += prev_free[i][j] >= t_end[i - 1][j] - horizon * (1 - use[i - 1][j])
                 model += prev_free[i][j] >= r_end[i - 1][j] - horizon * (1 - reconfig[i - 1][j])
 
-                # Eq. 4-5 (last_cfg / s_ij): the most recent previous use of the
-                # plane fixes its current topology. If an intervening use
+                # Pairwise encoding of Eqs. 4-5: the most recent previous use of
+                # the plane fixes its current topology. If an intervening use
                 # exists the implication is relaxed, so skipped steps model
                 # topology bypassing.
-                for prev in range(i):
+                for prev in (range(i) if formulation == "pairwise" else ()):
                     intervening = pulp.lpSum(use[h][j] for h in range(prev + 1, i))
                     if steps[prev].config == step.config:
                         model += reconfig[i][j] <= 2 - use[i][j] - use[prev][j] + intervening
@@ -143,14 +204,22 @@ def build_model(spec: ExperimentSpec, big_m: str = "lockstep") -> Dict:
     }
 
 
-def cbc(time_limit_s: float, seed: int, warm_start: bool = False) -> pulp.PULP_CBC_CMD:
+def cbc(time_limit_s: float, seed: int, warm_start: bool = False, max_nodes: int | None = None,
+        log_path: str | None = None) -> pulp.PULP_CBC_CMD:
+    """CBC with fixed seeds, one thread, a CPU-time safety limit and an optional node budget."""
     kwargs = {
         "msg": False,
         "timeLimit": max(1.0, float(time_limit_s)),
+        "timeMode": "cpu",
+        "threads": 1,
         "options": [f"randomSeed {seed}", f"randomCbcSeed {seed}"],
     }
+    if max_nodes:
+        kwargs["maxNodes"] = int(max_nodes)
     if warm_start:
         kwargs["warmStart"] = True
+    if log_path:
+        kwargs["logPath"] = log_path
     return pulp.PULP_CBC_CMD(**kwargs)
 
 
@@ -233,15 +302,18 @@ def schedule_cct(schedule: List[Dict]) -> float:
     return max(item["transmit_end_us"] for item in schedule)
 
 
-def solve_swot(spec: ExperimentSpec, time_limit_s: float = 120, seed: int = 1, big_m: str = "lockstep") -> Dict:
-    started = time.monotonic()
+def solve_swot(spec: ExperimentSpec, time_limit_s: float = 120, seed: int = 1, big_m: str = "lockstep",
+               max_nodes: int | None = None, log_path: str | None = None) -> Dict:
+    """Solve the SWOT MILP. ``max_nodes`` is the deterministic work budget;
+    ``time_limit_s`` is the CPU-time budget left for this call (safety stop)."""
+    started = cpu_used_s()
     milp = build_model(spec, big_m=big_m)
-    remaining = time_limit_s - (time.monotonic() - started)
+    remaining = time_limit_s - (cpu_used_s() - started) - SAFETY_MARGIN_S
     status = "Not Solved"
     volumes = None
     objective = None
     try:
-        code = milp["model"].solve(cbc(remaining, seed))
+        code = milp["model"].solve(cbc(remaining, seed, max_nodes=max_nodes, log_path=log_path))
         status = pulp.LpStatus.get(code, str(code))
         if has_incumbent(milp["model"], code):
             volumes = extract_volumes(spec, milp)
@@ -256,6 +328,8 @@ def solve_swot(spec: ExperimentSpec, time_limit_s: float = 120, seed: int = 1, b
     return {
         "method": "swot",
         "experiment": spec.name,
+        "cbc_max_nodes": max_nodes or None,
+        "cpu_s": round(cpu_used_s() - started, 3),
         "solver_status": status,
         "milp_objective_us": objective,
         "fallback_lockstep": fallback,
@@ -265,10 +339,11 @@ def solve_swot(spec: ExperimentSpec, time_limit_s: float = 120, seed: int = 1, b
     }
 
 
-def solve_instance_file(instance: Path, output: Path, time_limit_s: float, seed: int, big_m: str = "lockstep") -> None:
+def solve_instance_file(instance: Path, output: Path, time_limit_s: float, seed: int, big_m: str = "lockstep",
+                        max_nodes: int | None = None, log_path: str | None = None) -> None:
     spec = load_instance(instance)
-    budget = time_limit_s - (time.monotonic() - _PROCESS_START)
-    result = solve_swot(spec, time_limit_s=budget, seed=seed, big_m=big_m)
+    budget = time_limit_s - cpu_used_s()
+    result = solve_swot(spec, time_limit_s=budget, seed=seed, big_m=big_m, max_nodes=max_nodes, log_path=log_path)
     output.write_text(json.dumps(result))
 
 
@@ -280,7 +355,8 @@ def run(output_dir: Path, time_limit_s: int, seed: int = 1) -> None:
         spec = factory()
         payload["experiments"][name] = {
             "spec": spec.to_json(),
-            "results": {"swot": solve_swot(spec, time_limit_s=time_limit_s, seed=seed)},
+            "results": {"swot": solve_swot(spec, time_limit_s=time_limit_s, seed=seed,
+                                           max_nodes=default_max_nodes(spec))},
         }
     (output_dir / "swot_results.json").write_text(json.dumps(payload, indent=2))
 
@@ -290,14 +366,25 @@ def main() -> None:
     parser.add_argument("--instance", help="instance JSON (single-instance solver mode)")
     parser.add_argument("--output", help="schedule JSON to write (single-instance solver mode)")
     parser.add_argument("--output-dir", default="checkpoints/swot", help="batch mode output directory")
-    parser.add_argument("--time-limit-s", type=float, default=120)
+    parser.add_argument("--time-limit-s", type=float, default=120,
+                        help="CPU-seconds budget for this call (safety stop; the evaluator passes its budget)")
+    parser.add_argument("--max-nodes", type=int, default=None,
+                        help="CBC node budget (default: C/(n^2 k) from method/budget.json; 0 = time limit only)")
+    parser.add_argument("--node-scale", type=float, default=1.0,
+                        help="multiply the default node budget (budget-sensitivity variants)")
     parser.add_argument("--seed", type=int, default=1)
     parser.add_argument("--big-m", choices=["horizon", "lockstep"], default="lockstep")
+    parser.add_argument("--cbc-log", default=None, help="write the CBC log here (calibration)")
     args = parser.parse_args()
     if args.instance:
         if not args.output:
             parser.error("--output is required with --instance")
-        solve_instance_file(Path(args.instance), Path(args.output), args.time_limit_s, args.seed, args.big_m)
+        if args.max_nodes is None:
+            max_nodes = int(default_max_nodes(load_instance(Path(args.instance))) * args.node_scale)
+        else:
+            max_nodes = args.max_nodes
+        solve_instance_file(Path(args.instance), Path(args.output), args.time_limit_s, args.seed, args.big_m,
+                            max_nodes=max_nodes or None, log_path=args.cbc_log)
     else:
         run(Path(args.output_dir), int(args.time_limit_s), args.seed)
 
