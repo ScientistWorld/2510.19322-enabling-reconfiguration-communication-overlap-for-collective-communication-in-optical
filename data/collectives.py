@@ -250,8 +250,11 @@ EXPERIMENTS = PAPER_INSTANCES
 
 
 # ---------------------------------------------------------------------------
-# Instance families used by the scored experiments. The evaluators sample
-# their (frozen) instances from these parameter ranges.
+# Instance families used by the scored experiments. The evaluators hold frozen
+# instances drawn from these settings. Within a family, each instance's payload
+# is chosen so that the share of the lockstep (Strawman-ICR) completion time
+# spent switching, (#topology changes x T_recfg) / CCT_lockstep, lies in
+# ``switching_share``; the slices are stratified over that band.
 # ---------------------------------------------------------------------------
 
 FAMILIES = {
@@ -263,37 +266,46 @@ FAMILIES = {
         "optical_degree": [4],
         "reconfig_latency_us": [200.0],
         "base_latency_us": 20.0,
+        "switching_share": [0.35, 0.80],
     },
-    "collective_algorithms": {
-        "paper_section": "4.2.1 / Fig. 7",
-        "algorithms": [
-            "rabenseifner_reducescatter",
-            "rabenseifner_allreduce",
-            "bruck_alltoall",
-            "pairwise_alltoall",
-        ],
-        "nodes": {"default": [128, 256, 512], "pairwise_alltoall": [9, 10, 11, 12]},
+    "high_optical_degree": {
+        "paper_section": "4.2.1 / Fig. 7(a)-(b)",
+        "algorithms": ["rabenseifner_reducescatter", "rabenseifner_allreduce"],
+        "nodes": [128, 256, 512, 1024],
         "payload_mb": [1.0, 512.0],
         "optical_degree": [8],
         "reconfig_latency_us": [200.0],
         "base_latency_us": 20.0,
+        "switching_share": [0.35, 0.92],
     },
     "hardware_sensitivity": {
         "paper_section": "4.3 / Figs. 10-11",
-        "algorithms": [
-            "rabenseifner_reducescatter",
-            "rabenseifner_allreduce",
-            "bruck_alltoall",
-            "pairwise_alltoall",
-        ],
+        "algorithms": {
+            "2": ["rabenseifner_reducescatter", "rabenseifner_allreduce", "bruck_alltoall", "pairwise_alltoall"],
+            "4": ["rabenseifner_reducescatter", "rabenseifner_allreduce", "bruck_alltoall", "pairwise_alltoall"],
+            "8": ["rabenseifner_reducescatter", "rabenseifner_allreduce"],
+        },
         "nodes": {"default": [256], "pairwise_alltoall": [9, 17]},
-        "payload_mb": [1.0, 256.0],
+        "payload_mb": [0.25, 8192.0],
         "optical_degree": [2, 4, 8],
         "reconfig_latency_us": [20.0, 200.0, 2000.0, 20000.0],
         "base_latency_us": 20.0,
-        "min_steps_by_degree": {"2": 16, "4": 8, "8": 5},
+        "switching_share": [0.35, 0.92],
     },
 }
+
+
+def switching_share(spec: ExperimentSpec) -> float:
+    """Share of the lockstep (Strawman-ICR) completion time spent switching topology."""
+    bw = mb_per_us(spec.per_link_gbps)
+    total, changes, previous = 0.0, 0, None
+    for step in spec.steps:
+        if previous is not None and step.config != previous:
+            total += spec.reconfig_latency_us
+            changes += 1
+        total += step.message_mb / (spec.optical_degree * bw) + spec.base_latency_us
+        previous = step.config
+    return changes * spec.reconfig_latency_us / total
 
 
 def get_experiment(name: str) -> ExperimentSpec:

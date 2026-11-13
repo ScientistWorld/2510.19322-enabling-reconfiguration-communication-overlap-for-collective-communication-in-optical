@@ -3,15 +3,24 @@
     python -m eval.test.make_instances
 
 The three scored families follow the source paper's evaluation settings
-(Sections 4.2-4.3). Within each family, an instance's payload is drawn
-log-uniformly and kept only if switching is a material but not total share of
-the lockstep (Strawman-ICR) completion time:
+(Sections 4.2-4.3). Within each family, every instance gets a target
+switching share at evenly spaced quantiles of the family's band (so the
+slices have the same mix of difficulty), and its payload is set by bisection
+to reach it within the family's payload range (falling back to log-uniform
+rejection sampling when the range cannot reach it). The share is how much of
+the lockstep (Strawman-ICR) completion time is spent switching:
 
-    switching_share = (#topology changes x T_recfg) / CCT_strawman in [0.35, 0.92].
+    switching_share = (#topology changes x T_recfg) / CCT_strawman in SHARE_BAND[family].
 
 Outside that band the scheduling problem is degenerate: below it, lockstep is
-close to optimal for every scheduler; above it, every scheduler that hides
-switching reaches the same near-total reduction. This is a property of the
+close to optimal for every scheduler; above it, a fixed round-robin relay of
+plane groups is close to optimal. (AllReduce at k=4 uses a 0.80 cap: above it,
+on 18-20 step collectives, a fixed relay already matches the best schedules
+found, which says nothing about scheduling skill.) Bruck and Pairwise
+All-to-All at k=8 are not scored: every step needs a different topology on
+eight interchangeable planes, the regime the paper reports its time-limited
+solver handles badly (Section 4.3.1), and a fixed relay rule beats the
+paper's MILP there. This is a property of the
 instance alone and does not depend on any scheduler. The seed below is the
 only thing that distinguishes these instances from the public train ones; it
 lives only here.
@@ -30,10 +39,8 @@ HERE = Path(__file__).resolve().parent
 SLICE = "test"
 PREFIX = "te"
 SEED = 91_733_502
-SHARE_BAND = (0.35, 0.92)
-
-BIG = ("rabenseifner_reducescatter", "rabenseifner_allreduce", "bruck_alltoall")
-
+SHARE_BAND = {"allreduce_scaling": (0.35, 0.80), "high_optical_degree": (0.35, 0.92),
+              "hardware_sensitivity": (0.35, 0.92)}
 
 def strawman_cct_us(spec) -> float:
     bw = spec.per_link_gbps / 8000.0
@@ -51,12 +58,30 @@ def switching_share(spec) -> float:
     return changes * spec.reconfig_latency_us / strawman_cct_us(spec)
 
 
-def draw(rng, algorithm, nodes, k, recfg, payload_range):
+def payload_for_share(algorithm, nodes, k, recfg, payload_range, target):
+    """Payload (3 decimals) whose switching share is closest to ``target``; share falls as payload grows."""
+    lo, hi = (math.log(x) for x in payload_range)
+    for _ in range(60):
+        mid = 0.5 * (lo + hi)
+        spec = make_instance("x", algorithm, nodes, round(math.exp(mid), 3), k, reconfig_latency_us=recfg)
+        if switching_share(spec) > target:
+            lo = mid
+        else:
+            hi = mid
+    return round(math.exp(0.5 * (lo + hi)), 3)
+
+
+def draw(rng, experiment, algorithm, nodes, k, recfg, payload_range, target):
+    band = SHARE_BAND[experiment]
+    payload = payload_for_share(algorithm, nodes, k, recfg, payload_range, target)
+    spec = make_instance("x", algorithm, nodes, payload, k, reconfig_latency_us=recfg)
+    if band[0] <= switching_share(spec) <= band[1]:
+        return payload
     lo, hi = (math.log(x) for x in payload_range)
     for _ in range(20_000):
         payload = round(math.exp(rng.uniform(lo, hi)), 3)
         spec = make_instance("x", algorithm, nodes, payload, k, reconfig_latency_us=recfg)
-        if SHARE_BAND[0] <= switching_share(spec) <= SHARE_BAND[1]:
+        if band[0] <= switching_share(spec) <= band[1]:
             return payload
     raise RuntimeError(f"no payload in band for {algorithm} {nodes} k={k} recfg={recfg}")
 
@@ -69,17 +94,21 @@ def plan(rng):
     rng.shuffle(nodes)
     for p in nodes:
         items.append(("allreduce_scaling", "rabenseifner_allreduce", p, 4, 200.0, (16.0, 64.0)))
-    # Fig. 7: four algorithms at k=8 (100 Gbps), 200 us switching.
-    # Each algorithm three times, once per cluster size (three Pairwise sizes).
-    for a in ["rabenseifner_reducescatter", "rabenseifner_allreduce", "bruck_alltoall", "pairwise_alltoall"]:
-        sizes = sorted(rng.sample([9, 10, 11, 12], 3)) if a == "pairwise_alltoall" else [128, 256, 512]
-        for p in sizes:
-            items.append(("collective_algorithms", a, p, 8, 200.0, (1.0, 512.0)))
+    # Fig. 7(a)-(b): Rabenseifner ReduceScatter and AllReduce at k=8 (100 Gbps),
+    # 200 us switching, 128-1024 nodes; six instances each.
+    for a in ["rabenseifner_reducescatter", "rabenseifner_allreduce"]:
+        sizes = [128, 256, 512, 1024] + rng.sample([128, 256, 512, 1024], 2)
+        for p in sorted(sizes):
+            items.append(("high_optical_degree", a, p, 8, 200.0, (1.0, 512.0)))
     # Section 4.3: every (k, T_recfg) cell of the paper's sweep once, 256 nodes
     # (9 or 17 for Pairwise), payload around the transmission/switching knee.
-    # Every algorithm once per optical degree, at a random switching latency.
+    # Every algorithm once per optical degree at k=2 and k=4 (Rabenseifner only
+    # at k=8, see above), each at a different switching latency.
     for k in (2, 4, 8):
-        algos = ["rabenseifner_reducescatter", "rabenseifner_allreduce", "bruck_alltoall", "pairwise_alltoall"]
+        if k == 8:
+            algos = ["rabenseifner_reducescatter", "rabenseifner_allreduce"] * 2
+        else:
+            algos = ["rabenseifner_reducescatter", "rabenseifner_allreduce", "bruck_alltoall", "pairwise_alltoall"]
         rng.shuffle(algos)
         for r, a in zip((20.0, 200.0, 2000.0, 20000.0), algos):
             p = rng.choice([9, 17]) if a == "pairwise_alltoall" else 256
@@ -87,11 +116,25 @@ def plan(rng):
     return items
 
 
+def stratified_targets(rng, items):
+    """Target switching shares at evenly spaced quantiles of each family's band, randomly assigned."""
+    targets = []
+    for experiment in dict.fromkeys(item[0] for item in items):
+        idx = [i for i, item in enumerate(items) if item[0] == experiment]
+        lo, hi = SHARE_BAND[experiment]
+        values = [lo + (hi - lo) * (j + rng.random()) / len(idx) for j in range(len(idx))]
+        rng.shuffle(values)
+        targets.extend(zip(idx, values))
+    return dict(targets)
+
+
 def build() -> dict:
     rng = random.Random(SEED)
     experiments: dict[str, list] = {}
-    for n, (experiment, algorithm, nodes, k, recfg, prange) in enumerate(plan(rng), start=1):
-        payload = draw(rng, algorithm, nodes, k, recfg, prange)
+    items = plan(rng)
+    targets = stratified_targets(rng, items)
+    for n, (experiment, algorithm, nodes, k, recfg, prange) in enumerate(items, start=1):
+        payload = draw(rng, experiment, algorithm, nodes, k, recfg, prange, targets[n - 1])
         iid = f"{PREFIX}{n:02d}"
         spec = make_instance(iid, algorithm, nodes, payload, k, reconfig_latency_us=recfg)
         payload_json = spec.to_json()

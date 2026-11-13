@@ -15,96 +15,96 @@
      {
       "step": 1,
       "config": 1,
-      "message_mb": 12.2025
+      "message_mb": 32.0
      },
      {
       "step": 2,
       "config": 2,
-      "message_mb": 6.10125
+      "message_mb": 16.0
      },
      {
       "step": 3,
       "config": 3,
-      "message_mb": 3.050625
+      "message_mb": 8.0
      },
      {
       "step": 4,
       "config": 4,
-      "message_mb": 1.5253125
+      "message_mb": 4.0
      },
      {
       "step": 5,
       "config": 5,
-      "message_mb": 0.76265625
+      "message_mb": 2.0
      },
      {
       "step": 6,
       "config": 6,
-      "message_mb": 0.381328125
+      "message_mb": 1.0
      },
      {
       "step": 7,
       "config": 7,
-      "message_mb": 0.1906640625
+      "message_mb": 0.5
      },
      {
       "step": 8,
       "config": 8,
-      "message_mb": 0.09533203125
+      "message_mb": 0.25
      },
      {
       "step": 9,
       "config": 9,
-      "message_mb": 0.047666015625
+      "message_mb": 0.125
      },
      {
       "step": 10,
       "config": 9,
-      "message_mb": 0.047666015625
+      "message_mb": 0.125
      },
      {
       "step": 11,
       "config": 8,
-      "message_mb": 0.09533203125
+      "message_mb": 0.25
      },
      {
       "step": 12,
       "config": 7,
-      "message_mb": 0.1906640625
+      "message_mb": 0.5
      },
      {
       "step": 13,
       "config": 6,
-      "message_mb": 0.381328125
+      "message_mb": 1.0
      },
      {
       "step": 14,
       "config": 5,
-      "message_mb": 0.76265625
+      "message_mb": 2.0
      },
      {
       "step": 15,
       "config": 4,
-      "message_mb": 1.5253125
+      "message_mb": 4.0
      },
      {
       "step": 16,
       "config": 3,
-      "message_mb": 3.050625
+      "message_mb": 8.0
      },
      {
       "step": 17,
       "config": 2,
-      "message_mb": 6.10125
+      "message_mb": 16.0
      },
      {
       "step": 18,
       "config": 1,
-      "message_mb": 12.2025
+      "message_mb": 32.0
      }
     ],
     "algorithm": "rabenseifner_allreduce",
-    "payload_mb": 24.405,
+    "payload_mb": 64.0,
     "id": "te01",
     "experiment": "allreduce_scaling"
    },
@@ -120,106 +120,106 @@
      {
       "step": 1,
       "config": 1,
-      "message_mb": 28.4955
+      "message_mb": 32.0
      },
      {
       "step": 2,
       "config": 2,
-      "message_mb": 14.24775
+      "message_mb": 16.0
      },
      {
       "step": 3,
       "config": 3,
-      "message_mb": 7.123875
+      "message_mb": 8.0
      },
      {
       "step": 4,
       "config": 4,
-      "message_mb": 3.5619375
+      "message_mb": 4.0
      },
      {
       "step": 5,
       "config": 5,
-      "message_mb": 1.78096875
+      "message_mb": 2.0
      },
      {
       "step": 6,
       "config": 6,
-      "message_mb": 0.890484375
+      "message_mb": 1.0
      },
      {
       "step": 7,
       "config": 7,
-      "message_mb": 0.4452421875
+      "message_mb": 0.5
      },
      {
       "step": 8,
       "config": 8,
-      "message_mb": 0.22262109375
+      "message_mb": 0.25
      },
      {
       "step": 9,
       "config": 9,
-      "message_mb": 0.111310546875
+      "message_mb": 0.125
      },
      {
       "step": 10,
       "config": 10,
-      "message_mb": 0.0556552734375
+      "message_mb": 0.0625
      },
      {
       "step": 11,
       "config": 10,
-      "message_mb": 0.0556552734375
+      "message_mb": 0.0625
      },
      {
       "step": 12,
       "config": 9,
-      "message_mb": 0.111310546875
+      "message_mb": 0.125
      },
      {
       "step": 13,
       "config": 8,
-      "message_mb": 0.22262109375
+      "message_mb": 0.25
      },
      {
       "step": 14,
       "config": 7,
-      "message_mb": 0.4452421875
+      "message_mb": 0.5
      },
      {
       "step": 15,
       "config": 6,
-      "message_mb": 0.890484375
+      "message_mb": 1.0
      },
      {
       "step": 16,
       "config": 5,
-      "message_mb": 1.78096875
+      "message_mb": 2.0
      },
      {
       "step": 17,
       "config": 4,
-      "message_mb": 3.5619375
+      "message_mb": 4.0
      },
      {
       "step": 18,
       "config": 3,
-      "message_mb": 7.123875
+      "message_mb": 8.0
      },
      {
       "step": 19,
       "config": 2,
-      "message_mb": 14.24775
+      "message_mb": 16.0
      },
      {
       "step": 20,
       "config": 1,
-      "message_mb": 28.4955
+      "message_mb": 32.0
      }
     ],
     "algorithm": "rabenseifner_allreduce",
-    "payload_mb": 56.991,
+    "payload_mb": 64.0,
     "id": "te02",
     "experiment": "allreduce_scaling"
    },
@@ -235,106 +235,106 @@
      {
       "step": 1,
       "config": 1,
-      "message_mb": 23.869
+      "message_mb": 32.0
      },
      {
       "step": 2,
       "config": 2,
-      "message_mb": 11.9345
+      "message_mb": 16.0
      },
      {
       "step": 3,
       "config": 3,
-      "message_mb": 5.96725
+      "message_mb": 8.0
      },
      {
       "step": 4,
       "config": 4,
-      "message_mb": 2.983625
+      "message_mb": 4.0
      },
      {
       "step": 5,
       "config": 5,
-      "message_mb": 1.4918125
+      "message_mb": 2.0
      },
      {
       "step": 6,
       "config": 6,
-      "message_mb": 0.74590625
+      "message_mb": 1.0
      },
      {
       "step": 7,
       "config": 7,
-      "message_mb": 0.372953125
+      "message_mb": 0.5
      },
      {
       "step": 8,
       "config": 8,
-      "message_mb": 0.1864765625
+      "message_mb": 0.25
      },
      {
       "step": 9,
       "config": 9,
-      "message_mb": 0.09323828125
+      "message_mb": 0.125
      },
      {
       "step": 10,
       "config": 10,
-      "message_mb": 0.046619140625
+      "message_mb": 0.0625
      },
      {
       "step": 11,
       "config": 10,
-      "message_mb": 0.046619140625
+      "message_mb": 0.0625
      },
      {
       "step": 12,
       "config": 9,
-      "message_mb": 0.09323828125
+      "message_mb": 0.125
      },
      {
       "step": 13,
       "config": 8,
-      "message_mb": 0.1864765625
+      "message_mb": 0.25
      },
      {
       "step": 14,
       "config": 7,
-      "message_mb": 0.372953125
+      "message_mb": 0.5
      },
      {
       "step": 15,
       "config": 6,
-      "message_mb": 0.74590625
+      "message_mb": 1.0
      },
      {
       "step": 16,
       "config": 5,
-      "message_mb": 1.4918125
+      "message_mb": 2.0
      },
      {
       "step": 17,
       "config": 4,
-      "message_mb": 2.983625
+      "message_mb": 4.0
      },
      {
       "step": 18,
       "config": 3,
-      "message_mb": 5.96725
+      "message_mb": 8.0
      },
      {
       "step": 19,
       "config": 2,
-      "message_mb": 11.9345
+      "message_mb": 16.0
      },
      {
       "step": 20,
       "config": 1,
-      "message_mb": 23.869
+      "message_mb": 32.0
      }
     ],
     "algorithm": "rabenseifner_allreduce",
-    "payload_mb": 47.738,
+    "payload_mb": 64.0,
     "id": "te03",
     "experiment": "allreduce_scaling"
    },
@@ -350,76 +350,76 @@
      {
       "step": 1,
       "config": 1,
-      "message_mb": 9.3495
+      "message_mb": 32.0
      },
      {
       "step": 2,
       "config": 2,
-      "message_mb": 4.67475
+      "message_mb": 16.0
      },
      {
       "step": 3,
       "config": 3,
-      "message_mb": 2.337375
+      "message_mb": 8.0
      },
      {
       "step": 4,
       "config": 4,
-      "message_mb": 1.1686875
+      "message_mb": 4.0
      },
      {
       "step": 5,
       "config": 5,
-      "message_mb": 0.58434375
+      "message_mb": 2.0
      },
      {
       "step": 6,
       "config": 6,
-      "message_mb": 0.292171875
+      "message_mb": 1.0
      },
      {
       "step": 7,
       "config": 7,
-      "message_mb": 0.1460859375
+      "message_mb": 0.5
      },
      {
       "step": 8,
       "config": 7,
-      "message_mb": 0.1460859375
+      "message_mb": 0.5
      },
      {
       "step": 9,
       "config": 6,
-      "message_mb": 0.292171875
+      "message_mb": 1.0
      },
      {
       "step": 10,
       "config": 5,
-      "message_mb": 0.58434375
+      "message_mb": 2.0
      },
      {
       "step": 11,
       "config": 4,
-      "message_mb": 1.1686875
+      "message_mb": 4.0
      },
      {
       "step": 12,
       "config": 3,
-      "message_mb": 2.337375
+      "message_mb": 8.0
      },
      {
       "step": 13,
       "config": 2,
-      "message_mb": 4.67475
+      "message_mb": 16.0
      },
      {
       "step": 14,
       "config": 1,
-      "message_mb": 9.3495
+      "message_mb": 32.0
      }
     ],
     "algorithm": "rabenseifner_allreduce",
-    "payload_mb": 18.699,
+    "payload_mb": 64.0,
     "id": "te04",
     "experiment": "allreduce_scaling"
    },
@@ -435,66 +435,66 @@
      {
       "step": 1,
       "config": 1,
-      "message_mb": 9.4025
+      "message_mb": 26.3735
      },
      {
       "step": 2,
       "config": 2,
-      "message_mb": 4.70125
+      "message_mb": 13.18675
      },
      {
       "step": 3,
       "config": 3,
-      "message_mb": 2.350625
+      "message_mb": 6.593375
      },
      {
       "step": 4,
       "config": 4,
-      "message_mb": 1.1753125
+      "message_mb": 3.2966875
      },
      {
       "step": 5,
       "config": 5,
-      "message_mb": 0.58765625
+      "message_mb": 1.64834375
      },
      {
       "step": 6,
       "config": 6,
-      "message_mb": 0.293828125
+      "message_mb": 0.824171875
      },
      {
       "step": 7,
       "config": 6,
-      "message_mb": 0.293828125
+      "message_mb": 0.824171875
      },
      {
       "step": 8,
       "config": 5,
-      "message_mb": 0.58765625
+      "message_mb": 1.64834375
      },
      {
       "step": 9,
       "config": 4,
-      "message_mb": 1.1753125
+      "message_mb": 3.2966875
      },
      {
       "step": 10,
       "config": 3,
-      "message_mb": 2.350625
+      "message_mb": 6.593375
      },
      {
       "step": 11,
       "config": 2,
-      "message_mb": 4.70125
+      "message_mb": 13.18675
      },
      {
       "step": 12,
       "config": 1,
-      "message_mb": 9.4025
+      "message_mb": 26.3735
      }
     ],
     "algorithm": "rabenseifner_allreduce",
-    "payload_mb": 18.805,
+    "payload_mb": 52.747,
     "id": "te05",
     "experiment": "allreduce_scaling"
    },
@@ -510,86 +510,86 @@
      {
       "step": 1,
       "config": 1,
-      "message_mb": 22.5955
+      "message_mb": 26.0685
      },
      {
       "step": 2,
       "config": 2,
-      "message_mb": 11.29775
+      "message_mb": 13.03425
      },
      {
       "step": 3,
       "config": 3,
-      "message_mb": 5.648875
+      "message_mb": 6.517125
      },
      {
       "step": 4,
       "config": 4,
-      "message_mb": 2.8244375
+      "message_mb": 3.2585625
      },
      {
       "step": 5,
       "config": 5,
-      "message_mb": 1.41221875
+      "message_mb": 1.62928125
      },
      {
       "step": 6,
       "config": 6,
-      "message_mb": 0.706109375
+      "message_mb": 0.814640625
      },
      {
       "step": 7,
       "config": 7,
-      "message_mb": 0.3530546875
+      "message_mb": 0.4073203125
      },
      {
       "step": 8,
       "config": 8,
-      "message_mb": 0.17652734375
+      "message_mb": 0.20366015625
      },
      {
       "step": 9,
       "config": 8,
-      "message_mb": 0.17652734375
+      "message_mb": 0.20366015625
      },
      {
       "step": 10,
       "config": 7,
-      "message_mb": 0.3530546875
+      "message_mb": 0.4073203125
      },
      {
       "step": 11,
       "config": 6,
-      "message_mb": 0.706109375
+      "message_mb": 0.814640625
      },
      {
       "step": 12,
       "config": 5,
-      "message_mb": 1.41221875
+      "message_mb": 1.62928125
      },
      {
       "step": 13,
       "config": 4,
-      "message_mb": 2.8244375
+      "message_mb": 3.2585625
      },
      {
       "step": 14,
       "config": 3,
-      "message_mb": 5.648875
+      "message_mb": 6.517125
      },
      {
       "step": 15,
       "config": 2,
-      "message_mb": 11.29775
+      "message_mb": 13.03425
      },
      {
       "step": 16,
       "config": 1,
-      "message_mb": 22.5955
+      "message_mb": 26.0685
      }
     ],
     "algorithm": "rabenseifner_allreduce",
-    "payload_mb": 45.191,
+    "payload_mb": 52.137,
     "id": "te06",
     "experiment": "allreduce_scaling"
    },
@@ -605,66 +605,66 @@
      {
       "step": 1,
       "config": 1,
-      "message_mb": 8.054
+      "message_mb": 8.0
      },
      {
       "step": 2,
       "config": 2,
-      "message_mb": 4.027
+      "message_mb": 4.0
      },
      {
       "step": 3,
       "config": 3,
-      "message_mb": 2.0135
+      "message_mb": 2.0
      },
      {
       "step": 4,
       "config": 4,
-      "message_mb": 1.00675
+      "message_mb": 1.0
      },
      {
       "step": 5,
       "config": 5,
-      "message_mb": 0.503375
+      "message_mb": 0.5
      },
      {
       "step": 6,
       "config": 6,
-      "message_mb": 0.2516875
+      "message_mb": 0.25
      },
      {
       "step": 7,
       "config": 6,
-      "message_mb": 0.2516875
+      "message_mb": 0.25
      },
      {
       "step": 8,
       "config": 5,
-      "message_mb": 0.503375
+      "message_mb": 0.5
      },
      {
       "step": 9,
       "config": 4,
-      "message_mb": 1.00675
+      "message_mb": 1.0
      },
      {
       "step": 10,
       "config": 3,
-      "message_mb": 2.0135
+      "message_mb": 2.0
      },
      {
       "step": 11,
       "config": 2,
-      "message_mb": 4.027
+      "message_mb": 4.0
      },
      {
       "step": 12,
       "config": 1,
-      "message_mb": 8.054
+      "message_mb": 8.0
      }
     ],
     "algorithm": "rabenseifner_allreduce",
-    "payload_mb": 16.108,
+    "payload_mb": 16.0,
     "id": "te07",
     "experiment": "allreduce_scaling"
    },
@@ -680,86 +680,86 @@
      {
       "step": 1,
       "config": 1,
-      "message_mb": 14.547
+      "message_mb": 17.8545
      },
      {
       "step": 2,
       "config": 2,
-      "message_mb": 7.2735
+      "message_mb": 8.92725
      },
      {
       "step": 3,
       "config": 3,
-      "message_mb": 3.63675
+      "message_mb": 4.463625
      },
      {
       "step": 4,
       "config": 4,
-      "message_mb": 1.818375
+      "message_mb": 2.2318125
      },
      {
       "step": 5,
       "config": 5,
-      "message_mb": 0.9091875
+      "message_mb": 1.11590625
      },
      {
       "step": 6,
       "config": 6,
-      "message_mb": 0.45459375
+      "message_mb": 0.557953125
      },
      {
       "step": 7,
       "config": 7,
-      "message_mb": 0.227296875
+      "message_mb": 0.2789765625
      },
      {
       "step": 8,
       "config": 8,
-      "message_mb": 0.1136484375
+      "message_mb": 0.13948828125
      },
      {
       "step": 9,
       "config": 8,
-      "message_mb": 0.1136484375
+      "message_mb": 0.13948828125
      },
      {
       "step": 10,
       "config": 7,
-      "message_mb": 0.227296875
+      "message_mb": 0.2789765625
      },
      {
       "step": 11,
       "config": 6,
-      "message_mb": 0.45459375
+      "message_mb": 0.557953125
      },
      {
       "step": 12,
       "config": 5,
-      "message_mb": 0.9091875
+      "message_mb": 1.11590625
      },
      {
       "step": 13,
       "config": 4,
-      "message_mb": 1.818375
+      "message_mb": 2.2318125
      },
      {
       "step": 14,
       "config": 3,
-      "message_mb": 3.63675
+      "message_mb": 4.463625
      },
      {
       "step": 15,
       "config": 2,
-      "message_mb": 7.2735
+      "message_mb": 8.92725
      },
      {
       "step": 16,
       "config": 1,
-      "message_mb": 14.547
+      "message_mb": 17.8545
      }
     ],
     "algorithm": "rabenseifner_allreduce",
-    "payload_mb": 29.094,
+    "payload_mb": 35.709,
     "id": "te08",
     "experiment": "allreduce_scaling"
    },
@@ -775,76 +775,76 @@
      {
       "step": 1,
       "config": 1,
-      "message_mb": 19.8075
+      "message_mb": 32.0
      },
      {
       "step": 2,
       "config": 2,
-      "message_mb": 9.90375
+      "message_mb": 16.0
      },
      {
       "step": 3,
       "config": 3,
-      "message_mb": 4.951875
+      "message_mb": 8.0
      },
      {
       "step": 4,
       "config": 4,
-      "message_mb": 2.4759375
+      "message_mb": 4.0
      },
      {
       "step": 5,
       "config": 5,
-      "message_mb": 1.23796875
+      "message_mb": 2.0
      },
      {
       "step": 6,
       "config": 6,
-      "message_mb": 0.618984375
+      "message_mb": 1.0
      },
      {
       "step": 7,
       "config": 7,
-      "message_mb": 0.3094921875
+      "message_mb": 0.5
      },
      {
       "step": 8,
       "config": 7,
-      "message_mb": 0.3094921875
+      "message_mb": 0.5
      },
      {
       "step": 9,
       "config": 6,
-      "message_mb": 0.618984375
+      "message_mb": 1.0
      },
      {
       "step": 10,
       "config": 5,
-      "message_mb": 1.23796875
+      "message_mb": 2.0
      },
      {
       "step": 11,
       "config": 4,
-      "message_mb": 2.4759375
+      "message_mb": 4.0
      },
      {
       "step": 12,
       "config": 3,
-      "message_mb": 4.951875
+      "message_mb": 8.0
      },
      {
       "step": 13,
       "config": 2,
-      "message_mb": 9.90375
+      "message_mb": 16.0
      },
      {
       "step": 14,
       "config": 1,
-      "message_mb": 19.8075
+      "message_mb": 32.0
      }
     ],
     "algorithm": "rabenseifner_allreduce",
-    "payload_mb": 39.615,
+    "payload_mb": 64.0,
     "id": "te09",
     "experiment": "allreduce_scaling"
    },
@@ -860,101 +860,101 @@
      {
       "step": 1,
       "config": 1,
-      "message_mb": 14.886
+      "message_mb": 32.0
      },
      {
       "step": 2,
       "config": 2,
-      "message_mb": 7.443
+      "message_mb": 16.0
      },
      {
       "step": 3,
       "config": 3,
-      "message_mb": 3.7215
+      "message_mb": 8.0
      },
      {
       "step": 4,
       "config": 4,
-      "message_mb": 1.86075
+      "message_mb": 4.0
      },
      {
       "step": 5,
       "config": 5,
-      "message_mb": 0.930375
+      "message_mb": 2.0
      },
      {
       "step": 6,
       "config": 6,
-      "message_mb": 0.4651875
+      "message_mb": 1.0
      },
      {
       "step": 7,
       "config": 7,
-      "message_mb": 0.23259375
+      "message_mb": 0.5
      },
      {
       "step": 8,
       "config": 8,
-      "message_mb": 0.116296875
+      "message_mb": 0.25
      },
      {
       "step": 9,
       "config": 9,
-      "message_mb": 0.0581484375
+      "message_mb": 0.125
      },
      {
       "step": 10,
       "config": 9,
-      "message_mb": 0.0581484375
+      "message_mb": 0.125
      },
      {
       "step": 11,
       "config": 8,
-      "message_mb": 0.116296875
+      "message_mb": 0.25
      },
      {
       "step": 12,
       "config": 7,
-      "message_mb": 0.23259375
+      "message_mb": 0.5
      },
      {
       "step": 13,
       "config": 6,
-      "message_mb": 0.4651875
+      "message_mb": 1.0
      },
      {
       "step": 14,
       "config": 5,
-      "message_mb": 0.930375
+      "message_mb": 2.0
      },
      {
       "step": 15,
       "config": 4,
-      "message_mb": 1.86075
+      "message_mb": 4.0
      },
      {
       "step": 16,
       "config": 3,
-      "message_mb": 3.7215
+      "message_mb": 8.0
      },
      {
       "step": 17,
       "config": 2,
-      "message_mb": 7.443
+      "message_mb": 16.0
      },
      {
       "step": 18,
       "config": 1,
-      "message_mb": 14.886
+      "message_mb": 32.0
      }
     ],
     "algorithm": "rabenseifner_allreduce",
-    "payload_mb": 29.772,
+    "payload_mb": 64.0,
     "id": "te10",
     "experiment": "allreduce_scaling"
    }
   ],
-  "collective_algorithms": [
+  "high_optical_degree": [
    {
     "name": "te11",
     "description": "",
@@ -967,161 +967,46 @@
      {
       "step": 1,
       "config": 1,
-      "message_mb": 5.328
+      "message_mb": 105.113
      },
      {
       "step": 2,
       "config": 2,
-      "message_mb": 2.664
+      "message_mb": 52.5565
      },
      {
       "step": 3,
       "config": 3,
-      "message_mb": 1.332
+      "message_mb": 26.27825
      },
      {
       "step": 4,
       "config": 4,
-      "message_mb": 0.666
+      "message_mb": 13.139125
      },
      {
       "step": 5,
       "config": 5,
-      "message_mb": 0.333
+      "message_mb": 6.5695625
      },
      {
       "step": 6,
       "config": 6,
-      "message_mb": 0.1665
+      "message_mb": 3.28478125
      },
      {
       "step": 7,
       "config": 7,
-      "message_mb": 0.08325
+      "message_mb": 1.642390625
      }
     ],
     "algorithm": "rabenseifner_reducescatter",
-    "payload_mb": 10.656,
+    "payload_mb": 210.226,
     "id": "te11",
-    "experiment": "collective_algorithms"
+    "experiment": "high_optical_degree"
    },
    {
     "name": "te12",
-    "description": "",
-    "nodes": 256,
-    "optical_degree": 8,
-    "per_link_gbps": 100.0,
-    "base_latency_us": 20.0,
-    "reconfig_latency_us": 200.0,
-    "steps": [
-     {
-      "step": 1,
-      "config": 1,
-      "message_mb": 96.721
-     },
-     {
-      "step": 2,
-      "config": 2,
-      "message_mb": 48.3605
-     },
-     {
-      "step": 3,
-      "config": 3,
-      "message_mb": 24.18025
-     },
-     {
-      "step": 4,
-      "config": 4,
-      "message_mb": 12.090125
-     },
-     {
-      "step": 5,
-      "config": 5,
-      "message_mb": 6.0450625
-     },
-     {
-      "step": 6,
-      "config": 6,
-      "message_mb": 3.02253125
-     },
-     {
-      "step": 7,
-      "config": 7,
-      "message_mb": 1.511265625
-     },
-     {
-      "step": 8,
-      "config": 8,
-      "message_mb": 0.7556328125
-     }
-    ],
-    "algorithm": "rabenseifner_reducescatter",
-    "payload_mb": 193.442,
-    "id": "te12",
-    "experiment": "collective_algorithms"
-   },
-   {
-    "name": "te13",
-    "description": "",
-    "nodes": 512,
-    "optical_degree": 8,
-    "per_link_gbps": 100.0,
-    "base_latency_us": 20.0,
-    "reconfig_latency_us": 200.0,
-    "steps": [
-     {
-      "step": 1,
-      "config": 1,
-      "message_mb": 42.753
-     },
-     {
-      "step": 2,
-      "config": 2,
-      "message_mb": 21.3765
-     },
-     {
-      "step": 3,
-      "config": 3,
-      "message_mb": 10.68825
-     },
-     {
-      "step": 4,
-      "config": 4,
-      "message_mb": 5.344125
-     },
-     {
-      "step": 5,
-      "config": 5,
-      "message_mb": 2.6720625
-     },
-     {
-      "step": 6,
-      "config": 6,
-      "message_mb": 1.33603125
-     },
-     {
-      "step": 7,
-      "config": 7,
-      "message_mb": 0.668015625
-     },
-     {
-      "step": 8,
-      "config": 8,
-      "message_mb": 0.3340078125
-     },
-     {
-      "step": 9,
-      "config": 9,
-      "message_mb": 0.16700390625
-     }
-    ],
-    "algorithm": "rabenseifner_reducescatter",
-    "payload_mb": 85.506,
-    "id": "te13",
-    "experiment": "collective_algorithms"
-   },
-   {
-    "name": "te14",
     "description": "",
     "nodes": 128,
     "optical_degree": 8,
@@ -1132,81 +1017,46 @@
      {
       "step": 1,
       "config": 1,
-      "message_mb": 1.0895
+      "message_mb": 44.956
      },
      {
       "step": 2,
       "config": 2,
-      "message_mb": 0.54475
+      "message_mb": 22.478
      },
      {
       "step": 3,
       "config": 3,
-      "message_mb": 0.272375
+      "message_mb": 11.239
      },
      {
       "step": 4,
       "config": 4,
-      "message_mb": 0.1361875
+      "message_mb": 5.6195
      },
      {
       "step": 5,
       "config": 5,
-      "message_mb": 0.06809375
+      "message_mb": 2.80975
      },
      {
       "step": 6,
       "config": 6,
-      "message_mb": 0.034046875
+      "message_mb": 1.404875
      },
      {
       "step": 7,
       "config": 7,
-      "message_mb": 0.0170234375
-     },
-     {
-      "step": 8,
-      "config": 7,
-      "message_mb": 0.0170234375
-     },
-     {
-      "step": 9,
-      "config": 6,
-      "message_mb": 0.034046875
-     },
-     {
-      "step": 10,
-      "config": 5,
-      "message_mb": 0.06809375
-     },
-     {
-      "step": 11,
-      "config": 4,
-      "message_mb": 0.1361875
-     },
-     {
-      "step": 12,
-      "config": 3,
-      "message_mb": 0.272375
-     },
-     {
-      "step": 13,
-      "config": 2,
-      "message_mb": 0.54475
-     },
-     {
-      "step": 14,
-      "config": 1,
-      "message_mb": 1.0895
+      "message_mb": 0.7024375
      }
     ],
-    "algorithm": "rabenseifner_allreduce",
-    "payload_mb": 2.179,
-    "id": "te14",
-    "experiment": "collective_algorithms"
+    "algorithm": "rabenseifner_reducescatter",
+    "payload_mb": 89.912,
+    "id": "te12",
+    "experiment": "high_optical_degree"
    },
    {
-    "name": "te15",
+    "name": "te13",
     "description": "",
     "nodes": 256,
     "optical_degree": 8,
@@ -1217,91 +1067,106 @@
      {
       "step": 1,
       "config": 1,
-      "message_mb": 2.2975
+      "message_mb": 0.5
      },
      {
       "step": 2,
       "config": 2,
-      "message_mb": 1.14875
+      "message_mb": 0.25
      },
      {
       "step": 3,
       "config": 3,
-      "message_mb": 0.574375
+      "message_mb": 0.125
      },
      {
       "step": 4,
       "config": 4,
-      "message_mb": 0.2871875
+      "message_mb": 0.0625
      },
      {
       "step": 5,
       "config": 5,
-      "message_mb": 0.14359375
+      "message_mb": 0.03125
      },
      {
       "step": 6,
       "config": 6,
-      "message_mb": 0.071796875
+      "message_mb": 0.015625
      },
      {
       "step": 7,
       "config": 7,
-      "message_mb": 0.0358984375
+      "message_mb": 0.0078125
      },
      {
       "step": 8,
       "config": 8,
-      "message_mb": 0.01794921875
-     },
-     {
-      "step": 9,
-      "config": 8,
-      "message_mb": 0.01794921875
-     },
-     {
-      "step": 10,
-      "config": 7,
-      "message_mb": 0.0358984375
-     },
-     {
-      "step": 11,
-      "config": 6,
-      "message_mb": 0.071796875
-     },
-     {
-      "step": 12,
-      "config": 5,
-      "message_mb": 0.14359375
-     },
-     {
-      "step": 13,
-      "config": 4,
-      "message_mb": 0.2871875
-     },
-     {
-      "step": 14,
-      "config": 3,
-      "message_mb": 0.574375
-     },
-     {
-      "step": 15,
-      "config": 2,
-      "message_mb": 1.14875
-     },
-     {
-      "step": 16,
-      "config": 1,
-      "message_mb": 2.2975
+      "message_mb": 0.00390625
      }
     ],
-    "algorithm": "rabenseifner_allreduce",
-    "payload_mb": 4.595,
-    "id": "te15",
-    "experiment": "collective_algorithms"
+    "algorithm": "rabenseifner_reducescatter",
+    "payload_mb": 1.0,
+    "id": "te13",
+    "experiment": "high_optical_degree"
    },
    {
-    "name": "te16",
+    "name": "te14",
+    "description": "",
+    "nodes": 256,
+    "optical_degree": 8,
+    "per_link_gbps": 100.0,
+    "base_latency_us": 20.0,
+    "reconfig_latency_us": 200.0,
+    "steps": [
+     {
+      "step": 1,
+      "config": 1,
+      "message_mb": 96.8515
+     },
+     {
+      "step": 2,
+      "config": 2,
+      "message_mb": 48.42575
+     },
+     {
+      "step": 3,
+      "config": 3,
+      "message_mb": 24.212875
+     },
+     {
+      "step": 4,
+      "config": 4,
+      "message_mb": 12.1064375
+     },
+     {
+      "step": 5,
+      "config": 5,
+      "message_mb": 6.05321875
+     },
+     {
+      "step": 6,
+      "config": 6,
+      "message_mb": 3.026609375
+     },
+     {
+      "step": 7,
+      "config": 7,
+      "message_mb": 1.5133046875
+     },
+     {
+      "step": 8,
+      "config": 8,
+      "message_mb": 0.75665234375
+     }
+    ],
+    "algorithm": "rabenseifner_reducescatter",
+    "payload_mb": 193.703,
+    "id": "te14",
+    "experiment": "high_optical_degree"
+   },
+   {
+    "name": "te15",
     "description": "",
     "nodes": 512,
     "optical_degree": 8,
@@ -1312,98 +1177,118 @@
      {
       "step": 1,
       "config": 1,
-      "message_mb": 1.5
+      "message_mb": 43.9035
      },
      {
       "step": 2,
       "config": 2,
-      "message_mb": 0.75
+      "message_mb": 21.95175
      },
      {
       "step": 3,
       "config": 3,
-      "message_mb": 0.375
+      "message_mb": 10.975875
      },
      {
       "step": 4,
       "config": 4,
-      "message_mb": 0.1875
+      "message_mb": 5.4879375
      },
      {
       "step": 5,
       "config": 5,
-      "message_mb": 0.09375
+      "message_mb": 2.74396875
      },
      {
       "step": 6,
       "config": 6,
-      "message_mb": 0.046875
+      "message_mb": 1.371984375
      },
      {
       "step": 7,
       "config": 7,
-      "message_mb": 0.0234375
+      "message_mb": 0.6859921875
      },
      {
       "step": 8,
       "config": 8,
-      "message_mb": 0.01171875
+      "message_mb": 0.34299609375
      },
      {
       "step": 9,
       "config": 9,
-      "message_mb": 0.005859375
+      "message_mb": 0.171498046875
+     }
+    ],
+    "algorithm": "rabenseifner_reducescatter",
+    "payload_mb": 87.807,
+    "id": "te15",
+    "experiment": "high_optical_degree"
+   },
+   {
+    "name": "te16",
+    "description": "",
+    "nodes": 1024,
+    "optical_degree": 8,
+    "per_link_gbps": 100.0,
+    "base_latency_us": 20.0,
+    "reconfig_latency_us": 200.0,
+    "steps": [
+     {
+      "step": 1,
+      "config": 1,
+      "message_mb": 60.509
+     },
+     {
+      "step": 2,
+      "config": 2,
+      "message_mb": 30.2545
+     },
+     {
+      "step": 3,
+      "config": 3,
+      "message_mb": 15.12725
+     },
+     {
+      "step": 4,
+      "config": 4,
+      "message_mb": 7.563625
+     },
+     {
+      "step": 5,
+      "config": 5,
+      "message_mb": 3.7818125
+     },
+     {
+      "step": 6,
+      "config": 6,
+      "message_mb": 1.89090625
+     },
+     {
+      "step": 7,
+      "config": 7,
+      "message_mb": 0.945453125
+     },
+     {
+      "step": 8,
+      "config": 8,
+      "message_mb": 0.4727265625
+     },
+     {
+      "step": 9,
+      "config": 9,
+      "message_mb": 0.23636328125
      },
      {
       "step": 10,
-      "config": 9,
-      "message_mb": 0.005859375
-     },
-     {
-      "step": 11,
-      "config": 8,
-      "message_mb": 0.01171875
-     },
-     {
-      "step": 12,
-      "config": 7,
-      "message_mb": 0.0234375
-     },
-     {
-      "step": 13,
-      "config": 6,
-      "message_mb": 0.046875
-     },
-     {
-      "step": 14,
-      "config": 5,
-      "message_mb": 0.09375
-     },
-     {
-      "step": 15,
-      "config": 4,
-      "message_mb": 0.1875
-     },
-     {
-      "step": 16,
-      "config": 3,
-      "message_mb": 0.375
-     },
-     {
-      "step": 17,
-      "config": 2,
-      "message_mb": 0.75
-     },
-     {
-      "step": 18,
-      "config": 1,
-      "message_mb": 1.5
+      "config": 10,
+      "message_mb": 0.118181640625
      }
     ],
-    "algorithm": "rabenseifner_allreduce",
-    "payload_mb": 3.0,
+    "algorithm": "rabenseifner_reducescatter",
+    "payload_mb": 121.018,
     "id": "te16",
-    "experiment": "collective_algorithms"
+    "experiment": "high_optical_degree"
    },
    {
     "name": "te17",
@@ -1417,43 +1302,78 @@
      {
       "step": 1,
       "config": 1,
-      "message_mb": 3.419
+      "message_mb": 3.2995
      },
      {
       "step": 2,
       "config": 2,
-      "message_mb": 3.419
+      "message_mb": 1.64975
      },
      {
       "step": 3,
       "config": 3,
-      "message_mb": 3.419
+      "message_mb": 0.824875
      },
      {
       "step": 4,
       "config": 4,
-      "message_mb": 3.419
+      "message_mb": 0.4124375
      },
      {
       "step": 5,
       "config": 5,
-      "message_mb": 3.419
+      "message_mb": 0.20621875
      },
      {
       "step": 6,
       "config": 6,
-      "message_mb": 3.419
+      "message_mb": 0.103109375
      },
      {
       "step": 7,
       "config": 7,
-      "message_mb": 3.419
+      "message_mb": 0.0515546875
+     },
+     {
+      "step": 8,
+      "config": 7,
+      "message_mb": 0.0515546875
+     },
+     {
+      "step": 9,
+      "config": 6,
+      "message_mb": 0.103109375
+     },
+     {
+      "step": 10,
+      "config": 5,
+      "message_mb": 0.20621875
+     },
+     {
+      "step": 11,
+      "config": 4,
+      "message_mb": 0.4124375
+     },
+     {
+      "step": 12,
+      "config": 3,
+      "message_mb": 0.824875
+     },
+     {
+      "step": 13,
+      "config": 2,
+      "message_mb": 1.64975
+     },
+     {
+      "step": 14,
+      "config": 1,
+      "message_mb": 3.2995
      }
     ],
-    "algorithm": "bruck_alltoall",
-    "payload_mb": 6.838,
+    "algorithm": "rabenseifner_allreduce",
+    "payload_mb": 6.599,
     "id": "te17",
-    "experiment": "collective_algorithms"
+    "experiment": "high_optical_degree"
    },
    {
     "name": "te18",
@@ -1467,51 +1387,186 @@
      {
       "step": 1,
       "config": 1,
-      "message_mb": 25.9065
+      "message_mb": 6.9585
      },
      {
       "step": 2,
       "config": 2,
-      "message_mb": 25.9065
+      "message_mb": 3.47925
      },
      {
       "step": 3,
       "config": 3,
-      "message_mb": 25.9065
+      "message_mb": 1.739625
      },
      {
       "step": 4,
       "config": 4,
-      "message_mb": 25.9065
+      "message_mb": 0.8698125
      },
      {
       "step": 5,
       "config": 5,
-      "message_mb": 25.9065
+      "message_mb": 0.43490625
      },
      {
       "step": 6,
       "config": 6,
-      "message_mb": 25.9065
+      "message_mb": 0.217453125
      },
      {
       "step": 7,
       "config": 7,
-      "message_mb": 25.9065
+      "message_mb": 0.1087265625
      },
      {
       "step": 8,
       "config": 8,
-      "message_mb": 25.9065
+      "message_mb": 0.05436328125
+     },
+     {
+      "step": 9,
+      "config": 8,
+      "message_mb": 0.05436328125
+     },
+     {
+      "step": 10,
+      "config": 7,
+      "message_mb": 0.1087265625
+     },
+     {
+      "step": 11,
+      "config": 6,
+      "message_mb": 0.217453125
+     },
+     {
+      "step": 12,
+      "config": 5,
+      "message_mb": 0.43490625
+     },
+     {
+      "step": 13,
+      "config": 4,
+      "message_mb": 0.8698125
+     },
+     {
+      "step": 14,
+      "config": 3,
+      "message_mb": 1.739625
+     },
+     {
+      "step": 15,
+      "config": 2,
+      "message_mb": 3.47925
+     },
+     {
+      "step": 16,
+      "config": 1,
+      "message_mb": 6.9585
      }
     ],
-    "algorithm": "bruck_alltoall",
-    "payload_mb": 51.813,
+    "algorithm": "rabenseifner_allreduce",
+    "payload_mb": 13.917,
     "id": "te18",
-    "experiment": "collective_algorithms"
+    "experiment": "high_optical_degree"
    },
    {
     "name": "te19",
+    "description": "",
+    "nodes": 256,
+    "optical_degree": 8,
+    "per_link_gbps": 100.0,
+    "base_latency_us": 20.0,
+    "reconfig_latency_us": 200.0,
+    "steps": [
+     {
+      "step": 1,
+      "config": 1,
+      "message_mb": 73.528
+     },
+     {
+      "step": 2,
+      "config": 2,
+      "message_mb": 36.764
+     },
+     {
+      "step": 3,
+      "config": 3,
+      "message_mb": 18.382
+     },
+     {
+      "step": 4,
+      "config": 4,
+      "message_mb": 9.191
+     },
+     {
+      "step": 5,
+      "config": 5,
+      "message_mb": 4.5955
+     },
+     {
+      "step": 6,
+      "config": 6,
+      "message_mb": 2.29775
+     },
+     {
+      "step": 7,
+      "config": 7,
+      "message_mb": 1.148875
+     },
+     {
+      "step": 8,
+      "config": 8,
+      "message_mb": 0.5744375
+     },
+     {
+      "step": 9,
+      "config": 8,
+      "message_mb": 0.5744375
+     },
+     {
+      "step": 10,
+      "config": 7,
+      "message_mb": 1.148875
+     },
+     {
+      "step": 11,
+      "config": 6,
+      "message_mb": 2.29775
+     },
+     {
+      "step": 12,
+      "config": 5,
+      "message_mb": 4.5955
+     },
+     {
+      "step": 13,
+      "config": 4,
+      "message_mb": 9.191
+     },
+     {
+      "step": 14,
+      "config": 3,
+      "message_mb": 18.382
+     },
+     {
+      "step": 15,
+      "config": 2,
+      "message_mb": 36.764
+     },
+     {
+      "step": 16,
+      "config": 1,
+      "message_mb": 73.528
+     }
+    ],
+    "algorithm": "rabenseifner_allreduce",
+    "payload_mb": 147.056,
+    "id": "te19",
+    "experiment": "high_optical_degree"
+   },
+   {
+    "name": "te20",
     "description": "",
     "nodes": 512,
     "optical_degree": 8,
@@ -1522,113 +1577,103 @@
      {
       "step": 1,
       "config": 1,
-      "message_mb": 1.9495
+      "message_mb": 28.4715
      },
      {
       "step": 2,
       "config": 2,
-      "message_mb": 1.9495
+      "message_mb": 14.23575
      },
      {
       "step": 3,
       "config": 3,
-      "message_mb": 1.9495
+      "message_mb": 7.117875
      },
      {
       "step": 4,
       "config": 4,
-      "message_mb": 1.9495
+      "message_mb": 3.5589375
      },
      {
       "step": 5,
       "config": 5,
-      "message_mb": 1.9495
+      "message_mb": 1.77946875
      },
      {
       "step": 6,
       "config": 6,
-      "message_mb": 1.9495
+      "message_mb": 0.889734375
      },
      {
       "step": 7,
       "config": 7,
-      "message_mb": 1.9495
+      "message_mb": 0.4448671875
      },
      {
       "step": 8,
       "config": 8,
-      "message_mb": 1.9495
+      "message_mb": 0.22243359375
      },
      {
       "step": 9,
       "config": 9,
-      "message_mb": 1.9495
-     }
-    ],
-    "algorithm": "bruck_alltoall",
-    "payload_mb": 3.899,
-    "id": "te19",
-    "experiment": "collective_algorithms"
-   },
-   {
-    "name": "te20",
-    "description": "",
-    "nodes": 9,
-    "optical_degree": 8,
-    "per_link_gbps": 100.0,
-    "base_latency_us": 20.0,
-    "reconfig_latency_us": 200.0,
-    "steps": [
-     {
-      "step": 1,
-      "config": 1,
-      "message_mb": 0.8737777777777778
+      "message_mb": 0.111216796875
      },
      {
-      "step": 2,
-      "config": 2,
-      "message_mb": 0.8737777777777778
+      "step": 10,
+      "config": 9,
+      "message_mb": 0.111216796875
      },
      {
-      "step": 3,
-      "config": 3,
-      "message_mb": 0.8737777777777778
-     },
-     {
-      "step": 4,
-      "config": 4,
-      "message_mb": 0.8737777777777778
-     },
-     {
-      "step": 5,
-      "config": 5,
-      "message_mb": 0.8737777777777778
-     },
-     {
-      "step": 6,
-      "config": 6,
-      "message_mb": 0.8737777777777778
-     },
-     {
-      "step": 7,
-      "config": 7,
-      "message_mb": 0.8737777777777778
-     },
-     {
-      "step": 8,
+      "step": 11,
       "config": 8,
-      "message_mb": 0.8737777777777778
+      "message_mb": 0.22243359375
+     },
+     {
+      "step": 12,
+      "config": 7,
+      "message_mb": 0.4448671875
+     },
+     {
+      "step": 13,
+      "config": 6,
+      "message_mb": 0.889734375
+     },
+     {
+      "step": 14,
+      "config": 5,
+      "message_mb": 1.77946875
+     },
+     {
+      "step": 15,
+      "config": 4,
+      "message_mb": 3.5589375
+     },
+     {
+      "step": 16,
+      "config": 3,
+      "message_mb": 7.117875
+     },
+     {
+      "step": 17,
+      "config": 2,
+      "message_mb": 14.23575
+     },
+     {
+      "step": 18,
+      "config": 1,
+      "message_mb": 28.4715
      }
     ],
-    "algorithm": "pairwise_alltoall",
-    "payload_mb": 7.864,
+    "algorithm": "rabenseifner_allreduce",
+    "payload_mb": 56.943,
     "id": "te20",
-    "experiment": "collective_algorithms"
+    "experiment": "high_optical_degree"
    },
    {
     "name": "te21",
     "description": "",
-    "nodes": 10,
+    "nodes": 1024,
     "optical_degree": 8,
     "per_link_gbps": 100.0,
     "base_latency_us": 20.0,
@@ -1637,125 +1682,230 @@
      {
       "step": 1,
       "config": 1,
-      "message_mb": 0.3122
+      "message_mb": 29.923
      },
      {
       "step": 2,
       "config": 2,
-      "message_mb": 0.3122
+      "message_mb": 14.9615
      },
      {
       "step": 3,
       "config": 3,
-      "message_mb": 0.3122
+      "message_mb": 7.48075
      },
      {
       "step": 4,
       "config": 4,
-      "message_mb": 0.3122
+      "message_mb": 3.740375
      },
      {
       "step": 5,
       "config": 5,
-      "message_mb": 0.3122
+      "message_mb": 1.8701875
      },
      {
       "step": 6,
       "config": 6,
-      "message_mb": 0.3122
+      "message_mb": 0.93509375
      },
      {
       "step": 7,
       "config": 7,
-      "message_mb": 0.3122
+      "message_mb": 0.467546875
      },
      {
       "step": 8,
       "config": 8,
-      "message_mb": 0.3122
+      "message_mb": 0.2337734375
      },
      {
       "step": 9,
       "config": 9,
-      "message_mb": 0.3122
-     }
-    ],
-    "algorithm": "pairwise_alltoall",
-    "payload_mb": 3.122,
-    "id": "te21",
-    "experiment": "collective_algorithms"
-   },
-   {
-    "name": "te22",
-    "description": "",
-    "nodes": 11,
-    "optical_degree": 8,
-    "per_link_gbps": 100.0,
-    "base_latency_us": 20.0,
-    "reconfig_latency_us": 200.0,
-    "steps": [
-     {
-      "step": 1,
-      "config": 1,
-      "message_mb": 3.050636363636364
-     },
-     {
-      "step": 2,
-      "config": 2,
-      "message_mb": 3.050636363636364
-     },
-     {
-      "step": 3,
-      "config": 3,
-      "message_mb": 3.050636363636364
-     },
-     {
-      "step": 4,
-      "config": 4,
-      "message_mb": 3.050636363636364
-     },
-     {
-      "step": 5,
-      "config": 5,
-      "message_mb": 3.050636363636364
-     },
-     {
-      "step": 6,
-      "config": 6,
-      "message_mb": 3.050636363636364
-     },
-     {
-      "step": 7,
-      "config": 7,
-      "message_mb": 3.050636363636364
-     },
-     {
-      "step": 8,
-      "config": 8,
-      "message_mb": 3.050636363636364
-     },
-     {
-      "step": 9,
-      "config": 9,
-      "message_mb": 3.050636363636364
+      "message_mb": 0.11688671875
      },
      {
       "step": 10,
       "config": 10,
-      "message_mb": 3.050636363636364
+      "message_mb": 0.058443359375
+     },
+     {
+      "step": 11,
+      "config": 10,
+      "message_mb": 0.058443359375
+     },
+     {
+      "step": 12,
+      "config": 9,
+      "message_mb": 0.11688671875
+     },
+     {
+      "step": 13,
+      "config": 8,
+      "message_mb": 0.2337734375
+     },
+     {
+      "step": 14,
+      "config": 7,
+      "message_mb": 0.467546875
+     },
+     {
+      "step": 15,
+      "config": 6,
+      "message_mb": 0.93509375
+     },
+     {
+      "step": 16,
+      "config": 5,
+      "message_mb": 1.8701875
+     },
+     {
+      "step": 17,
+      "config": 4,
+      "message_mb": 3.740375
+     },
+     {
+      "step": 18,
+      "config": 3,
+      "message_mb": 7.48075
+     },
+     {
+      "step": 19,
+      "config": 2,
+      "message_mb": 14.9615
+     },
+     {
+      "step": 20,
+      "config": 1,
+      "message_mb": 29.923
      }
     ],
-    "algorithm": "pairwise_alltoall",
-    "payload_mb": 33.557,
+    "algorithm": "rabenseifner_allreduce",
+    "payload_mb": 59.846,
+    "id": "te21",
+    "experiment": "high_optical_degree"
+   },
+   {
+    "name": "te22",
+    "description": "",
+    "nodes": 1024,
+    "optical_degree": 8,
+    "per_link_gbps": 100.0,
+    "base_latency_us": 20.0,
+    "reconfig_latency_us": 200.0,
+    "steps": [
+     {
+      "step": 1,
+      "config": 1,
+      "message_mb": 20.1255
+     },
+     {
+      "step": 2,
+      "config": 2,
+      "message_mb": 10.06275
+     },
+     {
+      "step": 3,
+      "config": 3,
+      "message_mb": 5.031375
+     },
+     {
+      "step": 4,
+      "config": 4,
+      "message_mb": 2.5156875
+     },
+     {
+      "step": 5,
+      "config": 5,
+      "message_mb": 1.25784375
+     },
+     {
+      "step": 6,
+      "config": 6,
+      "message_mb": 0.628921875
+     },
+     {
+      "step": 7,
+      "config": 7,
+      "message_mb": 0.3144609375
+     },
+     {
+      "step": 8,
+      "config": 8,
+      "message_mb": 0.15723046875
+     },
+     {
+      "step": 9,
+      "config": 9,
+      "message_mb": 0.078615234375
+     },
+     {
+      "step": 10,
+      "config": 10,
+      "message_mb": 0.0393076171875
+     },
+     {
+      "step": 11,
+      "config": 10,
+      "message_mb": 0.0393076171875
+     },
+     {
+      "step": 12,
+      "config": 9,
+      "message_mb": 0.078615234375
+     },
+     {
+      "step": 13,
+      "config": 8,
+      "message_mb": 0.15723046875
+     },
+     {
+      "step": 14,
+      "config": 7,
+      "message_mb": 0.3144609375
+     },
+     {
+      "step": 15,
+      "config": 6,
+      "message_mb": 0.628921875
+     },
+     {
+      "step": 16,
+      "config": 5,
+      "message_mb": 1.25784375
+     },
+     {
+      "step": 17,
+      "config": 4,
+      "message_mb": 2.5156875
+     },
+     {
+      "step": 18,
+      "config": 3,
+      "message_mb": 5.031375
+     },
+     {
+      "step": 19,
+      "config": 2,
+      "message_mb": 10.06275
+     },
+     {
+      "step": 20,
+      "config": 1,
+      "message_mb": 20.1255
+     }
+    ],
+    "algorithm": "rabenseifner_allreduce",
+    "payload_mb": 40.251,
     "id": "te22",
-    "experiment": "collective_algorithms"
+    "experiment": "high_optical_degree"
    }
   ],
   "hardware_sensitivity": [
    {
     "name": "te23",
     "description": "",
-    "nodes": 256,
+    "nodes": 17,
     "optical_degree": 2,
     "per_link_gbps": 400.0,
     "base_latency_us": 20.0,
@@ -1764,46 +1914,86 @@
      {
       "step": 1,
       "config": 1,
-      "message_mb": 0.199
+      "message_mb": 0.014705882352941176
      },
      {
       "step": 2,
       "config": 2,
-      "message_mb": 0.199
+      "message_mb": 0.014705882352941176
      },
      {
       "step": 3,
       "config": 3,
-      "message_mb": 0.199
+      "message_mb": 0.014705882352941176
      },
      {
       "step": 4,
       "config": 4,
-      "message_mb": 0.199
+      "message_mb": 0.014705882352941176
      },
      {
       "step": 5,
       "config": 5,
-      "message_mb": 0.199
+      "message_mb": 0.014705882352941176
      },
      {
       "step": 6,
       "config": 6,
-      "message_mb": 0.199
+      "message_mb": 0.014705882352941176
      },
      {
       "step": 7,
       "config": 7,
-      "message_mb": 0.199
+      "message_mb": 0.014705882352941176
      },
      {
       "step": 8,
       "config": 8,
-      "message_mb": 0.199
+      "message_mb": 0.014705882352941176
+     },
+     {
+      "step": 9,
+      "config": 9,
+      "message_mb": 0.014705882352941176
+     },
+     {
+      "step": 10,
+      "config": 10,
+      "message_mb": 0.014705882352941176
+     },
+     {
+      "step": 11,
+      "config": 11,
+      "message_mb": 0.014705882352941176
+     },
+     {
+      "step": 12,
+      "config": 12,
+      "message_mb": 0.014705882352941176
+     },
+     {
+      "step": 13,
+      "config": 13,
+      "message_mb": 0.014705882352941176
+     },
+     {
+      "step": 14,
+      "config": 14,
+      "message_mb": 0.014705882352941176
+     },
+     {
+      "step": 15,
+      "config": 15,
+      "message_mb": 0.014705882352941176
+     },
+     {
+      "step": 16,
+      "config": 16,
+      "message_mb": 0.014705882352941176
      }
     ],
-    "algorithm": "bruck_alltoall",
-    "payload_mb": 0.398,
+    "algorithm": "pairwise_alltoall",
+    "payload_mb": 0.25,
     "id": "te23",
     "experiment": "hardware_sensitivity"
    },
@@ -1819,46 +2009,86 @@
      {
       "step": 1,
       "config": 1,
-      "message_mb": 0.334
+      "message_mb": 22.5985
      },
      {
       "step": 2,
       "config": 2,
-      "message_mb": 0.167
+      "message_mb": 11.29925
      },
      {
       "step": 3,
       "config": 3,
-      "message_mb": 0.0835
+      "message_mb": 5.649625
      },
      {
       "step": 4,
       "config": 4,
-      "message_mb": 0.04175
+      "message_mb": 2.8248125
      },
      {
       "step": 5,
       "config": 5,
-      "message_mb": 0.020875
+      "message_mb": 1.41240625
      },
      {
       "step": 6,
       "config": 6,
-      "message_mb": 0.0104375
+      "message_mb": 0.706203125
      },
      {
       "step": 7,
       "config": 7,
-      "message_mb": 0.00521875
+      "message_mb": 0.3531015625
      },
      {
       "step": 8,
       "config": 8,
-      "message_mb": 0.002609375
+      "message_mb": 0.17655078125
+     },
+     {
+      "step": 9,
+      "config": 8,
+      "message_mb": 0.17655078125
+     },
+     {
+      "step": 10,
+      "config": 7,
+      "message_mb": 0.3531015625
+     },
+     {
+      "step": 11,
+      "config": 6,
+      "message_mb": 0.706203125
+     },
+     {
+      "step": 12,
+      "config": 5,
+      "message_mb": 1.41240625
+     },
+     {
+      "step": 13,
+      "config": 4,
+      "message_mb": 2.8248125
+     },
+     {
+      "step": 14,
+      "config": 3,
+      "message_mb": 5.649625
+     },
+     {
+      "step": 15,
+      "config": 2,
+      "message_mb": 11.29925
+     },
+     {
+      "step": 16,
+      "config": 1,
+      "message_mb": 22.5985
      }
     ],
-    "algorithm": "rabenseifner_reducescatter",
-    "payload_mb": 0.668,
+    "algorithm": "rabenseifner_allreduce",
+    "payload_mb": 45.197,
     "id": "te24",
     "experiment": "hardware_sensitivity"
    },
@@ -1874,93 +2104,53 @@
      {
       "step": 1,
       "config": 1,
-      "message_mb": 438.1215
+      "message_mb": 1038.063
      },
      {
       "step": 2,
       "config": 2,
-      "message_mb": 219.06075
+      "message_mb": 519.0315
      },
      {
       "step": 3,
       "config": 3,
-      "message_mb": 109.530375
+      "message_mb": 259.51575
      },
      {
       "step": 4,
       "config": 4,
-      "message_mb": 54.7651875
+      "message_mb": 129.757875
      },
      {
       "step": 5,
       "config": 5,
-      "message_mb": 27.38259375
+      "message_mb": 64.8789375
      },
      {
       "step": 6,
       "config": 6,
-      "message_mb": 13.691296875
+      "message_mb": 32.43946875
      },
      {
       "step": 7,
       "config": 7,
-      "message_mb": 6.8456484375
+      "message_mb": 16.219734375
      },
      {
       "step": 8,
       "config": 8,
-      "message_mb": 3.42282421875
-     },
-     {
-      "step": 9,
-      "config": 8,
-      "message_mb": 3.42282421875
-     },
-     {
-      "step": 10,
-      "config": 7,
-      "message_mb": 6.8456484375
-     },
-     {
-      "step": 11,
-      "config": 6,
-      "message_mb": 13.691296875
-     },
-     {
-      "step": 12,
-      "config": 5,
-      "message_mb": 27.38259375
-     },
-     {
-      "step": 13,
-      "config": 4,
-      "message_mb": 54.7651875
-     },
-     {
-      "step": 14,
-      "config": 3,
-      "message_mb": 109.530375
-     },
-     {
-      "step": 15,
-      "config": 2,
-      "message_mb": 219.06075
-     },
-     {
-      "step": 16,
-      "config": 1,
-      "message_mb": 438.1215
+      "message_mb": 8.1098671875
      }
     ],
-    "algorithm": "rabenseifner_allreduce",
-    "payload_mb": 876.243,
+    "algorithm": "rabenseifner_reducescatter",
+    "payload_mb": 2076.126,
     "id": "te25",
     "experiment": "hardware_sensitivity"
    },
    {
     "name": "te26",
     "description": "",
-    "nodes": 17,
+    "nodes": 256,
     "optical_degree": 2,
     "per_link_gbps": 400.0,
     "base_latency_us": 20.0,
@@ -1969,86 +2159,46 @@
      {
       "step": 1,
       "config": 1,
-      "message_mb": 328.8409411764706
+      "message_mb": 410.068
      },
      {
       "step": 2,
       "config": 2,
-      "message_mb": 328.8409411764706
+      "message_mb": 410.068
      },
      {
       "step": 3,
       "config": 3,
-      "message_mb": 328.8409411764706
+      "message_mb": 410.068
      },
      {
       "step": 4,
       "config": 4,
-      "message_mb": 328.8409411764706
+      "message_mb": 410.068
      },
      {
       "step": 5,
       "config": 5,
-      "message_mb": 328.8409411764706
+      "message_mb": 410.068
      },
      {
       "step": 6,
       "config": 6,
-      "message_mb": 328.8409411764706
+      "message_mb": 410.068
      },
      {
       "step": 7,
       "config": 7,
-      "message_mb": 328.8409411764706
+      "message_mb": 410.068
      },
      {
       "step": 8,
       "config": 8,
-      "message_mb": 328.8409411764706
-     },
-     {
-      "step": 9,
-      "config": 9,
-      "message_mb": 328.8409411764706
-     },
-     {
-      "step": 10,
-      "config": 10,
-      "message_mb": 328.8409411764706
-     },
-     {
-      "step": 11,
-      "config": 11,
-      "message_mb": 328.8409411764706
-     },
-     {
-      "step": 12,
-      "config": 12,
-      "message_mb": 328.8409411764706
-     },
-     {
-      "step": 13,
-      "config": 13,
-      "message_mb": 328.8409411764706
-     },
-     {
-      "step": 14,
-      "config": 14,
-      "message_mb": 328.8409411764706
-     },
-     {
-      "step": 15,
-      "config": 15,
-      "message_mb": 328.8409411764706
-     },
-     {
-      "step": 16,
-      "config": 16,
-      "message_mb": 328.8409411764706
+      "message_mb": 410.068
      }
     ],
-    "algorithm": "pairwise_alltoall",
-    "payload_mb": 5590.296,
+    "algorithm": "bruck_alltoall",
+    "payload_mb": 820.136,
     "id": "te26",
     "experiment": "hardware_sensitivity"
    },
@@ -2064,86 +2214,86 @@
      {
       "step": 1,
       "config": 1,
-      "message_mb": 0.323
+      "message_mb": 0.125
      },
      {
       "step": 2,
       "config": 2,
-      "message_mb": 0.1615
+      "message_mb": 0.0625
      },
      {
       "step": 3,
       "config": 3,
-      "message_mb": 0.08075
+      "message_mb": 0.03125
      },
      {
       "step": 4,
       "config": 4,
-      "message_mb": 0.040375
+      "message_mb": 0.015625
      },
      {
       "step": 5,
       "config": 5,
-      "message_mb": 0.0201875
+      "message_mb": 0.0078125
      },
      {
       "step": 6,
       "config": 6,
-      "message_mb": 0.01009375
+      "message_mb": 0.00390625
      },
      {
       "step": 7,
       "config": 7,
-      "message_mb": 0.005046875
+      "message_mb": 0.001953125
      },
      {
       "step": 8,
       "config": 8,
-      "message_mb": 0.0025234375
+      "message_mb": 0.0009765625
      },
      {
       "step": 9,
       "config": 8,
-      "message_mb": 0.0025234375
+      "message_mb": 0.0009765625
      },
      {
       "step": 10,
       "config": 7,
-      "message_mb": 0.005046875
+      "message_mb": 0.001953125
      },
      {
       "step": 11,
       "config": 6,
-      "message_mb": 0.01009375
+      "message_mb": 0.00390625
      },
      {
       "step": 12,
       "config": 5,
-      "message_mb": 0.0201875
+      "message_mb": 0.0078125
      },
      {
       "step": 13,
       "config": 4,
-      "message_mb": 0.040375
+      "message_mb": 0.015625
      },
      {
       "step": 14,
       "config": 3,
-      "message_mb": 0.08075
+      "message_mb": 0.03125
      },
      {
       "step": 15,
       "config": 2,
-      "message_mb": 0.1615
+      "message_mb": 0.0625
      },
      {
       "step": 16,
       "config": 1,
-      "message_mb": 0.323
+      "message_mb": 0.125
      }
     ],
     "algorithm": "rabenseifner_allreduce",
-    "payload_mb": 0.646,
+    "payload_mb": 0.25,
     "id": "te27",
     "experiment": "hardware_sensitivity"
    },
@@ -2159,53 +2309,53 @@
      {
       "step": 1,
       "config": 1,
-      "message_mb": 25.4315
+      "message_mb": 10.5195
      },
      {
       "step": 2,
       "config": 2,
-      "message_mb": 25.4315
+      "message_mb": 10.5195
      },
      {
       "step": 3,
       "config": 3,
-      "message_mb": 25.4315
+      "message_mb": 10.5195
      },
      {
       "step": 4,
       "config": 4,
-      "message_mb": 25.4315
+      "message_mb": 10.5195
      },
      {
       "step": 5,
       "config": 5,
-      "message_mb": 25.4315
+      "message_mb": 10.5195
      },
      {
       "step": 6,
       "config": 6,
-      "message_mb": 25.4315
+      "message_mb": 10.5195
      },
      {
       "step": 7,
       "config": 7,
-      "message_mb": 25.4315
+      "message_mb": 10.5195
      },
      {
       "step": 8,
       "config": 8,
-      "message_mb": 25.4315
+      "message_mb": 10.5195
      }
     ],
     "algorithm": "bruck_alltoall",
-    "payload_mb": 50.863,
+    "payload_mb": 21.039,
     "id": "te28",
     "experiment": "hardware_sensitivity"
    },
    {
     "name": "te29",
     "description": "",
-    "nodes": 256,
+    "nodes": 9,
     "optical_degree": 4,
     "per_link_gbps": 200.0,
     "base_latency_us": 20.0,
@@ -2214,53 +2364,53 @@
      {
       "step": 1,
       "config": 1,
-      "message_mb": 1191.823
+      "message_mb": 265.1935555555556
      },
      {
       "step": 2,
       "config": 2,
-      "message_mb": 595.9115
+      "message_mb": 265.1935555555556
      },
      {
       "step": 3,
       "config": 3,
-      "message_mb": 297.95575
+      "message_mb": 265.1935555555556
      },
      {
       "step": 4,
       "config": 4,
-      "message_mb": 148.977875
+      "message_mb": 265.1935555555556
      },
      {
       "step": 5,
       "config": 5,
-      "message_mb": 74.4889375
+      "message_mb": 265.1935555555556
      },
      {
       "step": 6,
       "config": 6,
-      "message_mb": 37.24446875
+      "message_mb": 265.1935555555556
      },
      {
       "step": 7,
       "config": 7,
-      "message_mb": 18.622234375
+      "message_mb": 265.1935555555556
      },
      {
       "step": 8,
       "config": 8,
-      "message_mb": 9.3111171875
+      "message_mb": 265.1935555555556
      }
     ],
-    "algorithm": "rabenseifner_reducescatter",
-    "payload_mb": 2383.646,
+    "algorithm": "pairwise_alltoall",
+    "payload_mb": 2386.742,
     "id": "te29",
     "experiment": "hardware_sensitivity"
    },
    {
     "name": "te30",
     "description": "",
-    "nodes": 9,
+    "nodes": 256,
     "optical_degree": 4,
     "per_link_gbps": 200.0,
     "base_latency_us": 20.0,
@@ -2269,46 +2419,46 @@
      {
       "step": 1,
       "config": 1,
-      "message_mb": 336.0701111111111
+      "message_mb": 4096.0
      },
      {
       "step": 2,
       "config": 2,
-      "message_mb": 336.0701111111111
+      "message_mb": 2048.0
      },
      {
       "step": 3,
       "config": 3,
-      "message_mb": 336.0701111111111
+      "message_mb": 1024.0
      },
      {
       "step": 4,
       "config": 4,
-      "message_mb": 336.0701111111111
+      "message_mb": 512.0
      },
      {
       "step": 5,
       "config": 5,
-      "message_mb": 336.0701111111111
+      "message_mb": 256.0
      },
      {
       "step": 6,
       "config": 6,
-      "message_mb": 336.0701111111111
+      "message_mb": 128.0
      },
      {
       "step": 7,
       "config": 7,
-      "message_mb": 336.0701111111111
+      "message_mb": 64.0
      },
      {
       "step": 8,
       "config": 8,
-      "message_mb": 336.0701111111111
+      "message_mb": 32.0
      }
     ],
-    "algorithm": "pairwise_alltoall",
-    "payload_mb": 3024.631,
+    "algorithm": "rabenseifner_reducescatter",
+    "payload_mb": 8192.0,
     "id": "te30",
     "experiment": "hardware_sensitivity"
    },
@@ -2324,93 +2474,53 @@
      {
       "step": 1,
       "config": 1,
-      "message_mb": 1.2715
+      "message_mb": 0.125
      },
      {
       "step": 2,
       "config": 2,
-      "message_mb": 0.63575
+      "message_mb": 0.0625
      },
      {
       "step": 3,
       "config": 3,
-      "message_mb": 0.317875
+      "message_mb": 0.03125
      },
      {
       "step": 4,
       "config": 4,
-      "message_mb": 0.1589375
+      "message_mb": 0.015625
      },
      {
       "step": 5,
       "config": 5,
-      "message_mb": 0.07946875
+      "message_mb": 0.0078125
      },
      {
       "step": 6,
       "config": 6,
-      "message_mb": 0.039734375
+      "message_mb": 0.00390625
      },
      {
       "step": 7,
       "config": 7,
-      "message_mb": 0.0198671875
+      "message_mb": 0.001953125
      },
      {
       "step": 8,
       "config": 8,
-      "message_mb": 0.00993359375
-     },
-     {
-      "step": 9,
-      "config": 8,
-      "message_mb": 0.00993359375
-     },
-     {
-      "step": 10,
-      "config": 7,
-      "message_mb": 0.0198671875
-     },
-     {
-      "step": 11,
-      "config": 6,
-      "message_mb": 0.039734375
-     },
-     {
-      "step": 12,
-      "config": 5,
-      "message_mb": 0.07946875
-     },
-     {
-      "step": 13,
-      "config": 4,
-      "message_mb": 0.1589375
-     },
-     {
-      "step": 14,
-      "config": 3,
-      "message_mb": 0.317875
-     },
-     {
-      "step": 15,
-      "config": 2,
-      "message_mb": 0.63575
-     },
-     {
-      "step": 16,
-      "config": 1,
-      "message_mb": 1.2715
+      "message_mb": 0.0009765625
      }
     ],
-    "algorithm": "rabenseifner_allreduce",
-    "payload_mb": 2.543,
+    "algorithm": "rabenseifner_reducescatter",
+    "payload_mb": 0.25,
     "id": "te31",
     "experiment": "hardware_sensitivity"
    },
    {
     "name": "te32",
     "description": "",
-    "nodes": 9,
+    "nodes": 256,
     "optical_degree": 8,
     "per_link_gbps": 100.0,
     "base_latency_us": 20.0,
@@ -2419,46 +2529,86 @@
      {
       "step": 1,
       "config": 1,
-      "message_mb": 16.609555555555556
+      "message_mb": 39.191
      },
      {
       "step": 2,
       "config": 2,
-      "message_mb": 16.609555555555556
+      "message_mb": 19.5955
      },
      {
       "step": 3,
       "config": 3,
-      "message_mb": 16.609555555555556
+      "message_mb": 9.79775
      },
      {
       "step": 4,
       "config": 4,
-      "message_mb": 16.609555555555556
+      "message_mb": 4.898875
      },
      {
       "step": 5,
       "config": 5,
-      "message_mb": 16.609555555555556
+      "message_mb": 2.4494375
      },
      {
       "step": 6,
       "config": 6,
-      "message_mb": 16.609555555555556
+      "message_mb": 1.22471875
      },
      {
       "step": 7,
       "config": 7,
-      "message_mb": 16.609555555555556
+      "message_mb": 0.612359375
      },
      {
       "step": 8,
       "config": 8,
-      "message_mb": 16.609555555555556
+      "message_mb": 0.3061796875
+     },
+     {
+      "step": 9,
+      "config": 8,
+      "message_mb": 0.3061796875
+     },
+     {
+      "step": 10,
+      "config": 7,
+      "message_mb": 0.612359375
+     },
+     {
+      "step": 11,
+      "config": 6,
+      "message_mb": 1.22471875
+     },
+     {
+      "step": 12,
+      "config": 5,
+      "message_mb": 2.4494375
+     },
+     {
+      "step": 13,
+      "config": 4,
+      "message_mb": 4.898875
+     },
+     {
+      "step": 14,
+      "config": 3,
+      "message_mb": 9.79775
+     },
+     {
+      "step": 15,
+      "config": 2,
+      "message_mb": 19.5955
+     },
+     {
+      "step": 16,
+      "config": 1,
+      "message_mb": 39.191
      }
     ],
-    "algorithm": "pairwise_alltoall",
-    "payload_mb": 149.486,
+    "algorithm": "rabenseifner_allreduce",
+    "payload_mb": 78.382,
     "id": "te32",
     "experiment": "hardware_sensitivity"
    },
@@ -2474,46 +2624,86 @@
      {
       "step": 1,
       "config": 1,
-      "message_mb": 135.0045
+      "message_mb": 347.2415
      },
      {
       "step": 2,
       "config": 2,
-      "message_mb": 135.0045
+      "message_mb": 173.62075
      },
      {
       "step": 3,
       "config": 3,
-      "message_mb": 135.0045
+      "message_mb": 86.810375
      },
      {
       "step": 4,
       "config": 4,
-      "message_mb": 135.0045
+      "message_mb": 43.4051875
      },
      {
       "step": 5,
       "config": 5,
-      "message_mb": 135.0045
+      "message_mb": 21.70259375
      },
      {
       "step": 6,
       "config": 6,
-      "message_mb": 135.0045
+      "message_mb": 10.851296875
      },
      {
       "step": 7,
       "config": 7,
-      "message_mb": 135.0045
+      "message_mb": 5.4256484375
      },
      {
       "step": 8,
       "config": 8,
-      "message_mb": 135.0045
+      "message_mb": 2.71282421875
+     },
+     {
+      "step": 9,
+      "config": 8,
+      "message_mb": 2.71282421875
+     },
+     {
+      "step": 10,
+      "config": 7,
+      "message_mb": 5.4256484375
+     },
+     {
+      "step": 11,
+      "config": 6,
+      "message_mb": 10.851296875
+     },
+     {
+      "step": 12,
+      "config": 5,
+      "message_mb": 21.70259375
+     },
+     {
+      "step": 13,
+      "config": 4,
+      "message_mb": 43.4051875
+     },
+     {
+      "step": 14,
+      "config": 3,
+      "message_mb": 86.810375
+     },
+     {
+      "step": 15,
+      "config": 2,
+      "message_mb": 173.62075
+     },
+     {
+      "step": 16,
+      "config": 1,
+      "message_mb": 347.2415
      }
     ],
-    "algorithm": "bruck_alltoall",
-    "payload_mb": 270.009,
+    "algorithm": "rabenseifner_allreduce",
+    "payload_mb": 694.483,
     "id": "te33",
     "experiment": "hardware_sensitivity"
    },
@@ -2529,46 +2719,46 @@
      {
       "step": 1,
       "config": 1,
-      "message_mb": 1139.16
+      "message_mb": 4096.0
      },
      {
       "step": 2,
       "config": 2,
-      "message_mb": 569.58
+      "message_mb": 2048.0
      },
      {
       "step": 3,
       "config": 3,
-      "message_mb": 284.79
+      "message_mb": 1024.0
      },
      {
       "step": 4,
       "config": 4,
-      "message_mb": 142.395
+      "message_mb": 512.0
      },
      {
       "step": 5,
       "config": 5,
-      "message_mb": 71.1975
+      "message_mb": 256.0
      },
      {
       "step": 6,
       "config": 6,
-      "message_mb": 35.59875
+      "message_mb": 128.0
      },
      {
       "step": 7,
       "config": 7,
-      "message_mb": 17.799375
+      "message_mb": 64.0
      },
      {
       "step": 8,
       "config": 8,
-      "message_mb": 8.8996875
+      "message_mb": 32.0
      }
     ],
     "algorithm": "rabenseifner_reducescatter",
-    "payload_mb": 2278.32,
+    "payload_mb": 8192.0,
     "id": "te34",
     "experiment": "hardware_sensitivity"
    }

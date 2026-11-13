@@ -1,8 +1,8 @@
 {
-  "_note": "Scored experiments are families of workload instances drawn from the paper's own evaluation settings (Sections 4.2-4.3). Each method is run as a solver on every instance under the paper's 120 s solver limit; train instances are public (eval/train/instances.json), test instances are held out. The family means are not quantities the paper reports, so the paper's numbers are kept under '_' keys (per experiment and in '_paper_reported') rather than as results the gym must match. Setup scaling: 6 instances per family per slice instead of the paper's full sweeps; otherwise node counts, optical degrees, bandwidths (800/k Gbps), base latency (20 us) and switching latencies follow the paper.",
+  "_note": "Scored experiments are families of workload instances drawn from the paper's own evaluation settings (Sections 4.2-4.3). Each method is run as a solver on every instance under a 120 CPU-second budget per instance (the paper's 120 s solver limit, counted by the evaluator as CPU time); train instances are public (eval/train/instances.json), test instances are held out. The family means are not quantities the paper reports, so the paper's numbers are kept under '_' keys (per experiment and in '_paper_reported') and as labelled anchors rather than as results the gym must match. Setup scaling: 10-12 instances per family per slice instead of the paper's full sweeps; otherwise node counts, optical degrees, bandwidths (800/k Gbps), base latency (20 us) and switching latencies follow the paper.",
   "experiments": {
     "allreduce_scaling": {
-      "description": "Paper Fig. 8(a) setting: Rabenseifner AllReduce on 64-1024 nodes, k=4 optical planes at 200 Gbps, 16-64 MB payloads, 20 us base latency, 200 us reconfiguration latency.",
+      "description": "Paper Fig. 8(a) setting: Rabenseifner AllReduce on 64-1024 nodes (12-20 steps), k=4 optical planes at 200 Gbps, 16-64 MB payloads, 20 us base latency, 200 us reconfiguration latency; switching share of the lockstep time 0.35-0.80.",
       "weight": 0.4,
       "primary_metric": "cct_reduction_vs_strawman_pct",
       "metrics": {
@@ -14,7 +14,7 @@
         "valid_schedule": {
           "higher_is_better": true,
           "coefficient": 1.0,
-          "description": "1 if every instance of every experiment got a physically valid schedule within the time limit (traffic conservation, plane indices < k, alpha-beta transmission time, switching latency, per-plane serial use, step barriers); 0 for a failed run."
+          "description": "1 if every instance of every experiment got a physically valid schedule within the CPU budget (traffic conservation, plane indices < k, alpha-beta transmission time, switching latency, per-plane serial use, step barriers); 0 for a failed run."
         }
       },
       "results": {
@@ -36,9 +36,9 @@
       },
       "_paper_note": "Anchor: the paper's Fig. 8(a) reduction over Strawman-ICR at 64 nodes (32 MB, k=4), 39.6%, growing to 46.9% at 512 nodes. The scored value is a mean over 64-1024 nodes and 16-64 MB payloads, which the paper does not report; the anchor is a paper point, not a target."
     },
-    "collective_algorithms": {
-      "description": "Paper Fig. 7 setting: Rabenseifner ReduceScatter and AllReduce, Bruck All-to-All (128-512 nodes) and Pairwise All-to-All (9-12 nodes) on k=8 optical planes at 100 Gbps, 1-512 MB payloads, 200 us reconfiguration latency.",
-      "weight": 0.4,
+    "high_optical_degree": {
+      "description": "Paper Fig. 7(a)-(b) setting: Rabenseifner ReduceScatter and AllReduce on 128-1024 nodes with k=8 optical planes at 100 Gbps, 1-512 MB payloads, 200 us reconfiguration latency; switching share 0.35-0.92. Bruck and Pairwise All-to-All at k=8 are not scored (see scoring/EXPERIMENTS.md).",
+      "weight": 0.3,
       "primary_metric": "cct_reduction_vs_strawman_pct",
       "metrics": {
         "cct_reduction_vs_strawman_pct": {
@@ -49,7 +49,7 @@
         "valid_schedule": {
           "higher_is_better": true,
           "coefficient": 1.0,
-          "description": "1 if every instance of every experiment got a physically valid schedule within the time limit; 0 for a failed run."
+          "description": "1 if every instance of every experiment got a physically valid schedule within the CPU budget (traffic conservation, plane indices < k, alpha-beta transmission time, switching latency, per-plane serial use, step barriers); 0 for a failed run."
         }
       },
       "results": {
@@ -60,7 +60,7 @@
         },
         "swot": {
           "type": "proposed",
-          "cct_reduction_vs_strawman_pct": 45.5,
+          "cct_reduction_vs_strawman_pct": 46.9,
           "valid_schedule": 1.0
         },
         "_paper_fig7_peak_rabenseifner_reducescatter": {
@@ -78,13 +78,17 @@
         "_paper_fig7_peak_bruck_alltoall": {
           "type": "proposed",
           "cct_reduction_vs_strawman_pct": 85.4
+        },
+        "_paper_fig8b_pairwise_10node_k4": {
+          "type": "proposed",
+          "cct_reduction_vs_strawman_pct": 45.5
         }
       },
-      "_paper_note": "Anchor (swot): the paper's Fig. 8(b) non-peak reduction over Strawman-ICR for Pairwise All-to-All at 10 nodes, 45.5% (32 MB, k=4; 26.0% at 5 nodes) - an algorithm and node count inside this family, at a lower optical degree. The Fig. 7 numbers for this k=8 setting are peaks over a message-size sweep ('up to' 85.4-89.1%) and are kept under '_paper_fig7_peak_*'. The family mean over four algorithms and 1-512 MB is not reported by the paper; the anchor is not a target."
+      "_paper_note": "The paper reports k=8 results for these algorithms only as peaks over a message-size sweep ('up to' 89.1% for ReduceScatter and 87.1% for AllReduce), kept under '_paper_fig7_peak_*' with the two unscored All-to-All peaks. Anchor (swot): the paper's only non-peak AllReduce reduction, 46.9% (Fig. 8(a), 512 nodes, k=4) - same algorithm, lower optical degree. The family mean is not reported by the paper; the anchor is not a target."
     },
     "hardware_sensitivity": {
-      "description": "Paper Section 4.3 setting: 256-node Rabenseifner/Bruck (9 or 17 node Pairwise) collectives with optical degree k in {2,4,8} at 800/k Gbps and reconfiguration latency in {0.02, 0.2, 2, 20} ms, 1-256 MB payloads.",
-      "weight": 0.2,
+      "description": "Paper Section 4.3 setting: 256-node Rabenseifner/Bruck collectives and 9- or 17-node Pairwise All-to-All with optical degree k in {2,4,8} at 800/k Gbps and reconfiguration latency in {0.02, 0.2, 2, 20} ms (every algorithm once per k at k=2 and k=4, Rabenseifner only at k=8), payloads 0.25-8192 MB chosen around the transmission/switching knee (switching share 0.35-0.92).",
+      "weight": 0.3,
       "primary_metric": "cct_reduction_vs_strawman_pct",
       "metrics": {
         "cct_reduction_vs_strawman_pct": {
@@ -95,7 +99,7 @@
         "valid_schedule": {
           "higher_is_better": true,
           "coefficient": 1.0,
-          "description": "1 if every instance of every experiment got a physically valid schedule within the time limit; 0 for a failed run."
+          "description": "1 if every instance of every experiment got a physically valid schedule within the CPU budget (traffic conservation, plane indices < k, alpha-beta transmission time, switching latency, per-plane serial use, step barriers); 0 for a failed run."
         }
       },
       "results": {
@@ -170,5 +174,5 @@
     },
     "solver_time_limit_s": 120
   },
-  "_weights_note": "Weights 0.4/0.4/0.2 (iteration 11): the paper's headline quantitative claims are algorithm-level efficiency (Fig. 7) and cluster scalability (Fig. 8); Section 4.3 robustness is reported only graphically, and on the hidden test several hardware-sensitivity instances are solved to proven optimality by every MILP run, so that experiment separates methods least (positive-control gain 1.2 points vs 1.4 points of seed noise)."
+  "_weights_note": "Weights 0.4/0.3/0.3 (iteration 12): the paper's headline quantitative claim is cluster scalability (Fig. 8(a): 39.6% -> 46.9%); algorithm-level efficiency at high optical degree (Fig. 7) and robustness to optical degree and switching latency (Section 4.3, Figs. 10-11) are the other two evaluation axes. The k=8 family now covers two of Fig. 7's four algorithms, and the hardware sweep now separates a stronger scheduler from the reference (it was down-weighted to 0.2 in iteration 11 because it did not)."
 }
