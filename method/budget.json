@@ -1,0 +1,61 @@
+{
+  "node_constant": 4000000,
+  "min_nodes": 100,
+  "rule": "CBC node budget per instance = max(100, floor(node_constant / (steps^2 * k))); node_constant = min over 4 train instances spread over the size range of steps^2*k x nodes CBC processed after 70 CPU-s (two significant digits, rounded down). Replaces the paper's 120 s time limit with a machine-independent work budget.",
+  "target_cbc_cpu_s": 70.0,
+  "evaluator_cpu_budget_s": 120,
+  "calibration": [
+    {
+      "id": "tr16",
+      "steps": 18,
+      "k": 8,
+      "cbc_cpu_s": 94.51,
+      "cbc_wall_s": 98.12,
+      "nodes": 8919,
+      "nodes_at_target": 6476.751734754131,
+      "elapsed_s": 98.83441186696291,
+      "reduction_note": 7361.1413671875,
+      "n2k": 2592,
+      "constant": 16787740.496482708
+    },
+    {
+      "id": "tr08",
+      "steps": 16,
+      "k": 4,
+      "cbc_cpu_s": 94.57,
+      "cbc_wall_s": 100.89,
+      "nodes": 7392,
+      "nodes_at_target": 5836.041045885606,
+      "elapsed_s": 101.50435163802467,
+      "reduction_note": 3766.1859374999995,
+      "n2k": 1024,
+      "constant": 5976106.03098686
+    },
+    {
+      "id": "tr02",
+      "steps": 12,
+      "k": 4,
+      "cbc_cpu_s": 94.55,
+      "cbc_wall_s": 102.59,
+      "nodes": 12903,
+      "nodes_at_target": 11385.624216903816,
+      "elapsed_s": 103.2661098120152,
+      "reduction_note": 3467.1415625,
+      "n2k": 576,
+      "constant": 6558119.548936598
+    },
+    {
+      "id": "tr34",
+      "steps": 8,
+      "k": 8,
+      "cbc_cpu_s": 94.66,
+      "cbc_wall_s": 103.3,
+      "nodes": 9994,
+      "nodes_at_target": 7852.092086985922,
+      "elapsed_s": 103.91172390495194,
+      "reduction_note": 259983.18,
+      "n2k": 512,
+      "constant": 4020271.148536792
+    }
+  ]
+}

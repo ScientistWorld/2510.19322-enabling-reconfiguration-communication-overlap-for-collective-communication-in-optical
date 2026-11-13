@@ -1,8 +1,8 @@
 # Once you set action to 'submit' or 'done', STOP immediately.
 # Do NOT sleep, poll, or wait for jobs. The system reads this file
 # only after your turn ends.
-action: pending
+action: submit
 gpus: 0
 test: false
 milestone: core_claim_plus
-notes: ""
+notes: "Hardening step 1/2: calibrate deterministic CBC node budget (method/budget.json), smoke-test new solvers, exploration runs (reference, seed 2, relay rule, hybrid positive control, 30 s annealing) on a third-seed exploration set to choose the scored instance regime."
