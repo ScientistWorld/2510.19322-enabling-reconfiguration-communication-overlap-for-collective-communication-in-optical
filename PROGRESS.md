@@ -59,3 +59,19 @@
   - Every redteam shortcut now fails or scores its true lockstep value.
   - A pure-Python local search outranks the reference about as much as the positive control does (see `HARDENING.md` §3).
 - **Paper instances.** Fig. 5 1500 → 1200 us (exact); Fig. 8 38.4% at 64 nodes (paper 39.6%); 25.2% at 512 nodes in this run (paper 46.9%; time-limit variance, 41.6% on the identical train instance).
+
+## Iteration 12 (hardening)
+
+- **Review items.**
+  - The annealing heuristic tied the positive control.
+  - The hardware sweep separated weakly.
+  - Results depended on a wall-clock CBC limit.
+- **Budget.** CPU time is counted by the evaluator (subreaper over the solver's process tree). The reference uses a calibrated deterministic CBC node budget. CBC `timeMode cpu` was found to write unusable solutions on time-limited stops, so it is not used.
+- **Test.** 34 instances per slice in three families, stratified over the switching share. Settings where a fixed relay rule matches the paper's MILP are unscored.
+- **Results (hidden test).**
+  - Reference: 32.08 / 26.88 / 24.29%.
+  - Hybrid positive control: 45.62 / 40.33 / 34.57%.
+  - Relay rule: 28.63 / 23.21 / 25.04%.
+  - Seed noise: 1-2.4 points.
+  - Every shortcut fails or scores lockstep.
+  - Details in `HARDENING.md`.

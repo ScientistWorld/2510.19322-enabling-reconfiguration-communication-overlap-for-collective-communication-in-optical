@@ -1,164 +1,205 @@
-# Hardening report (iteration 11)
+# Hardening report (iteration 12)
 
-**Bottom line.** Better results now score higher and worse results lower, by more than the measured seed noise. Every shortcut listed in `REDTEAM.md` now fails the run or scores exactly its true (lockstep) value. Two things remain, stated plainly:
+**Bottom line.** Better schedules now score higher by far more than the test's noise. The reference is bit-for-bit repeatable. The evaluator counts the compute budget itself instead of trusting a wall-clock limit. Every shortcut from `REDTEAM.md`, plus a new attempt to hide CPU use in detached processes, fails or scores its true lockstep value. What remains is stated plainly in §3 and §6:
+- a 15-line relay rule ties the reference on one family;
+- some settings are unscored because that rule matches the paper's method there;
+- simple annealing comes close to the positive control.
 
-- A pure-Python local search outranks the paper's time-limited MILP at the same budget, about as much as the positive control does (§3).
-- The `hardware_sensitivity` experiment separates methods only weakly (§5).
+All numbers come from the hidden test run by `hardening/harness.py`. Each run executes exactly what `scripts/evaluate_test.sh` executes (`python -m eval.test.evaluate`, no other arguments), in a private copy of `eval/`, with the candidate installed as `swot.sh`. Raw logs and score files are in `hardening/final_runs/<run>/`; tables are in `hardening/results.md` and `hardening/summary.json`.
 
-All numbers below come from running the unmodified `bash scripts/evaluate_test.sh` (no arguments) in the compute container, with each candidate installed as `scripts/solvers/swot.sh` (`hardening/harness.py`). Raw outputs, logs and per-instance lines are in `hardening/runs/<run>/`; the tables are in `hardening/results.md` and `hardening/summary.json`.
-
-**Rank.** For each experiment and metric: weight × |coefficient| × direction × (candidate − reference) / population std, summed over all of them; missing values are skipped (`hardening/analyze.py`).
-- Weights and coefficients come from the final `scoring/reference.json`.
-- The population is the honest runs (reference, seed-2 rerun, MILP+LNS, MILP at 10 s, lockstep, private search), plus the candidate itself when it is a shortcut.
-- Before-numbers are the redteam's ranks on the old test, which used a different population, so compare signs and orders of magnitude rather than exact values.
+**Rank** (`hardening/analyze.py`):
+- For every experiment and metric: weight × |coefficient| × direction × (candidate − reference) / population std; missing values are skipped.
+- The population is the honest runs: reference, seeds 2 and 3, hybrid, 1/10-node MILP, time-only MILP, lockstep, relay rule and full-budget annealing.
+- A shortcut's rank adds the shortcut itself to the population.
 
 ## What changed
 
-- **Methods are solvers run on held-out instances.**
-  - A method is `scripts/solvers/<method>.sh INSTANCE OUTPUT TIME_LIMIT`. The evaluator runs it once per instance, passes the paper's 120 s limit, and kills the process group at 150 s.
-  - The 18 test instances (6 per experiment) live only in `eval/test/instances.json`. The 18 train instances are public in `eval/train/instances.json`. The paper's three named instances are reproduced, unscored, in `scores.json`.
-  - The method needs no training, so it never sees test instances outside the scored call, and replaying cached answers cannot work.
-- **Everything is recomputed from the schedule.** For each instance the evaluator re-derives the following from its own frozen copy:
-  - plane index in `[0, k)`, positive volumes, per-step volume conservation;
-  - transmission time `>= d/B + T_lat`, switching time `>= T_recfg` whenever a plane's topology changes, no switching while transmitting, circuit ready before transmitting, step barriers;
-  - CCT = latest transmission end measured from time 0 (the whole collective, not a suffix).
+### 1. Budget: CPU time counted by the evaluator (REVIEW item 3)
 
-  The Strawman-ICR baseline is computed by the evaluator. Every number, flag, spec or baseline the method writes is ignored.
-- **Failure is total.** Any missing, late, crashed, unparseable or invalid instance fails the whole run: every metric of every experiment gets its worst value (reduction −100, valid 0). `swot` is always reported, so a missing solver is a failed run. Per-instance reductions are clipped to [−100, 100], so a valid but absurdly slow schedule cannot score lower than a failure.
-- **Scored experiments.** These are families from the paper's own evaluation, each instance too large to enumerate:
+The evaluator now counts **CPU-seconds** for every instance, replacing the old 120 s wall-clock kill.
+- **What is counted.** The solver's whole process tree. The evaluator makes itself the child subreaper, then kills and reaps every leftover descendant, including detached ones that started a new session.
+- **The rule.** More than 120 CPU-s (the paper's 120 s) on any instance fails the run.
+- **Backstops.** Each process also has a 135 CPU-s limit against runaway processes. A 300 s wall-clock cap stops hung or sleeping solvers.
+- **Unscored record.** The CPU-seconds each instance used are written to `_status`.
+- **Bypass test.** A solver whose two detached helpers burn 65 CPU-s each is counted at 130.1 s and fails (`shortcut_cpu_escape`).
+- **Why the backstop is 135 s.** In this container the kernel's per-process CPU clock ran about 6% ahead of the reaped totals: the first full-budget annealing run was killed by the old 123 s backstop when 115.5 s had been counted. The per-process limit is therefore only a loose backstop; the counted total is the budget.
 
-  | Experiment | Setting | Weight |
-  |---|---|---:|
-  | `allreduce_scaling` | Fig. 8a: AllReduce, 64–1024 nodes, k=4 | 0.40 |
-  | `collective_algorithms` | Fig. 7: four algorithms, k=8 | 0.40 |
-  | `hardware_sensitivity` | §4.3: k ∈ {2,4,8}, switching 0.02–20 ms | 0.20 |
+### 2. Reference: deterministic work budget instead of a time limit (REVIEW item 3)
 
-  - Metrics are the mean `cct_reduction_vs_strawman_pct` (benefit) and `valid_schedule` (constraint).
-  - `cct_us` was dropped from the scored metrics: with a fixed baseline it is a linear transform of the reduction, so it double-counted, and its mean across instances is dominated by the largest ones.
-  - `reconfiguration_events` was dropped: it measures a mechanism, not the paper's objective, and was counted inconsistently against the baseline.
-  - Volume error and plane overlap are now part of the validity gate.
-  - The paper's numbers are kept unchanged in `scoring/reference.json`, under `_paper_reported` and as labelled `_`/anchor entries.
-- **Weights 0.4/0.4/0.2.** Changed from 0.35/0.35/0.30, for two reasons:
-  - The paper's headline quantitative results are Fig. 7 (algorithms) and Fig. 8 (scaling); §4.3 robustness is only shown graphically.
-  - On the test, `hardware_sensitivity` separates methods least (§5).
-- **Reference method.** Same MILP formulation, CBC via PuLP, 120 s. Changes:
-  - **Big-M.** The paper leaves M unspecified, and earlier iterations used a loose horizon. With it, CBC's 120 s incumbent was worse than lockstep on 3 of 18 hidden instances (−1.2%, −48.6%, −13.4%), although lockstep is a feasible point of the MILP. M is now the lockstep CCT, with CCT ≤ M; this keeps the MILP's optimum unchanged. The loose-M variant is kept as `--big-m horizon`.
-  - **Repeatability and output.** Fixed CBC seeds. The MILP's decisions are serialized with exact earliest-start times. If CBC returns no incumbent, the lockstep schedule is written.
+The paper's MILP is solved by CBC, as before, but CBC now stops after a fixed number of branch-and-bound nodes instead of a time limit (`method/budget.json`):
+- 5800 nodes for collectives of up to 14 steps, scaled by (14/steps)² for longer ones. That gives 4440, 3508 and 2841 nodes at 16, 18 and 20 steps.
+- Calibrated once on the compute node (`hardening/calibrate.py` plus the exploration run), so that CBC uses roughly 50–110 of the 120 CPU-s. The node rate fell about as 1/steps² beyond 14 steps.
+- CBC's default single-threaded search with fixed seeds, so the schedule no longer depends on the machine or its load. **Verified:** the reference scored 32.077 / 26.875 / 24.291 in two separate jobs on different nodes.
+- The CPU budget is only a safety stop (CBC `sec`). It never bound for the reference: largest instance 80.0 CPU-s.
+- **CBC `timeMode cpu` is not used.** When CBC stops on a time limit in that mode, the solution it writes back is unusable (objective 0, garbage values). This made the reference return lockstep schedules in a first exploration run; reproduced locally on tr34.
+- **Formulation.** The paper's own `last_cfg`/`s_ij` formulation was restored as an option (`formulation="paper"`). It has the same optimum, but in a node-limited probe it was about 2× slower per CBC node and found no better incumbent (58.5% vs 61.6%). The equivalent pairwise encoding stays the default.
+
+### 3. Instances: scaled up, stratified, and only where scheduling matters (REVIEW items 2 and 3)
+
+There are now 34 test and 34 train instances (was 18 + 18): 10 / 12 / 12 per family. They are generated by `eval/{train,test}/make_instances.py`; the test seed exists only in `eval/test/`.
+- **Switching-share band.** In every family the payload is chosen so that the share of the lockstep time spent switching lies in a band: 0.35–0.80 for AllReduce at k=4, 0.35–0.92 elsewhere.
+- **Stratification.** Instances sit at evenly spaced quantiles of the part of the band their payload range can reach, so train and test have the same difficulty mix. There are no duplicates. An earlier draw had duplicates; that run was discarded, and its per-instance results are kept in `hardening/interim_run_04473b93.json`.
+- **Why the band.** In iteration 11, 7 of 18 hidden instances either scored 0% for every method or were solved identically by every MILP run. They separated nothing.
+
+**Scored experiments:**
+
+| Experiment | Setting | Weight |
+|---|---|---:|
+| `allreduce_scaling` | Fig. 8(a): Rabenseifner AllReduce, 64–1024 nodes, k=4 | 0.40 |
+| `high_optical_degree` | Fig. 7(a): Rabenseifner ReduceScatter, 128–1024 nodes, k=8 | 0.30 |
+| `hardware_sensitivity` | §4.3: each (k ∈ {2,4,8}, T_recfg ∈ {0.02, 0.2, 2, 20} ms) cell once; four algorithms at k=2, no Bruck at k=4, ReduceScatter at k=8 | 0.30 |
+
+**Not scored: settings where a 15-line rule matches the paper's MILP.** The rule (`short_rule_relay` in `hardening/candidates.py`) rotates over g equal groups of planes, water-fills each step's traffic over its group, and keeps the best g.
+- On the exploration set (`hardening/explore/`, a third seed), it beat the paper's budget-limited MILP on Bruck at k=8 (41.5 vs 22.0) and Pairwise at k=8 (72.0 vs 67.7).
+- On an interim draw it also beat the MILP on AllReduce at k=8 (by 5.6 points on test and 14.3 on train) and on Bruck at k=4.
+- These are long or all-distinct-topology collectives on many interchangeable planes, the regime where the paper itself reports that its time-limited solver struggles (§4.3.1). Scoring them would reward the hand-written rule, so they are excluded.
+- AllReduce at k=4 above 0.80 switching share is excluded for the same reason: the rule matched the MILP on 18–20-step collectives there.
+
+**Weights 0.4 / 0.3 / 0.3** (iteration 11: 0.4 / 0.4 / 0.2):
+- The scaling claim (Fig. 8(a), 39.6% → 46.9%) is the paper's headline number.
+- The k=8 family now covers one of Fig. 7's algorithms.
+- The hardware sweep (§4.3, two figures) now separates the positive control from the reference by 10.3 points against at most 2.4 points of seed noise. In iteration 11 its gain was 1.2 against 1.36 of noise.
+
+### 4. Positive control (REVIEW item 1)
+
+The positive control is `hardening/swot_hybrid.py`. It runs the paper's MILP inside a better search, with every budget counted in work (deterministic):
+1. Plane-pattern annealing with a water-filling timing model, starting from lockstep and every relay pattern.
+2. An exact LP polish (the MILP with the plane-use binaries fixed) of the 8 best distinct patterns.
+3. A short monolithic MILP solve at a quarter of the reference's nodes.
+4. Windowed MILP neighbourhood search with a CCT cutoff, widening the window after an unproductive sweep.
+
+It uses less CPU than the reference: 22.1 s mean and 65.3 s max per instance, against 37.4 s and 80.0 s.
+
+### 5. Harness robustness
+
+The compute worker was declared lost and restarted several times. Lost attempts kept running against the shared workspace, overwrote each other's `scripts/solvers/swot.sh`, and deleted each other's caches; one positive-control run was corrupted this way. That run was discarded.
+
+The harness now:
+- runs every candidate in its own copy of `eval/`, with solver scripts written by the harness;
+- never touches the workspace's `scripts/solvers/` or `scoring/` during runs;
+- uses an append-only per-instance cache, so runs resume after preemption.
+
+The reference outputs are copied into `scoring/` at the end.
 
 ## 1. Do better results score higher?
 
-Before (redteam, old test): the stronger solve gained +0.458, but three-seed spread was 0.811, so it was not distinguishable from noise. The weaker lockstep variant scored −4.29.
+**Before** (iteration 11, old families; REVIEW.md):
 
-After (hidden test, paired: every method on the same 18 instances; reduction in % over Strawman-ICR):
+| Run | Result |
+|---|---|
+| Positive control (MILP + LNS) | rank +0.362, paired +5.73 ± 1.73 |
+| 150-line annealing | rank +0.375 (tied the positive control) |
+| `hardware_sensitivity` positive-control gain | +1.2, below 1.36 seed noise |
+| Reference | wall-clock dependent: the identical 512-node workload scored 41.6% and 25.2% in one job |
 
-| Run | allreduce_scaling | collective_algorithms | hardware_sensitivity | Rank | Paired Δ vs reference, all 18 (wins/losses) |
+**After** (hidden test, paired on the same 34 instances; % reduction vs Strawman-ICR):
+
+| Run | allreduce_scaling | high_optical_degree | hardware_sensitivity | Rank | Paired Δ vs reference, all 34 (wins/losses) |
 |---|---:|---:|---:|---:|---|
-| Reference (paper MILP, 120 s) | 37.93 | 46.93 | 43.71 | 0 | — |
-| Reference, CBC seed 2 (noise) | 33.80 | 47.08 | 45.06 | −0.074 | −0.87 ± 0.84 (5/8) |
-| **Better:** same MILP + symmetry breaking + LNS, same 120 s | 45.57 | 55.27 | 44.91 | **+0.362** | **+5.73 ± 1.73 (12/0)** |
-| Weaker: same MILP, 10 s | 10.25 | 36.44 | 42.60 | −0.861 | −13.09 ± 2.98 (0/13) |
-| Weaker: lockstep (= Strawman-ICR) | 0 | 0 | 0 | −2.373 | — |
-| Previous reference (loose big-M) | 37.47 | 37.85 | 40.52 | −0.257 | −4.24 ± 2.83 (4/10) |
-| Previous better (loose big-M + LNS) | 44.46 | 52.61 | 44.99 | +0.293 | +4.50 ± 2.36 (13/1) |
+| **Reference** (paper MILP, deterministic budget) | 32.08 | 26.88 | 24.29 | 0 | — |
+| Reference, CBC seed 2 (noise) | 33.07 | 28.59 | 26.70 | +0.04 | +1.75 ± 1.35 (19/11) |
+| Reference, CBC seed 3 (noise) | 34.34 | 26.27 | 25.43 | +0.03 | +0.86 ± 1.35 (15/15) |
+| **Better: hybrid**, less CPU | **45.62** | **40.33** | **34.57** | **+0.31** | **+12.36 ± 1.49 (30/0)** |
+| More compute: same MILP, time-limited to the full budget | 35.91 | 29.41 | 26.46 | +0.07 | — |
+| Weaker: same MILP, 1/10 of the nodes | 22.34 | 18.64 | 18.69 | −0.20 | — |
+| Weaker: lockstep (= Strawman-ICR) | 0 | 0 | 0 | −0.69 | — |
+| Full-budget annealing (`shortcut_private_search`) | TBD-SA | TBD-SA | TBD-SA | TBD-SA | TBD-SA |
+| Relay rule (15 lines) | 28.63 | 23.21 | 25.04 | −0.05 | −2.04 ± 1.16 (8/23) |
 
-- **Overall.** The better variant's rank gain is 4.9× the seed rerun's |rank change|. Its paired gain (+5.7 points) is 6.8× the seed rerun's paired mean difference.
-- **Per experiment.** Seed noise vs better-variant gain:
+- **Per family:**
 
-  | Experiment | Seed noise | Better variant gain |
+  | Experiment | Hybrid gain | Seed noise (seed 2 / seed 3 shift) |
   |---|---:|---:|
-  | `allreduce_scaling` | 4.13 | +7.64 |
-  | `collective_algorithms` | 0.15 | +8.35 |
-  | `hardware_sensitivity` | 1.36 | +1.20 |
+  | `allreduce_scaling` | +13.5 | +1.0 / +2.3 |
+  | `high_optical_degree` | +13.5 | +1.7 / −0.6 |
+  | `hardware_sensitivity` | +10.3 | +2.4 / +1.1 |
 
-  The gain beats noise in the first two and does **not** in `hardware_sensitivity` (§5).
-- **Train vs test.** On train the better variant scores 49.06 / 45.46 / 45.25 against the reference's 41.19 / 37.67 / 41.68. The gain carries over: +7.9 / +7.8 / +3.6 points on train versus +7.6 / +8.3 / +1.2 on test. The family means of one honest method differ between slices by up to 9 points (`collective_algorithms`: 37.7 train, 46.9 test), because per-instance reductions range from 0 to 80% and there are only 6 instances.
+  The hybrid wins 30 of 34 instances outright and loses none.
+- **More compute.** Giving the same MILP the full 120 CPU-s (time-limited, hence not repeatable) gains 2–4 points. That is about the size of seed noise and a fifth of the hybrid's gain.
+- **Train vs test:**
+
+  | Method | Train | Test |
+  |---|---|---|
+  | Reference | 33.40 / 25.12 / 25.26 | 32.08 / 26.88 / 24.29 |
+  | Hybrid | 46.56 / 39.45 / 33.90 | 45.62 / 40.33 / 34.57 |
+  | Relay rule | 29.19 / 21.61 / 24.27 | 28.63 / 23.21 / 25.04 |
+
+  Train and test agree within 1.8 points for every method.
 
 ## 2. Major shortcuts: fix and score before → after
 
-| Shortcut (redteam name) | Fix | Before | After (result) | Rank after |
-|---|---|---:|---|---:|
-| scalar_claims | Only `schedule` is read; numbers the method writes are ignored | +4.018 | run failed: "missing or empty schedule" | −5.706 |
-| empty_schedule | Empty schedule = invalid → whole run failed | +4.018 | run failed | −5.706 |
-| impossible_scalars | Same; reduction clipped to [−100, 100], CCT checked against the physical lower bound | +10.717 | run failed | −5.706 |
-| invalid_fast (all times 0) | Duration, barrier and switching checks | +1.160 | run failed: "transmission shorter than message/bandwidth + base latency" | −5.706 |
-| zero_duration | `t_end − t_start >= d/B + T_lat` | +2.799 | run failed (same reason) | −5.706 |
-| extra_planes | Plane index must be in `[0, k)` of the frozen instance | +3.933 | run failed: "plane index outside the fixed optical degree" | −5.706 |
-| fixed_spec (`shortcut_spec_override`) | Spec comes only from `eval/`; any `spec`/`instance` in the output is ignored | +3.919 | run failed (plane index) | −5.706 |
-| baseline_inflation | Strawman computed by the evaluator; `checkpoints/` is never read | +1.788 | its true lockstep value, 0.00% | −2.058 |
-| late_prefix (+1e6 us) | Full-collective CCT from time 0 | tie (≈0) | valid but −100% per instance | −2.849 |
-| replay | Hidden instances only in `eval/test/`; methods run on them at test time | tie (0) | 0 of 18 cache hits; fell back to lockstep, 0.00% | −2.058 |
-| bruteforce (8-node example) | Test instances have 2.15e7–5e38 plane-use patterns even after dividing by k! symmetry; the 6-step example is now an unscored `_paper_` check | tie (0) | exhaustive search never applicable; a time-limited local search is in §3 | — |
-| omit_all | `swot` always reported; a missing solver means a failed run | tie (0) | `swot` failed; the alternative name was scored separately (lockstep, 0%) | −5.706 |
-| drop_one_experiment (exit 1 on k=8) | Any failed instance fails all experiments | tie (0) | run failed: "exit code 1" | −5.706 |
-| empty_entry `{}` | Complete worst values, including the old 0-events hole | −9.609 | run failed | −5.706 |
-| null | Same | −10.717 | run failed | −5.706 |
-| claimed_fields_ignored | Claims ignored | tie (0) | scored as its real (lockstep) schedule, 0.00% | −2.058 |
-| *new:* timeout | Process group killed at 150 s, then failed | — | run failed: "timeout" | −5.706 |
-| *new:* tamper_scores (writes `scores_test.json` mid-run) | Evaluator deletes the file at start and writes it atomically at the end | — | overwritten; 0.00% | −2.058 |
+All iteration-11 fixes still hold. Each probe was rerun on the new instances through the isolated harness.
+
+| Shortcut | Fix | Before (iter 11 → redteam) | After |
+|---|---|---|---|
+| scalar_claims, empty_schedule, impossible_scalars, empty_entry, null | only `schedule` is read; missing or empty fails the run | +4.0 / +10.7 (redteam) → failed (iter 11) | failed: "missing or empty schedule" / "not a JSON object"; −100 / valid 0 everywhere |
+| invalid_fast, zero_duration | `t_end − t_start ≥ d/B + T_lat` | +1.2 / +2.8 → failed | failed: "transmission shorter than message/bandwidth + base latency" |
+| extra_planes, spec_override | plane index < k from the evaluator's frozen instance | +3.9 → failed | failed: "plane index outside the fixed optical degree" |
+| baseline_inflation, claimed_fields_ignored, tamper_scores, replay | baseline computed by the evaluator; claims ignored; output written atomically; hidden instances | +1.8 / tie → lockstep value | lockstep value, 0.00%, rank −0.72 |
+| late_prefix | CCT measured from time 0 | tie → −100% | −100% per instance (valid), rank −2.50 |
+| omit, drop_experiment, timeout | `swot` always scored; any failed instance fails all experiments | tie → failed | failed |
+| *new:* cpu_escape (two detached helpers × 65 CPU-s) | subreaper + counted CPU over the process tree | — | failed: "CPU budget exceeded: 130.1 s > 120 s" |
+| bruteforce | instances far too large to enumerate (k=8 ReduceScatter: 255⁷–255¹⁰ plane patterns; k=4 AllReduce: 15¹²–15²⁰) | tie (redteam) | not applicable |
 
 ## 3. Shortcuts and weaknesses left, and why
 
-1. **A local search outranks the reference (`shortcut_private_search`).** It is pure Python: simulated annealing over plane-use patterns, with step splits that equalize finish times, using its own copy of the timing model, for the full 120 s.
-   - It scores 45.89 / 56.62 / 43.09, rank **+0.375**, paired +5.68 ± 2.23 (13 wins, 2 losses). That is level with the MILP+LNS positive control. Exhaustive enumeration never applied.
-   - It sees only the instance and is bound by the same wall-clock limit as the MILP. So it is not an evaluator-budget bypass: it is a better scheduler at equal compute. The paper itself concedes (§4.3.1) that its 120 s MILP is sub-optimal at high optical degree.
-   - The reproduction is the paper's own method at the paper's settings, with the big-M tightened. I could not make that MILP beat this heuristic without replacing the method, so I kept the paper's method as the reference.
-   - Consequence: a future agent can outrank the reference with a heuristic of about 150 lines. That is a real improvement on the scheduling problem, but this one already exists in `hardening/candidates.py` (as does the LNS variant in `hardening/swot_lns.py`). An attempt that copies either is not new work, and the shortcut grader should treat it so.
-2. **Wall-clock budget.**
-   - Time-limited CBC is not repeatable. On the 512-node Fig. 8 workload, the same seed gave 41.6% (train instance tr02) and 25.2% (identical paper copy) in the same job.
-   - Future runs on faster or slower nodes shift results.
-   - Paired aggregate noise across a seed change is ~0.9 points. Removing it would mean abandoning the paper's time-limited setting.
-3. **150 s kill vs the 120 s limit passed.** A solver may use about 25% more time than the reference's CBC call.
-4. **No sandbox.** The solver runs in the same filesystem as the evaluator.
-   - It could read `eval/test/instances.json` during the hidden run and spend one instance's budget working on others. The total budget is unchanged.
-   - It could kill or disturb the evaluator process. A killed evaluator writes no score file and the script fails; tampering with the score file is overwritten (tested). Editing instance files mid-run has no effect, because instances are loaded before any solver starts.
-   - No further defenses were built.
-5. **Paper anchors.** The paper reports no family means, but `validate.py` needs a numeric `swot` value per experiment. Each `swot` entry therefore carries the paper's closest *non-peak* number at a setting inside the family, labelled as not a target:
-
-   | Experiment | Anchor |
-   |---|---|
-   | `allreduce_scaling` | 39.6% (Fig. 8a, 64 nodes) |
-   | `collective_algorithms` | 45.5% (Fig. 8b, Pairwise All-to-All, 10 nodes, k=4) |
-   | `hardware_sensitivity` | 46.9% (Fig. 8a, AllReduce at k=4 and 0.2 ms, 512 nodes) |
-
-   - An earlier draft of this iteration used a Fig. 7 *peak* (87.1%) and the 8-node example (20%) as anchors. Those are not on the scale of a family mean, and `--post-design` flagged them.
-   - The peaks, the Fig. 5 example and every other paper number are kept unchanged under `_` keys.
-   - The setup and scores were not changed.
-6. **Weak separation in `hardware_sensitivity`.** See §5. I lowered its weight instead of enlarging it, because enlarging means another full reference-plus-variants cycle (≈2 min per instance per method on 1 CPU), and the compute was not available.
+1. **The relay rule ties the reference on `hardware_sensitivity`.**
+   - It scores 25.04 against 24.29, within seed noise: seed 2 of the same reference scores 26.70.
+   - It is below the reference on the other two families (−3.4 and −3.7) and overall (rank −0.05; paired −2.0 ± 1.2, 8 wins / 23 losses).
+   - The cause is that the paper's MILP, at its budget, returns lockstep-like schedules on a few k=4/k=8 hardware cells where a relay does well (e.g. Pairwise at k=4 with 20 ms switching).
+   - Excluding more settings would leave too little of §4.3.
+2. **Unscored settings.** AllReduce, Bruck and Pairwise at k=8, Bruck at k=4, and AllReduce at k=4 above 0.80 switching share are not scored, for the reason in §3 of "What changed". The test therefore covers one of Fig. 7's four algorithms at k=8.
+3. **Simple annealing vs the positive control.** TBD-SA.
+4. **Only the reference is repeatable.** The CPU budget is counted, not deterministic, for other methods: a faster CPU does more search in 120 CPU-s. The docs ask methods to use work counts. A time-limited version of the reference gains 2–4 points from the extra compute (§1).
+5. **No sandbox.** As in iteration 11, a solver runs in the same filesystem as the evaluator and could read `eval/test/instances.json` during the hidden run.
+   - It could spend one instance's budget on another instance's problem.
+   - The total budget is unchanged and the per-instance CPU count still applies.
+   - No defence was built.
 
 ## 4. Reference score before → after
 
-- **Before** (old test, suffix-span metric). Hidden CCT 500 / 1106.7 / 1202.5 µs; reduction 28.57 / 22.88 / 42.72%; valid 1.
-  - On the paper instances (full CCT): Fig. 5 1200 µs (20%), Fig. 8 64-node 1840 µs (35.9%), 512-node 2431.7 µs (42.1%).
-- **After** (hidden families, full-collective CCT). 37.93 / 46.93 / 43.71% (`allreduce_scaling` / `collective_algorithms` / `hardware_sensitivity`); valid 1 / 1 / 1.
-  - Train: 41.19 / 37.67 / 41.68%.
-  - Paper instances (`scoring/scores.json`) against the paper's numbers:
+**Before** (iteration 11 families, 120 s wall-clock):
+- 37.93 / 46.93 / 43.71% (allreduce_scaling / collective_algorithms / hardware_sensitivity).
+- Not repeatable: seed 2 gave 33.80 / 47.08 / 45.06.
 
-    | Instance | Reference | Paper |
-    |---|---|---|
-    | Fig. 5, 8 nodes | 1500 → **1200 µs (20.0%)** | 1500 → 1200 µs (20%) |
-    | Fig. 8, 64 nodes | **1766.7 µs (38.4%)** | 39.6% |
-    | Fig. 8, 512 nodes | **3140 µs (25.2%)** | 46.9% |
+**After** (new families, deterministic):
 
-    The 512-node result is far below the paper's 46.9%. The identical workload scored 41.6% earlier in the same job; this is the time-limit variance in item 2 of §3, and I did not rerun until a good draw.
-- The paper's claim (lower CCT than Strawman-ICR) holds in every family and on every paper instance, and the reference is never worse than lockstep on any instance.
+| Slice | allreduce_scaling | high_optical_degree | hardware_sensitivity |
+|---|---:|---:|---:|
+| Hidden test | 32.08 | 26.88 | 24.29 |
+| Train | 33.40 | 25.12 | 25.26 |
+
+valid_schedule = 1 everywhere.
+- The family means are lower than in iteration 11 because the families changed (moderate switching shares, k=8 ReduceScatter). They are not comparable to the old ones.
+- Paper instances (`scoring/scores.json`, unscored):
+
+  | Instance | Reproduced | Paper | Iteration 11 |
+  |---|---|---|---|
+  | Fig. 5, 8 nodes | **1200 µs (20.0%)** | 1500 → 1200 µs | — |
+  | Fig. 8, 64 nodes | **38.2%** | 39.6% | — |
+  | Fig. 8, 512 nodes | **41.6%** | 46.9% | 25.2%, a time-limit draw |
+
+- The paper's direction holds in every family and on every paper instance. The reference is never worse than lockstep on any instance.
 
 ## 5. Headroom check
 
-- **At the bound.** The reference sits at the bound only for `valid_schedule` (= 1 in all three experiments), which is the constraint metric. `cct_reduction_vs_strawman_pct` is below what other methods reach in every experiment:
-  - the MILP+LNS variant exceeds it in all three;
-  - the local search exceeds it in two;
-  - transmission-only lower bounds leave more room still.
-- **Saturated instances.** Three of the six `hardware_sensitivity` test instances tie across every MILP-based run:
-  - two k=2, 16-step instances that CBC solves to proven optimality in ~70 s;
-  - the 20 ms-switching instance, at 96.0% (the local search reaches only 85.2% there).
+- **At the bound:** the reference sits at the bound only for `valid_schedule` (1 everywhere).
+- **Room above it:** `cct_reduction_vs_strawman_pct` is 10–13.5 points below the hybrid in every family. The hybrid uses less CPU and is itself not proven optimal.
+- **Simple baselines:**
+  - Lockstep scores 0.
+  - The 1/10-node MILP scores 18.6–22.3, clearly below the reference's 24.3–32.1, with the hybrid's 34.6–45.6 above.
+  - The relay rule is below the reference overall (see §3.1).
+- **Brute force** over plane-use patterns is infeasible on every instance (§2).
 
-  Two more are 20 µs-switching instances where no method gains more than 1% over lockstep. That leaves one instance with real spread, where the seed-2 rerun alone moves the result by 7 points. So the experiment's positive-control gain (+1.2) is within seed noise (1.36), hence weight 0.2.
-- **Where the paper's method falls short.** `collective_algorithms` uses k=8, which the paper itself (§4.3.1) names as the regime where its 120 s solver returns sub-optimal schedules; it is part of the scored set, at weight 0.4. That is where the reference leaves the most room (+8.3 for LNS, +9.7 for local search). Many-step AllReduce (up to 20 steps at 1024 nodes) adds more (+7.6).
-- **Brute force.** Enumerating plane-use patterns with one LP each is infeasible on every test instance (≥2.15e7 patterns after symmetry, against a 150 s budget). The 6-step paper example that the redteam enumerated (729 patterns) is now an unscored check.
-- **Simple baselines.** Lockstep Strawman-ICR scores 0%, and the 10 s MILP scores 10–43%, both clearly below the reference's 38–47%, with room above (positive control 45–55%).
+## 6. Could not fix
 
-## 6. Reproduce
+1. The relay-rule tie on `hardware_sensitivity`, and the unscored settings that come with it (§3.1–2).
+2. Headroom above simple annealing is not demonstrated (§3.3).
+3. The 512-node Fig. 8 point reproduces at 41.6%, against the paper's 46.9%.
+4. Wall-clock instability of the compute nodes meant several jobs were restarted or discarded. The final numbers come from one clean, restart-safe harness run (job `4c28ddba-c00`) plus the annealing follow-up. `hardening/explore/results.jsonl` and `hardening/interim_run_04473b93.json` are design evidence from earlier instance draws, not scores.
 
-- `bash scripts/run.sh` regenerates `scoring/scores.json`, `scores_train.json` and `scores_test.json` from the reference (≈80 min on 1 CPU), then validates.
-- `python -m hardening.harness all` replays this check. It resumes after preemption; completed runs are skipped.
-- `python validate.py` passes.
+## 7. Reproduce
+
+- `bash scripts/run.sh` regenerates `scoring/scores.json` and `scores_train.json` (visible, about 25 min) and `scoring/scores_test.json` (about 25 min) from the reference, then validates.
+- `python -m hardening.harness all` replays this check (about 5 h on one CPU, resumable).
+- `python -m hardening.calibrate --refit` re-derives `method/budget.json` from the recorded calibration.

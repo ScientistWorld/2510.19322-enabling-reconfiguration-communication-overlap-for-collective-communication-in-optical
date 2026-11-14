@@ -27,3 +27,9 @@
 ### [2026-11-12] - core_claim_plus
 - Hardening: the hidden test now runs solvers on held-out instances from the paper's Figs. 7-8 and Section 4.3 settings. It validates schedules physically and rewards better schedulers above seed noise.
 - The reference (the paper's MILP, tight valid big-M, 120 s CBC) beats Strawman-ICR in every family. Fig. 5 reproduces exactly (1500 -> 1200 us).
+
+### [2026-11-14] - core_claim_plus
+- Hardening iteration 12. The evaluator counts a 120 CPU-second budget per instance over the solver's process tree, replacing the wall-clock limit. The reference MILP uses a deterministic CBC node budget and is bit-repeatable across nodes.
+- The test was scaled to 34 stratified instances per slice, restricted to settings where a 15-line relay rule does not match the paper's method.
+- Hidden-test reference: 32.08 / 26.88 / 24.29%. A hybrid positive control scores 45.62 / 40.33 / 34.57%: +12.4 points paired, 30 wins and 0 losses, against 1-2.4 points of seed noise.
+- Fig. 5 reproduces exactly (1500 -> 1200 us). Fig. 8: 38.2% at 64 nodes (paper 39.6%) and 41.6% at 512 nodes (paper 46.9%).
