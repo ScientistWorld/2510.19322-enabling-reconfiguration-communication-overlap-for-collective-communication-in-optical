@@ -304,9 +304,11 @@ def _children_cpu_s() -> float:
 
 
 def _limit_cpu() -> None:
-    # Per-process backstop; the budget itself is the counted total below.
-    soft = int(CPU_BUDGET_S + CPU_TOLERANCE_S) + 2
-    resource.setrlimit(resource.RLIMIT_CPU, (soft, soft + 3))
+    # Per-process backstop against runaway processes only; the budget itself is
+    # the counted total below. The kernel's per-process CPU clock can run a few
+    # percent ahead of the reaped rusage totals, hence the margin.
+    soft = int(CPU_BUDGET_S) + 15
+    resource.setrlimit(resource.RLIMIT_CPU, (soft, soft + 5))
 
 
 def run_solver(script: Path, instance: dict[str, Any], workdir: Path) -> tuple[Any, str, float]:

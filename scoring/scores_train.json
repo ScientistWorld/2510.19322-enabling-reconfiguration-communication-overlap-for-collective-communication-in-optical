@@ -1,18 +1,19 @@
 {
   "_metadata": {
     "slice": "train",
-    "instance_suite_sha256_16": "6d8383079df6f3e2",
+    "instance_suite_sha256_16": "6f4ee8a8be172a92",
     "instances_per_experiment": {
-      "allreduce_scaling": 6,
-      "collective_algorithms": 6,
-      "hardware_sensitivity": 6
+      "allreduce_scaling": 10,
+      "high_optical_degree": 12,
+      "hardware_sensitivity": 12
     },
-    "solver_time_limit_s": 120,
-    "hard_wall_clock_limit_s": 150,
+    "solver_cpu_budget_s": 120,
+    "budget_rule": "CPU-seconds of the solver's whole process tree, counted by the evaluator; over budget = failed instance",
+    "wall_clock_cap_s": 300,
     "methods": [
       "swot"
     ],
-    "failure_rule": "any missing/late/invalid instance fails the whole run: worst value in every metric of every experiment"
+    "failure_rule": "any missing/over-budget/invalid instance fails the whole run: worst value in every metric of every experiment"
   },
   "experiments": {
     "allreduce_scaling": {
@@ -22,32 +23,58 @@
           "valid_schedule": 1.0
         },
         "swot": {
-          "cct_reduction_vs_strawman_pct": 41.189693717599766,
+          "cct_reduction_vs_strawman_pct": 33.401475260265535,
           "valid_schedule": 1.0
         }
       },
       "_status": {
         "swot": {
           "run_failed": false,
-          "failure": null
+          "failure": null,
+          "cpu_s": {
+            "tr01": 0.01,
+            "tr02": 0.01,
+            "tr03": 0.01,
+            "tr04": 0.01,
+            "tr05": 0.01,
+            "tr06": 0.01,
+            "tr07": 0.01,
+            "tr08": 0.01,
+            "tr09": 0.01,
+            "tr10": 0.01
+          }
         }
       }
     },
-    "collective_algorithms": {
+    "high_optical_degree": {
       "results": {
         "strawman_icr": {
           "cct_reduction_vs_strawman_pct": 0.0,
           "valid_schedule": 1.0
         },
         "swot": {
-          "cct_reduction_vs_strawman_pct": 37.67035823712699,
+          "cct_reduction_vs_strawman_pct": 25.115183776682695,
           "valid_schedule": 1.0
         }
       },
       "_status": {
         "swot": {
           "run_failed": false,
-          "failure": null
+          "failure": null,
+          "cpu_s": {
+            "tr11": 0.01,
+            "tr12": 0.02,
+            "tr13": 0.01,
+            "tr14": 0.01,
+            "tr15": 0.01,
+            "tr16": 0.01,
+            "tr17": 47.34,
+            "tr18": 71.09,
+            "tr19": 60.9,
+            "tr20": 34.63,
+            "tr21": 34.29,
+            "tr22": 55.37
+          }
         }
       }
     },
@@ -58,14 +85,28 @@
           "valid_schedule": 1.0
         },
         "swot": {
-          "cct_reduction_vs_strawman_pct": 41.68396417792507,
+          "cct_reduction_vs_strawman_pct": 25.255917446375904,
           "valid_schedule": 1.0
         }
       },
       "_status": {
         "swot": {
           "run_failed": false,
-          "failure": null
+          "failure": null,
+          "cpu_s": {
+            "tr23": 26.31,
+            "tr24": 2.89,
+            "tr25": 1.59,
+            "tr26": 1.5,
+            "tr27": 71.02,
+            "tr28": 17.23,
+            "tr29": 64.23,
+            "tr30": 68.37,
+            "tr31": 43.13,
+            "tr32": 54.79,
+            "tr33": 46.33,
+            "tr34": 23.26
+          }
         }
       }
     }
