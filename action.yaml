@@ -1,6 +1,8 @@
 # Once you set action to 'submit' or 'done', STOP immediately.
 # Do NOT sleep, poll, or wait for jobs. The system reads this file
 # only after your turn ends.
-action: done
+action: pending
+gpus: 0
+test: false
 milestone: core_claim_plus
-notes: "Hardened: evaluator-counted CPU budget, deterministic reference (repeatable across nodes), 34 stratified instances/slice; hybrid positive control +12.4 pts paired (30/0) vs 1-2.4 seed noise; all shortcuts fail or score lockstep; relay rule ties on hardware_sensitivity and annealing trails the positive control by only 1.3 pts (documented in HARDENING.md)."
+notes: ""
