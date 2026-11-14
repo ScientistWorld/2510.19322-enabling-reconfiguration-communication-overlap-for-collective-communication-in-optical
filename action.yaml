@@ -5,4 +5,4 @@ action: submit
 gpus: 0
 test: false
 milestone: core_claim_plus
-notes: "Hardening step 1/2 (rerun after CBC timeMode fix): smoke + exploration (reference with step-scaled deterministic node budget, hybrid, 30 s annealing, reference seed 2) on the third-seed exploration set; relay and small-instance reference results carried over."
+notes: "Hardening step 2/2 (rerun on the fixed instance draw: no duplicates, k=8 family = ReduceScatter): harness runs through the unmodified evaluators (reference test + visible, relay rule, lockstep, shortcut probes incl. CPU-escape, hybrid, seed 2, 1/10-node MILP, full-budget annealing, train hybrid, seed 3, time-only MILP). Resumable."
