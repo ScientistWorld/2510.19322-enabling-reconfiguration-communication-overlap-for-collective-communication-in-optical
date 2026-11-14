@@ -3,7 +3,7 @@
 **Bottom line.** Better schedules now score higher by far more than the test's noise. The reference is bit-for-bit repeatable. The evaluator counts the compute budget itself instead of trusting a wall-clock limit. Every shortcut from `REDTEAM.md`, plus a new attempt to hide CPU use in detached processes, fails or scores its true lockstep value. What remains is stated plainly in §3 and §6:
 - a 15-line relay rule ties the reference on one family;
 - some settings are unscored because that rule matches the paper's method there;
-- simple annealing comes close to the positive control.
+- full-budget simple annealing comes within 1.3 points of the positive control. The positive control is clearly ahead (24 wins, 4 losses, about a third of the CPU), but by a small margin.
 
 All numbers come from the hidden test run by `hardening/harness.py`. Each run executes exactly what `scripts/evaluate_test.sh` executes (`python -m eval.test.evaluate`, no other arguments), in a private copy of `eval/`, with the candidate installed as `swot.sh`. Raw logs and score files are in `hardening/final_runs/<run>/`; tables are in `hardening/results.md` and `hardening/summary.json`.
 
@@ -68,7 +68,7 @@ The positive control is `hardening/swot_hybrid.py`. It runs the paper's MILP ins
 3. A short monolithic MILP solve at a quarter of the reference's nodes.
 4. Windowed MILP neighbourhood search with a CCT cutoff, widening the window after an unproductive sweep.
 
-It uses less CPU than the reference: 22.1 s mean and 65.3 s max per instance, against 37.4 s and 80.0 s.
+It uses about the same CPU as the reference: 35.7 s mean (over the 21 instances not replayed from cache after a worker restart) and 65.3 s max per instance, against 37.4 s and 80.0 s.
 
 ### 5. Harness robustness
 
@@ -97,15 +97,16 @@ The reference outputs are copied into `scoring/` at the end.
 | Run | allreduce_scaling | high_optical_degree | hardware_sensitivity | Rank | Paired Δ vs reference, all 34 (wins/losses) |
 |---|---:|---:|---:|---:|---|
 | **Reference** (paper MILP, deterministic budget) | 32.08 | 26.88 | 24.29 | 0 | — |
-| Reference, CBC seed 2 (noise) | 33.07 | 28.59 | 26.70 | +0.04 | +1.75 ± 1.35 (19/11) |
-| Reference, CBC seed 3 (noise) | 34.34 | 26.27 | 25.43 | +0.03 | +0.86 ± 1.35 (15/15) |
-| **Better: hybrid**, less CPU | **45.62** | **40.33** | **34.57** | **+0.31** | **+12.36 ± 1.49 (30/0)** |
-| More compute: same MILP, time-limited to the full budget | 35.91 | 29.41 | 26.46 | +0.07 | — |
-| Weaker: same MILP, 1/10 of the nodes | 22.34 | 18.64 | 18.69 | −0.20 | — |
-| Weaker: lockstep (= Strawman-ICR) | 0 | 0 | 0 | −0.69 | — |
-| Full-budget annealing (`shortcut_private_search`) | TBD-SA | TBD-SA | TBD-SA | TBD-SA | TBD-SA |
-| Relay rule (15 lines) | 28.63 | 23.21 | 25.04 | −0.05 | −2.04 ± 1.16 (8/23) |
+| Reference, CBC seed 2 (noise) | 33.07 | 28.59 | 26.70 | +0.15 | +1.75 ± 1.35 (19/11) |
+| Reference, CBC seed 3 (noise) | 34.34 | 26.27 | 25.43 | +0.09 | +0.86 ± 1.35 (15/15) |
+| **Better: hybrid** (≈36 CPU-s/instance) | **45.62** | **40.33** | **34.57** | **+1.11** | **+12.36 ± 1.49 (30/0)** |
+| Full-budget annealing (`shortcut_private_search`, 110 CPU-s/instance) | 44.75 | 38.59 | 33.24 | +0.99 | +11.02 ± 1.41 (29/2) |
+| More compute: same MILP, time-limited to the full budget | 35.91 | 29.41 | 26.46 | +0.26 | — |
+| Relay rule (15 lines) | 28.63 | 23.21 | 25.04 | −0.18 | −2.04 ± 1.16 (8/23) |
+| Weaker: same MILP, 1/10 of the nodes | 22.34 | 18.64 | 18.69 | −0.70 | −7.74 ± 1.72 (0/28) |
+| Weaker: lockstep (= Strawman-ICR) | 0 | 0 | 0 | −2.49 | −27.49 ± 3.20 (0/34) |
 
+- **Same compute.** The hybrid uses about the reference's CPU, so its gain is a better method, not more compute.
 - **Per family:**
 
   | Experiment | Hybrid gain | Seed noise (seed 2 / seed 3 shift) |
@@ -132,11 +133,11 @@ All iteration-11 fixes still hold. Each probe was rerun on the new instances thr
 
 | Shortcut | Fix | Before (iter 11 → redteam) | After |
 |---|---|---|---|
-| scalar_claims, empty_schedule, impossible_scalars, empty_entry, null | only `schedule` is read; missing or empty fails the run | +4.0 / +10.7 (redteam) → failed (iter 11) | failed: "missing or empty schedule" / "not a JSON object"; −100 / valid 0 everywhere |
+| scalar_claims, empty_schedule, impossible_scalars, empty_entry, null | only `schedule` is read; missing or empty fails the run | +4.0 / +10.7 (redteam) → failed (iter 11) | failed: "missing or empty schedule" / "not a JSON object"; −100 / valid 0 everywhere, rank −6.57 |
 | invalid_fast, zero_duration | `t_end − t_start ≥ d/B + T_lat` | +1.2 / +2.8 → failed | failed: "transmission shorter than message/bandwidth + base latency" |
 | extra_planes, spec_override | plane index < k from the evaluator's frozen instance | +3.9 → failed | failed: "plane index outside the fixed optical degree" |
-| baseline_inflation, claimed_fields_ignored, tamper_scores, replay | baseline computed by the evaluator; claims ignored; output written atomically; hidden instances | +1.8 / tie → lockstep value | lockstep value, 0.00%, rank −0.72 |
-| late_prefix | CCT measured from time 0 | tie → −100% | −100% per instance (valid), rank −2.50 |
+| baseline_inflation, claimed_fields_ignored, tamper_scores, replay | baseline computed by the evaluator; claims ignored; output written atomically; hidden instances | +1.8 / tie → lockstep value | lockstep value, 0.00%, rank −2.09 |
+| late_prefix | CCT measured from time 0 | tie → −100% | −100% per instance (valid), rank −3.23 |
 | omit, drop_experiment, timeout | `swot` always scored; any failed instance fails all experiments | tie → failed | failed |
 | *new:* cpu_escape (two detached helpers × 65 CPU-s) | subreaper + counted CPU over the process tree | — | failed: "CPU budget exceeded: 130.1 s > 120 s" |
 | bruteforce | instances far too large to enumerate (k=8 ReduceScatter: 255⁷–255¹⁰ plane patterns; k=4 AllReduce: 15¹²–15²⁰) | tie (redteam) | not applicable |
@@ -145,11 +146,17 @@ All iteration-11 fixes still hold. Each probe was rerun on the new instances thr
 
 1. **The relay rule ties the reference on `hardware_sensitivity`.**
    - It scores 25.04 against 24.29, within seed noise: seed 2 of the same reference scores 26.70.
-   - It is below the reference on the other two families (−3.4 and −3.7) and overall (rank −0.05; paired −2.0 ± 1.2, 8 wins / 23 losses).
+   - It is below the reference on the other two families (−3.4 and −3.7) and overall (rank −0.18; paired −2.0 ± 1.2, 8 wins / 23 losses).
    - The cause is that the paper's MILP, at its budget, returns lockstep-like schedules on a few k=4/k=8 hardware cells where a relay does well (e.g. Pairwise at k=4 with 20 ms switching).
    - Excluding more settings would leave too little of §4.3.
 2. **Unscored settings.** AllReduce, Bruck and Pairwise at k=8, Bruck at k=4, and AllReduce at k=4 above 0.80 switching share are not scored, for the reason in §3 of "What changed". The test therefore covers one of Fig. 7's four algorithms at k=8.
-3. **Simple annealing vs the positive control.** TBD-SA.
+3. **Simple annealing vs the positive control (REVIEW item 1).** `shortcut_private_search` is about 150 lines of annealing over plane-use patterns. It uses its own copy of the timing model and the whole 120 CPU-s budget.
+   - It scores 44.75 / 38.59 / 33.24, rank +0.99. The hybrid scores 45.62 / 40.33 / 34.57, rank +1.11.
+   - Paired, the hybrid is ahead by +0.87 / +1.74 / +1.33 points per family (+1.34 ± 0.21 overall; 24 wins, 4 losses). It uses about a third of the CPU (≈36 vs 110 CPU-s per instance).
+   - So the test now separates the positive control from simple search, but only by about 1.3 points. On iteration 11's test the annealing ranked above the positive control (+0.375 vs +0.362).
+   - The margin is small because annealing with a water-filling split already finds near-best plane patterns on these instance sizes. The hybrid's extra gain comes from exact (uneven) splits and MILP neighbourhoods.
+   - I found no method that beats both by a wide margin, so headroom above them is not demonstrated (the bound on `cct_reduction_vs_strawman_pct` is not reached by either).
+   - This annealing is not a shortcut in the grader's sense: it is a legitimate, if simple, scheduler at equal compute. It does, however, already exist in `hardening/candidates.py`, so an attempt that copies it is not new work.
 4. **Only the reference is repeatable.** The CPU budget is counted, not deterministic, for other methods: a faster CPU does more search in 120 CPU-s. The docs ask methods to use work counts. A time-limited version of the reference gains 2–4 points from the extra compute (§1).
 5. **No sandbox.** As in iteration 11, a solver runs in the same filesystem as the evaluator and could read `eval/test/instances.json` during the hidden run.
    - It could spend one instance's budget on another instance's problem.
@@ -184,7 +191,7 @@ valid_schedule = 1 everywhere.
 ## 5. Headroom check
 
 - **At the bound:** the reference sits at the bound only for `valid_schedule` (1 everywhere).
-- **Room above it:** `cct_reduction_vs_strawman_pct` is 10–13.5 points below the hybrid in every family. The hybrid uses less CPU and is itself not proven optimal.
+- **Room above it:** `cct_reduction_vs_strawman_pct` is 10–13.5 points below the hybrid in every family. The hybrid uses about the same CPU and is itself not proven optimal.
 - **Simple baselines:**
   - Lockstep scores 0.
   - The 1/10-node MILP scores 18.6–22.3, clearly below the reference's 24.3–32.1, with the hybrid's 34.6–45.6 above.
@@ -194,9 +201,9 @@ valid_schedule = 1 everywhere.
 ## 6. Could not fix
 
 1. The relay-rule tie on `hardware_sensitivity`, and the unscored settings that come with it (§3.1–2).
-2. Headroom above simple annealing is not demonstrated (§3.3).
+2. Headroom above simple annealing is small: the positive control leads it by only 1.3 points (§3.3).
 3. The 512-node Fig. 8 point reproduces at 41.6%, against the paper's 46.9%.
-4. Wall-clock instability of the compute nodes meant several jobs were restarted or discarded. The final numbers come from one clean, restart-safe harness run (job `4c28ddba-c00`) plus the annealing follow-up. `hardening/explore/results.jsonl` and `hardening/interim_run_04473b93.json` are design evidence from earlier instance draws, not scores.
+4. Wall-clock instability of the compute nodes meant several jobs were restarted or discarded. The final numbers come from one clean, restart-safe harness run (job `4c28ddba-c00`) plus the annealing follow-up (job `83e19523-3bc`). The CPU means in `hardening/results.md` count cache replays after worker restarts as near zero: 13 of 34 hybrid instances, 31 annealing, 9 time-only MILP, 0 reference. The figures quoted here are over the instances that actually ran. `hardening/explore/results.jsonl` and `hardening/interim_run_04473b93.json` are design evidence from earlier instance draws, not scores.
 
 ## 7. Reproduce
 
