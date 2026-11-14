@@ -6,17 +6,20 @@ per-plane asynchronous reconfiguration times, and topology bypassing (r_ij,
 u_ij) to minimize the collective completion time, solved with CBC via PuLP.
 
 Solver budget. The paper gives CBC a 120 s time limit. A time limit makes the
-returned schedule depend on the machine and its load, so the reproduction
-gives CBC a deterministic work budget instead: a number of branch-and-bound
-nodes per instance (``method/budget.json``: ``cbc_max_nodes`` for collectives
-of up to ``full_budget_max_steps`` steps, scaled by (max_steps / steps)^2
-beyond that, because CBC's node rate falls about that fast with the number of
-steps), CBC's default single-threaded search, fixed seeds. The budget was
-calibrated once on the reference compute node so that CBC uses roughly 70-95
-of the evaluator's 120 CPU-seconds; the schedule is then identical on any
-machine. The evaluator's CPU budget (the third solver argument) is only a
-safety stop here (CBC ``sec``). CBC's ``timeMode cpu`` is not used: when CBC
-stops on a time limit in that mode, the solution it writes is unusable.
+returned schedule depend on the machine and on whatever else runs beside it
+(PuLP's CBC time limit is wall-clock, and CBC's heuristics also scale their
+effort with the time left), so the reproduction gives CBC a deterministic work
+budget instead and passes CBC no time limit at all: a number of
+branch-and-bound nodes per instance (``method/budget.json``: ``cbc_max_nodes``
+for collectives of up to ``full_budget_max_steps`` steps, scaled by
+(max_steps / steps)^2 beyond that, because CBC's node rate falls about that
+fast with the number of steps), CBC's default single-threaded search, fixed
+seeds. The budget was calibrated once on the reference compute node so that
+CBC uses well under the evaluator's 120 CPU-seconds; the schedule is then the
+same on any machine and under any load. The only other stop is a safety stop
+on CPU time (an RLIMIT_CPU on the CBC process, ``SAFETY_MARGIN_S`` below the
+CPU budget the evaluator passes) that never binds for the reference; if it
+ever did, CBC would be killed and the lockstep schedule written.
 
 Solver interface (used by every evaluator through scripts/solvers/swot.sh):
 
@@ -25,8 +28,8 @@ Solver interface (used by every evaluator through scripts/solvers/swot.sh):
 The MILP's discrete decisions (which planes carry which volume in each step)
 are serialized with exact earliest-start timing, so the written schedule is
 numerically consistent and never slower than the MILP's own solution. If CBC
-returns no incumbent within the limit, the lockstep schedule is written so
-the output is always a valid schedule.
+returns no incumbent within its node budget, the lockstep schedule is written
+so the output is always a valid schedule.
 """
 
 from __future__ import annotations
@@ -34,7 +37,6 @@ from __future__ import annotations
 import argparse
 import json
 import resource
-import time
 from pathlib import Path
 from typing import Dict, List, Tuple
 
@@ -42,21 +44,20 @@ import pulp
 
 from data.collectives import EXPERIMENTS, ExperimentSpec, load_instance, mb_per_us
 
-_PROCESS_START = time.monotonic()
 BUDGET_FILE = Path(__file__).resolve().parent / "budget.json"
-SAFETY_MARGIN_S = 8.0
+SAFETY_MARGIN_S = 8.0  # CPU-seconds kept free of the evaluator's budget for model building and output
 
 Volumes = Dict[Tuple[int, int], float]
 
 
 def default_max_nodes(spec: ExperimentSpec | None = None) -> int:
-    """The calibrated deterministic CBC node budget for ``spec`` (0 = time limit only)."""
+    """The calibrated deterministic CBC node budget for ``spec``."""
     try:
         budget = json.loads(BUDGET_FILE.read_text())
         nodes = int(budget["cbc_max_nodes"])
         max_steps = int(budget.get("full_budget_max_steps", 0))
-    except (OSError, ValueError, KeyError, TypeError):
-        return 0
+    except (OSError, ValueError, KeyError, TypeError) as exc:
+        raise RuntimeError(f"cannot read the CBC node budget from {BUDGET_FILE}: {exc}") from None
     if spec is None or not max_steps or len(spec.steps) <= max_steps:
         return nodes
     return max(100, int(nodes * (max_steps / len(spec.steps)) ** 2))
@@ -205,12 +206,19 @@ def build_model(spec: ExperimentSpec, big_m: str = "lockstep", formulation: str 
     }
 
 
-def cbc(time_limit_s: float, seed: int, warm_start: bool = False, max_nodes: int | None = None,
+def cbc(seed: int, max_nodes: int | None = None, warm_start: bool = False,
         log_path: str | None = None) -> pulp.PULP_CBC_CMD:
-    """CBC (default single-threaded search) with fixed seeds, a safety time limit and an optional node budget."""
+    """CBC (default single-threaded search) with fixed seeds and an optional node budget.
+
+    No time limit is passed to CBC (no ``-sec``), so nothing in CBC's search
+    depends on the clock; CBC's clock is set to CPU time (PuLP otherwise
+    passes ``timeMode elapsed``), so even its log never reads the wall clock.
+    Bound CBC's CPU time with ``cpu_cap`` around the solve instead (a kill
+    switch outside the solver, not a search parameter).
+    """
     kwargs = {
         "msg": False,
-        "timeLimit": max(1.0, float(time_limit_s)),
+        "timeMode": "cpu",
         "options": [f"randomSeed {seed}", f"randomCbcSeed {seed}"],
     }
     if max_nodes:
@@ -220,6 +228,37 @@ def cbc(time_limit_s: float, seed: int, warm_start: bool = False, max_nodes: int
     if log_path:
         kwargs["logPath"] = log_path
     return pulp.PULP_CBC_CMD(**kwargs)
+
+
+class cpu_cap:
+    """Safety stop: CBC processes started inside this block are killed after ``seconds`` CPU-seconds.
+
+    Sets the soft RLIMIT_CPU (inherited by child processes; counted per
+    process) and disables core dumps; restores both on exit. A killed CBC makes
+    PuLP raise, and callers fall back to a valid schedule.
+    """
+
+    def __init__(self, seconds: float):
+        self.seconds = max(1, int(seconds))
+
+    def __enter__(self):
+        self.saved_cpu = resource.getrlimit(resource.RLIMIT_CPU)
+        self.saved_core = resource.getrlimit(resource.RLIMIT_CORE)
+        hard = self.saved_cpu[1]
+        soft = self.seconds if hard == resource.RLIM_INFINITY else min(self.seconds, hard)
+        # The cap also applies to this process: never set it below what it has already used.
+        own = resource.getrusage(resource.RUSAGE_SELF)
+        soft = max(soft, int(own.ru_utime + own.ru_stime) + 2)
+        if hard != resource.RLIM_INFINITY:
+            soft = min(soft, hard)
+        resource.setrlimit(resource.RLIMIT_CPU, (soft, hard))
+        resource.setrlimit(resource.RLIMIT_CORE, (0, self.saved_core[1]))
+        return self
+
+    def __exit__(self, *exc):
+        resource.setrlimit(resource.RLIMIT_CPU, self.saved_cpu)
+        resource.setrlimit(resource.RLIMIT_CORE, self.saved_core)
+        return False
 
 
 def has_incumbent(model: pulp.LpProblem, status_code: int) -> bool:
@@ -303,21 +342,25 @@ def schedule_cct(schedule: List[Dict]) -> float:
 
 def solve_swot(spec: ExperimentSpec, time_limit_s: float = 120, seed: int = 1, big_m: str = "lockstep",
                max_nodes: int | None = None, log_path: str | None = None) -> Dict:
-    """Solve the SWOT MILP. ``max_nodes`` is the deterministic work budget;
-    ``time_limit_s`` is the CPU-time budget left for this call (safety stop)."""
+    """Solve the SWOT MILP. ``max_nodes`` is the deterministic work budget (default:
+    ``method/budget.json``); ``time_limit_s`` is the CPU-time budget left for this
+    call and only sets the safety stop (it never reaches CBC as a time limit)."""
     started = cpu_used_s()
+    if not max_nodes:
+        max_nodes = default_max_nodes(spec)
     milp = build_model(spec, big_m=big_m)
-    remaining = time_limit_s - (cpu_used_s() - started) - SAFETY_MARGIN_S
+    cap = time_limit_s - (cpu_used_s() - started) - SAFETY_MARGIN_S
     status = "Not Solved"
     volumes = None
     objective = None
     try:
-        code = milp["model"].solve(cbc(remaining, seed, max_nodes=max_nodes, log_path=log_path))
+        with cpu_cap(cap):
+            code = milp["model"].solve(cbc(seed, max_nodes=max_nodes, log_path=log_path))
         status = pulp.LpStatus.get(code, str(code))
         if has_incumbent(milp["model"], code):
             volumes = extract_volumes(spec, milp)
             objective = milp["cct"].varValue
-    except Exception as exc:  # CBC crash or missing binary: keep a valid output
+    except Exception as exc:  # CBC crash, safety stop or missing binary: keep a valid output
         status = f"solver error: {type(exc).__name__}: {exc}"
     fallback = volumes is None
     if fallback:
@@ -327,7 +370,7 @@ def solve_swot(spec: ExperimentSpec, time_limit_s: float = 120, seed: int = 1, b
     return {
         "method": "swot",
         "experiment": spec.name,
-        "cbc_max_nodes": max_nodes or None,
+        "cbc_max_nodes": max_nodes,
         "cpu_s": round(cpu_used_s() - started, 3),
         "solver_status": status,
         "milp_objective_us": objective,
@@ -366,9 +409,9 @@ def main() -> None:
     parser.add_argument("--output", help="schedule JSON to write (single-instance solver mode)")
     parser.add_argument("--output-dir", default="checkpoints/swot", help="batch mode output directory")
     parser.add_argument("--time-limit-s", type=float, default=120,
-                        help="CPU-seconds budget for this call (safety stop; the evaluator passes its budget)")
+                        help="CPU-seconds budget for this call (sets only the CPU safety stop; never a CBC time limit)")
     parser.add_argument("--max-nodes", type=int, default=None,
-                        help="CBC node budget (default: method/budget.json; 0 = time limit only)")
+                        help="CBC node budget (default: method/budget.json)")
     parser.add_argument("--node-scale", type=float, default=1.0,
                         help="multiply the default node budget (budget-sensitivity variants)")
     parser.add_argument("--seed", type=int, default=1)
@@ -379,11 +422,13 @@ def main() -> None:
         if not args.output:
             parser.error("--output is required with --instance")
         if args.max_nodes is None:
-            max_nodes = int(default_max_nodes(load_instance(Path(args.instance))) * args.node_scale)
-        else:
+            max_nodes = max(1, int(default_max_nodes(load_instance(Path(args.instance))) * args.node_scale))
+        elif args.max_nodes > 0:
             max_nodes = args.max_nodes
+        else:
+            parser.error("--max-nodes must be positive (CBC gets no time limit, so the node budget is its only stop)")
         solve_instance_file(Path(args.instance), Path(args.output), args.time_limit_s, args.seed, args.big_m,
-                            max_nodes=max_nodes or None, log_path=args.cbc_log)
+                            max_nodes=max_nodes, log_path=args.cbc_log)
     else:
         run(Path(args.output_dir), int(args.time_limit_s), args.seed)
 

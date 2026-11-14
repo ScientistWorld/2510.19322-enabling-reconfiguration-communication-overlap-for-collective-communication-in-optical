@@ -16,4 +16,4 @@
 
 set -e
 
-uv pip install --system pulp
+uv pip install --system "pulp==3.3.2"  # pinned: the bundled CBC binary decides the reference schedules
