@@ -25,7 +25,7 @@ The baseline is computed by the evaluator from the frozen instance: **Strawman-I
 - `cct_reduction_vs_strawman_pct` (primary, higher is better): mean over the experiment's instances of `100 * (CCT_strawman - CCT) / CCT_strawman`, each instance clipped to [-100, 100].
 - `valid_schedule` (constraint, higher is better): 1 when the run produced a valid schedule within the budget for every instance of every experiment.
 
-**Failure rule.** If any instance (in any experiment) is missing, over budget, non-zero exit, unparseable or physically invalid, the whole run fails: every metric of every experiment gets its worst value (`-100` and `0`). Numbers the solver writes itself (CCTs, validity flags, specs, baselines) are never read. The CPU-seconds each instance used are reported under `_status` (not scored).
+**Failure rule.** If any instance (in any experiment) is missing, over budget, non-zero exit, unparseable or physically invalid, the whole run fails: every metric of every experiment gets its worst value (`-100` and `0`). Before any solver runs, the evaluator writes the output file with every method failed; it is replaced only when every method has been scored, so an evaluator that is killed or crashes leaves worst values, not a missing entry. Numbers the solver writes itself (CCTs, validity flags, specs, baselines) are never read. The CPU-seconds each instance used are reported under `_status` (not scored).
 
 ## Experiments
 
@@ -33,7 +33,7 @@ Three families from the source paper's evaluation (see `scoring/EXPERIMENTS.md`)
 
 - `allreduce_scaling` (weight 0.40, 10 instances per slice): Rabenseifner AllReduce, 64-1024 nodes, k=4.
 - `high_optical_degree` (weight 0.30, 12 instances per slice): Rabenseifner ReduceScatter, 128-1024 nodes, k=8.
-- `hardware_sensitivity` (weight 0.30, 12 instances per slice): every combination of k in {2,4,8} and switching latency 0.02-20 ms once; four algorithms at k=2, no Bruck at k=4, ReduceScatter at k=8.
+- `hardware_sensitivity` (weight 0.30, 12 instances per slice): every combination of k in {2,4,8} and switching latency 0.02-20 ms once; four algorithms at k=2, ReduceScatter and AllReduce at k=4, ReduceScatter at k=8.
 
 In every family the payloads are spread so that the share of the lockstep time spent switching covers the family's band evenly; train and test have the same mix.
 

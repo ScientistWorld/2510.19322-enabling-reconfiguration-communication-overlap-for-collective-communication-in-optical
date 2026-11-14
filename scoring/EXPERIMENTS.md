@@ -14,11 +14,11 @@ Tests whether the gains hold when there are many parallel optical planes (eight)
 
 ## hardware_sensitivity (weight 0.30)
 
-Tests robustness to the optical hardware: two, four or eight planes, and switching latencies from 0.02 ms to 20 ms, each combination once, across reduce-scatter, AllReduce and two all-to-all algorithms (12 instances per slice; which algorithms appear depends on the number of planes, see below). Payloads sit around the point where transmission time and switching time are comparable, which is where a scheduler's choices matter most. A good scheduler should stay valid and keep its advantage from fast to slow switches and from narrow to wide optical degree.
+Tests robustness to the optical hardware: two, four or eight planes, and switching latencies from 0.02 ms to 20 ms, each combination once, across reduce-scatter, AllReduce and two all-to-all algorithms (12 instances per slice; all four algorithms with two planes, reduce-scatter and AllReduce with four, reduce-scatter with eight; see below). Payloads sit around the point where transmission time and switching time are comparable, which is where a scheduler's choices matter most. A good scheduler should stay valid and keep its advantage from fast to slow switches and from narrow to wide optical degree.
 
 ## Not scored: long or all-distinct collectives on many planes
 
-AllReduce, Bruck and Pairwise All-to-All with eight planes, and Bruck with four planes, are not part of the scored families. There a simple fixed schedule pattern already does as well as the reference scheduler or better, so the setting would reward a hand-written pattern rather than scheduling.
+AllReduce, Bruck and Pairwise All-to-All with eight planes, Bruck and Pairwise All-to-All with four planes, and collectives on more than 1024 nodes are not part of the scored families. There a simple fixed schedule pattern already does as well as the reference scheduler or better (on AllReduce with eight planes, and on AllReduce and reduce-scatter beyond 1024 nodes, the reference's schedules are mostly no better than the lockstep baseline), so the setting would reward a hand-written pattern rather than scheduling.
 
 ## Unscored reproduction checks (`scores.json` only)
 

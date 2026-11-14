@@ -282,10 +282,10 @@ FAMILIES = {
         "paper_section": "4.3 / Figs. 10-11",
         "algorithms": {
             "2": ["rabenseifner_reducescatter", "rabenseifner_allreduce", "bruck_alltoall", "pairwise_alltoall"],
-            "4": ["rabenseifner_reducescatter", "rabenseifner_allreduce", "pairwise_alltoall"],
+            "4": ["rabenseifner_reducescatter", "rabenseifner_allreduce"],
             "8": ["rabenseifner_reducescatter"],
         },
-        "nodes": {"default": [256], "pairwise_alltoall": [9, 17]},
+        "nodes": {"default": [256], "pairwise_alltoall": [9, 17]},  # Pairwise only at k=2
         "payload_mb": [0.25, 8192.0],
         "optical_degree": [2, 4, 8],
         "reconfig_latency_us": [20.0, 200.0, 2000.0, 20000.0],
