@@ -17,7 +17,8 @@ flag or specification the solver writes is ignored. The comparison baseline
 
 A run fails as a whole if any instance is missing, late, malformed or physically
 infeasible; a failed run receives the worst value of every scored metric in
-every experiment. The method key ``swot`` is always reported (missing solver =
+every experiment. Before any solver runs, the output file already holds every
+method as failed; it is replaced atomically once all methods are scored. The method key ``swot`` is always reported (missing solver =
 failed run). This module never imports method code.
 """
 
@@ -428,6 +429,18 @@ def evaluate(output: Path) -> dict[str, Any]:
             for name in suite
         },
     }
+    # Until every method has been scored, the file on disk says every method
+    # failed: if the evaluator is killed or crashes mid-run (for instance by a
+    # solver), the worst values stand instead of a missing (skipped) entry.
+    provisional = json.loads(json.dumps(scores))
+    provisional["_metadata"]["incomplete"] = "evaluator did not finish; every method is scored as failed"
+    for name in suite:
+        for method in methods:
+            provisional["experiments"][name]["results"][method] = dict(WORST_ROW)
+            provisional["experiments"][name]["_status"][method] = {"run_failed": True,
+                                                                   "failure": {"instance": None,
+                                                                               "reason": "evaluator did not finish"}}
+    _write_atomic(output, provisional)
     for method in methods:
         result = evaluate_method(method, suite)
         for experiment, row in result["rows"].items():
@@ -438,11 +451,15 @@ def evaluate(output: Path) -> dict[str, Any]:
                 "cpu_s": {iid: result["cpu_s"][iid] for iid in
                           (item["id"] for item in suite[experiment]) if iid in result["cpu_s"]},
             }
-    output.parent.mkdir(parents=True, exist_ok=True)
-    tmp = output.with_suffix(".tmp")
-    tmp.write_text(json.dumps(scores, indent=2))
-    tmp.replace(output)
+    _write_atomic(output, scores)
     return scores
+
+
+def _write_atomic(output: Path, payload: dict) -> None:
+    output.parent.mkdir(parents=True, exist_ok=True)
+    tmp = output.with_suffix(f".{os.getpid()}.tmp")
+    tmp.write_text(json.dumps(payload, indent=2))
+    tmp.replace(output)
 
 
 def main() -> None:

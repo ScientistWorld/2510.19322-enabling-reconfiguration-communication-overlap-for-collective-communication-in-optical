@@ -20,7 +20,7 @@ found, which says nothing about scheduling skill.) Settings where a fixed
 round-robin relay of plane groups (a 15-line rule) matches or beats the
 paper's budget-limited MILP are not scored, because there the test would
 reward a hand-written rule rather than scheduling: AllReduce, Bruck and
-Pairwise All-to-All at k=8 and Bruck at k=4. These are long or
+Pairwise All-to-All at k=8, and Bruck and Pairwise All-to-All at k=4. These are long or
 all-distinct-topology collectives on many interchangeable planes, the regime
 the paper itself reports its time-limited solver handles badly (Section
 4.3.1). This is a property of the
@@ -45,25 +45,6 @@ SEED = 91_733_502
 SHARE_BAND = {"allreduce_scaling": (0.35, 0.80), "high_optical_degree": (0.35, 0.92),
               "hardware_sensitivity": (0.35, 0.92)}
 
-# Families added in iteration 13 where the paper's own budget-limited solver
-# falls short: AllReduce at optical degree 8 (Fig. 7(b) setting; Section 4.3.1
-# reports that at k=8 the 120 s solver returns sub-optimal schedules for
-# halving-doubling) and AllReduce beyond the paper's 1024 nodes at k=4 (the
-# Fig. 8(a) scaling axis, extended). Each family is drawn from its own random
-# stream, so the families above keep their instances. Payloads are stratified
-# over ``draw_band``; instances whose switching share falls outside
-# ``keep_band`` are dropped (an instance property, independent of any scheduler).
-EXTRA_FAMILIES = {
-    "allreduce_high_degree": {"algorithm": "rabenseifner_allreduce", "k": 8, "recfg": 200.0,
-                              "nodes": [64, 256, 1024, 4096, 16384], "per_size": 3,
-                              "payload": (1.0, 4096.0), "draw_band": (0.35, 0.85), "keep_band": (0.35, 0.85)},
-    "allreduce_large_scale": {"algorithm": "rabenseifner_allreduce", "k": 4, "recfg": 200.0,
-                              "nodes": [2048, 4096, 8192, 16384], "per_size": 3,
-                              "payload": (1.0, 4096.0), "draw_band": (0.35, 0.80), "keep_band": (0.35, 0.80)},
-    "reducescatter_large_scale": {"algorithm": "rabenseifner_reducescatter", "k": 8, "recfg": 200.0,
-                                  "nodes": [2048, 4096, 8192, 16384], "per_size": 3,
-                                  "payload": (1.0, 8192.0), "draw_band": (0.35, 0.92), "keep_band": (0.35, 0.92)},
-}
 
 def strawman_cct_us(spec) -> float:
     bw = spec.per_link_gbps / 8000.0
@@ -144,6 +125,12 @@ def plan(rng):
         rng.shuffle(algos)
         for r, a in zip((20.0, 200.0, 2000.0, 20000.0), algos):
             p = rng.choice([9, 17]) if a == "pairwise_alltoall" else 256
+            if k == 4 and a == "pairwise_alltoall":
+                # Iteration 13: Pairwise All-to-All at k=4 is not scored (a fixed
+                # relay rule reaches the best known schedule there, far above the
+                # paper's MILP); its cell gets ReduceScatter. The draw above is
+                # kept so every other instance stays the same.
+                a, p = "rabenseifner_reducescatter", 256
             items.append(("hardware_sensitivity", a, p, k, r, (0.25, 8192.0)))
     return items
 
@@ -157,36 +144,6 @@ def stratified_quantiles(rng, items):
         rng.shuffle(values)
         quantiles.extend(zip(idx, values))
     return dict(quantiles)
-
-
-def build_extra(family: str, cfg: dict, start: int, used: set) -> list:
-    """Instances of one iteration-13 family (own random stream, stratified over draw_band)."""
-    rng = random.Random(f"{SEED}:{family}")
-    sizes = list(cfg["nodes"]) * cfg["per_size"]
-    rng.shuffle(sizes)
-    quantiles = [(j + rng.random()) / len(sizes) for j in range(len(sizes))]
-    rng.shuffle(quantiles)
-    lo_band, hi_band = cfg["draw_band"]
-    out = []
-    for n, (nodes, quantile) in enumerate(zip(sizes, quantiles), start=start):
-        alg, k, recfg, prange = cfg["algorithm"], cfg["k"], cfg["recfg"], cfg["payload"]
-        at_max = switching_share(make_instance("x", alg, nodes, prange[1], k, reconfig_latency_us=recfg))
-        at_min = switching_share(make_instance("x", alg, nodes, prange[0], k, reconfig_latency_us=recfg))
-        lo, hi = max(lo_band, at_max), min(hi_band, at_min)
-        payload = payload_for_share(alg, nodes, k, recfg, prange, lo + (hi - lo) * quantile)
-        while (alg, nodes, k, recfg, payload) in used:  # no duplicate instances
-            quantile = min(0.999, max(0.001, quantile + rng.uniform(-0.05, 0.05)))
-            payload = payload_for_share(alg, nodes, k, recfg, prange, lo + (hi - lo) * quantile)
-        used.add((alg, nodes, k, recfg, payload))
-        iid = f"{PREFIX}{n:02d}"
-        spec = make_instance(iid, alg, nodes, payload, k, reconfig_latency_us=recfg)
-        keep_lo, keep_hi = cfg["keep_band"]
-        if not keep_lo <= switching_share(spec) <= keep_hi:
-            continue
-        payload_json = spec.to_json()
-        payload_json.update({"id": iid, "experiment": family, "description": ""})
-        out.append(payload_json)
-    return out
 
 
 def build() -> dict:
@@ -207,12 +164,6 @@ def build() -> dict:
         payload_json = spec.to_json()
         payload_json.update({"id": iid, "experiment": experiment, "description": ""})
         experiments.setdefault(experiment, []).append(payload_json)
-    start = len(items) + 1
-    for family, cfg in EXTRA_FAMILIES.items():
-        drawn = build_extra(family, cfg, start, used)
-        start += len(cfg["nodes"]) * cfg["per_size"]
-        if drawn:
-            experiments[family] = drawn
     return {"slice": SLICE, "generator": f"eval/{SLICE}/make_instances.py", "experiments": experiments}
 
 
