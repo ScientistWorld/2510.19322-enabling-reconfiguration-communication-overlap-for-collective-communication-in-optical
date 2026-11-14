@@ -80,7 +80,7 @@ The constraints enforce traffic conservation, transmission duration under an alp
 
 - The paper's MILP (Eqs. 1-11). The `last_cfg`/`s_ij` bypass logic is linearized with pairwise "most recent previous use" implications; the paper's own `last_cfg` encoding is available (`build_model(..., formulation="paper")`), has the same optimum, and was about twice as slow per CBC node with no better incumbents in a probe, so it is not the default. A plane's first use is free (planes are pre-configured), as in the paper's Fig. 5.
 - Solved with CBC via PuLP, CBC's default single-threaded search, fixed CBC seeds.
-- **Budget.** The paper uses a 120 s CBC time limit. A time limit makes the schedule depend on the machine and its load, so the reproduction stops CBC after a fixed number of branch-and-bound nodes instead (`method/budget.json`): 5800 nodes for collectives of up to 14 steps, scaled by (14 / steps)^2 for longer ones (CBC's node rate fell about that fast with the number of steps). The budget was calibrated once on the compute node so that CBC uses roughly 50-110 of the 120 CPU-seconds; the schedule is then the same on any machine. The evaluator's CPU budget is only a safety stop (CBC `sec`). CBC's `timeMode cpu` is not used: a time-limited stop in that mode wrote unusable solutions.
+- **Budget.** The paper uses a 120 s CBC time limit. A time limit makes the schedule depend on the machine and on whatever runs beside it, so the reproduction gives CBC no time limit at all and stops it after a fixed number of branch-and-bound nodes instead (`method/budget.json`): 5800 nodes for collectives of up to 14 steps, scaled by (14 / steps)^2 for longer ones (CBC's node rate fell about that fast with the number of steps). The budget was calibrated once on the compute node; on the scored instances CBC then uses 1-100 of the 120 CPU-seconds, and the schedule is the same under any load (two independent runs of the hidden test, and a run with every CPU busy, gave identical schedules). CBC's clock is set to CPU time and it never sees a time limit; the only other stop is a CPU-time kill switch on the CBC process (8 CPU-s below the evaluator's budget) that has never fired on the scored instances; if it did, the lockstep schedule would be written. PuLP is pinned to 3.3.2, whose bundled CBC binary produced the reference numbers.
 - The paper leaves the big-M constant unspecified. The reproduction uses the lockstep (Strawman-ICR) completion time as M and bounds the CCT by it. The lockstep schedule is feasible, so the MILP optimum is unchanged (`--big-m horizon` keeps the loose variant of earlier iterations).
 - The MILP's plane-use/split decisions are written with exact earliest-start timing. If CBC returns no incumbent, the lockstep schedule is written.
 
@@ -117,7 +117,7 @@ The baseline is computed by the evaluator from the frozen instance: **Strawman-I
 - `cct_reduction_vs_strawman_pct` (primary, higher is better): mean over the experiment's instances of `100 * (CCT_strawman - CCT) / CCT_strawman`, each instance clipped to [-100, 100].
 - `valid_schedule` (constraint, higher is better): 1 when the run produced a valid schedule within the budget for every instance of every experiment.
 
-**Failure rule.** If any instance (in any experiment) is missing, over budget, non-zero exit, unparseable or physically invalid, the whole run fails: every metric of every experiment gets its worst value (`-100` and `0`). Numbers the solver writes itself (CCTs, validity flags, specs, baselines) are never read. The CPU-seconds each instance used are reported under `_status` (not scored).
+**Failure rule.** If any instance (in any experiment) is missing, over budget, non-zero exit, unparseable or physically invalid, the whole run fails: every metric of every experiment gets its worst value (`-100` and `0`). Before any solver runs, the evaluator writes the output file with every method failed; it is replaced only when every method has been scored, so an evaluator that is killed or crashes leaves worst values, not a missing entry. Numbers the solver writes itself (CCTs, validity flags, specs, baselines) are never read. The CPU-seconds each instance used are reported under `_status` (not scored).
 
 ## Experiments
 
@@ -125,7 +125,7 @@ Three families from the source paper's evaluation (see `scoring/EXPERIMENTS.md`)
 
 - `allreduce_scaling` (weight 0.40, 10 instances per slice): Rabenseifner AllReduce, 64-1024 nodes, k=4.
 - `high_optical_degree` (weight 0.30, 12 instances per slice): Rabenseifner ReduceScatter, 128-1024 nodes, k=8.
-- `hardware_sensitivity` (weight 0.30, 12 instances per slice): every combination of k in {2,4,8} and switching latency 0.02-20 ms once; four algorithms at k=2, no Bruck at k=4, ReduceScatter at k=8.
+- `hardware_sensitivity` (weight 0.30, 12 instances per slice): every combination of k in {2,4,8} and switching latency 0.02-20 ms once; four algorithms at k=2, ReduceScatter and AllReduce at k=4, ReduceScatter at k=8.
 
 In every family the payloads are spread so that the share of the lockstep time spent switching covers the family's band evenly; train and test have the same mix.
 
@@ -494,6 +494,50 @@ All comparisons use the frozen instance: same steps, optical degree, bandwidth, 
 - The test was scaled to 34 stratified instances per slice, restricted to settings where a 15-line relay rule does not match the paper's method.
 - Hidden-test reference: 32.08 / 26.88 / 24.29%. A hybrid positive control scores 45.62 / 40.33 / 34.57%: +12.4 points paired, 30 wins and 0 losses, against 1-2.4 points of seed noise.
 - Fig. 5 reproduces exactly (1500 -> 1200 us). Fig. 8: 38.2% at 64 nodes (paper 39.6%) and 41.6% at 512 nodes (paper 46.9%).
+
+</details>
+
+### Iteration 11: claude-opus-5-5 (hardener)
+- **Milestone**: `core_claim_plus` | **Status**: done
+- **Working time**: 29m | **GPU**: 0.0h
+- **Jobs**: 20 total (9 completed, 3 failed)
+
+<details>
+<summary>Progress Log</summary>
+
+### [2026-06-06 01:35] - core_claim
+- Managed CPU job ran `scripts/reproduce.sh` successfully.
+- Reproduced the paper's Fig. 5 Rabenseifner AllReduce example: Strawman-ICR 1500 us, SWOT 1200 us, 20% CCT reduction, valid schedule.
+
+### [2026-06-06 05:48] - core_claim
+- Added two paper Fig. 8 AllReduce scalability targets to the benchmark plan.
+- Fixed evaluator artifact merging so `eval/` independently validates generated schedules from their workload specs.
+- Tightened topology-bypass consistency so repeated use of the same plane/configuration cannot report a redundant reconfiguration.
+
+### [2026-06-06 05:58] - core_claim_plus
+- Managed CPU job `f4fb2013-489` regenerated all registered baseline and SWOT artifacts in the container.
+- Reproduced Fig. 5 exactly: Strawman-ICR 1500 us, SWOT 1200 us, 20.0% CCT reduction, valid schedule.
+- Reproduced the same claim on two Fig. 8 scalability settings with valid schedules: 64-node AllReduce reduction 35.89% versus the paper's 39.6%, and 512-node AllReduce reduction 42.09% versus the paper's 46.9%.
+- `python validate.py --compare` passed, including evaluation/method import separation and checks that evaluation reads generated artifacts.
+
+### [2026-06-06 06:35] - core_claim_plus
+- Final verification removed unscored Pairwise All-to-All target entries from the official rubric, keeping `TARGETS.md`, `EXPERIMENTS.md`, `reference.json`, and `scores.json` aligned.
+- Generalized the main evaluator to discover result artifacts under `checkpoints/` instead of loading only fixed baseline/SWOT paths.
+- Re-ran standalone evaluation and validation after the cleanup; both passed.
+
+### [2026-11-12] - core_claim_plus
+- Hardening: the hidden test now runs solvers on held-out instances from the paper's Figs. 7-8 and Section 4.3 settings. It validates schedules physically and rewards better schedulers above seed noise.
+- The reference (the paper's MILP, tight valid big-M, 120 s CBC) beats Strawman-ICR in every family. Fig. 5 reproduces exactly (1500 -> 1200 us).
+
+### [2026-11-14] - core_claim_plus
+- Hardening iteration 12. The evaluator counts a 120 CPU-second budget per instance over the solver's process tree, replacing the wall-clock limit. The reference MILP uses a deterministic CBC node budget and is bit-repeatable across nodes.
+- The test was scaled to 34 stratified instances per slice, restricted to settings where a 15-line relay rule does not match the paper's method.
+- Hidden-test reference: 32.08 / 26.88 / 24.29%. A hybrid positive control scores 45.62 / 40.33 / 34.57%: +12.4 points paired, 30 wins and 0 losses, against 1-2.4 points of seed noise.
+- Fig. 5 reproduces exactly (1500 -> 1200 us). Fig. 8: 38.2% at 64 nodes (paper 39.6%) and 41.6% at 512 nodes (paper 46.9%).
+
+### [2026-11-14] - core_claim_plus (iteration 13 hardening)
+- The reference MILP's CBC no longer sees any time limit (node budget only, CPU-time mode, kill switch outside CBC); PuLP pinned to 3.3.2. Two independent hidden-test runs, each run alone, are identical: 32.08 / 26.87 / 25.39 (Fig. 5: 1500 -> 1200 us exactly).
+- Positive control +11.8 +- 1.5 points over the reference (30/0 instances), CBC seed noise +1.1 to +1.5; relay rule below the reference in every family after the Pairwise k=4 hardware cell became ReduceScatter. Details in HARDENING.md.
 
 </details>
 
