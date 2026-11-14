@@ -7,7 +7,7 @@ Every scored experiment reports, per method, a benefit metric and a constraint m
 
 How to run: `bash scripts/evaluate_train.sh` (visible), `bash scripts/evaluate_test.sh` (held out). Both take no arguments and score every `scripts/solvers/*.sh` plus the required `swot`.
 
-The reference numbers below are the reproduced paper method (the SWOT MILP with CBC under a deterministic node budget); they are identical on every run.
+The reference numbers below are the reproduced paper method (the SWOT MILP with CBC under a deterministic node budget and no time limit); two independent runs of the hidden test, each with nothing else running, gave identical schedules and scores.
 
 ## Primary: allreduce_scaling (weight 0.40)
 
@@ -19,7 +19,7 @@ Rabenseifner ReduceScatter on 128-1024 nodes, k=8 at 100 Gbps, 1-512 MB payloads
 
 ## hardware_sensitivity (weight 0.30)
 
-Every combination of k in {2,4,8} (800/k Gbps) and switching latency in {0.02, 0.2, 2, 20} ms once: all four algorithms at k=2 (256 nodes, Pairwise on 9 or 17), no Bruck at k=4, ReduceScatter at k=8; 0.25-8192 MB payloads around the transmission/switching knee (switching share 0.35-0.92). Paper anchor: 46.9% (Fig. 8(a) AllReduce at k=4, 0.2 ms switching, 512 nodes; Section 4.3 itself gives no numbers); the k=2 design example (20%) is kept under a `_` key. Reference reproduction: 24.29% (hidden test), 25.26% (train).
+Every combination of k in {2,4,8} (800/k Gbps) and switching latency in {0.02, 0.2, 2, 20} ms once: all four algorithms at k=2 (256 nodes, Pairwise on 9 or 17), ReduceScatter and AllReduce at k=4, ReduceScatter at k=8; 0.25-8192 MB payloads around the transmission/switching knee (switching share 0.35-0.92). Paper anchor: 46.9% (Fig. 8(a) AllReduce at k=4, 0.2 ms switching, 512 nodes; Section 4.3 itself gives no numbers); the k=2 design example (20%) is kept under a `_` key. Reference reproduction: 25.39% (hidden test), 24.82% (train).
 
 ## Unscored paper checks (`scoring/scores.json`, via `bash scripts/evaluate.sh`)
 

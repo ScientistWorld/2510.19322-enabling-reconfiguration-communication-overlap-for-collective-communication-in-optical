@@ -33,3 +33,7 @@
 - The test was scaled to 34 stratified instances per slice, restricted to settings where a 15-line relay rule does not match the paper's method.
 - Hidden-test reference: 32.08 / 26.88 / 24.29%. A hybrid positive control scores 45.62 / 40.33 / 34.57%: +12.4 points paired, 30 wins and 0 losses, against 1-2.4 points of seed noise.
 - Fig. 5 reproduces exactly (1500 -> 1200 us). Fig. 8: 38.2% at 64 nodes (paper 39.6%) and 41.6% at 512 nodes (paper 46.9%).
+
+### [2026-11-14] - core_claim_plus (iteration 13 hardening)
+- The reference MILP's CBC no longer sees any time limit (node budget only, CPU-time mode, kill switch outside CBC); PuLP pinned to 3.3.2. Two independent hidden-test runs, each run alone, are identical: 32.08 / 26.87 / 25.39 (Fig. 5: 1500 -> 1200 us exactly).
+- Positive control +11.8 +- 1.5 points over the reference (30/0 instances), CBC seed noise +1.1 to +1.5; relay rule below the reference in every family after the Pairwise k=4 hardware cell became ReduceScatter. Details in HARDENING.md.

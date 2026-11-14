@@ -75,3 +75,11 @@
   - Seed noise: 1-2.4 points.
   - Every shortcut fails or scores lockstep.
   - Details in `HARDENING.md`.
+
+## Iteration 13 (hardening)
+
+- Reference: CBC gets no wall-clock or CPU time limit, only the deterministic node budget; CPU-time kill switch outside CBC as safety stop; `pulp==3.3.2` pinned. Reference reproduced bit-identically twice (and under full CPU load).
+- REVIEW.md's "reference = hybrid" did not reproduce: the corrected reference equals the stored 32.08 / 26.87; the hybrid stays 13.5 / 13.5 / 8.8 points above.
+- Three candidate families where the paper's solver falls short (k=8 AllReduce, AllReduce and ReduceScatter beyond 1024 nodes) were measured and dropped: a 15-line relay rule beats the reference there.
+- `hardware_sensitivity`: Pairwise k=4 cell replaced by ReduceScatter (relay rule reached the best known schedule there); relay rule now below the reference in every family.
+- Evaluators pre-write an all-failed score file, so a solver that kills the evaluator scores as failed.
