@@ -235,3 +235,7 @@ core.[0-9]*
 hardening/_runtime/
 hardening/replay_cache.json
 !hardening/runs/
+hardening/_runtime_final/
+hardening/final_runs/*/checkpoints_train/
+hardening/final_runs/*.new/
+hardening/runs/
