@@ -46,7 +46,7 @@ The collective starts at time 0; its CCT is the end of the last transmission.
 
 ## Workloads
 
-Instances come from the collective algorithms and network settings of the source paper's evaluation (see `data/collectives.py` for generators): Rabenseifner ReduceScatter / AllReduce (recursive halving/doubling), Bruck All-to-All and Pairwise-exchange All-to-All, on 9-1024 nodes, with `k` in {2, 4, 8}, payloads of 1-512 MB, `T_lat` = 20 us and `T_recfg` from 20 us to 20 ms. Public train instances are in `eval/train/instances.json`; held-out test instances are drawn from the same families and ranges.
+Instances come from the collective algorithms and network settings of the source paper's evaluation (see `data/collectives.py` for generators and family settings): Rabenseifner ReduceScatter / AllReduce (recursive halving/doubling), Bruck All-to-All and Pairwise-exchange All-to-All, on 9-1024 nodes (7-20 steps), with `k` in {2, 4, 8}, `T_lat` = 20 us and `T_recfg` from 20 us to 20 ms. Payloads are chosen per instance so that switching is a material but not total share of the lockstep schedule's time (between 35% and 80-92% of it), which is where schedules differ. Public train instances are in `eval/train/instances.json`; held-out test instances are drawn from the same families and ranges.
 
 ## Why It Matters
 
@@ -54,7 +54,7 @@ Distributed ML training spends substantial time in collective communication. Opt
 
 ## Success Criteria
 
-Valid schedules with lower CCT than the naive lockstep reconfiguration baseline (all planes serve every step with an even split and switch together whenever the topology changes), under fixed optical resources, bandwidth, latencies and collective workload, produced within a fixed per-instance compute budget.
+Valid schedules with lower CCT than the naive lockstep reconfiguration baseline (all planes serve every step with an even split and switch together whenever the topology changes), under fixed optical resources, bandwidth, latencies and collective workload, produced within a fixed per-instance compute budget (120 CPU-seconds, counted by the evaluator).
 
 ---
 
@@ -78,9 +78,10 @@ The constraints enforce traffic conservation, transmission duration under an alp
 
 ## Reproduction (`method/swot_scheduler.py`, exposed as `scripts/solvers/swot.sh`)
 
-- The paper's MILP (Eqs. 1-11): the `last_cfg`/`s_ij` logic is linearized with pairwise "most recent previous use" implications. A plane's first use is free (planes are pre-configured), as in the paper's Fig. 5.
-- Solved with CBC via PuLP under the paper's 120 s limit, single thread, fixed CBC seeds.
-- The paper leaves the big-M constant unspecified. The reproduction uses the lockstep (Strawman-ICR) completion time as M and bounds the CCT by it. The lockstep schedule is feasible, so the MILP optimum is unchanged. Earlier iterations used a loose horizon M, which let the time-limited incumbent end up worse than lockstep on some large k=8 instances (`--big-m horizon` keeps that variant).
+- The paper's MILP (Eqs. 1-11). The `last_cfg`/`s_ij` bypass logic is linearized with pairwise "most recent previous use" implications; the paper's own `last_cfg` encoding is available (`build_model(..., formulation="paper")`), has the same optimum, and was about twice as slow per CBC node with no better incumbents in a probe, so it is not the default. A plane's first use is free (planes are pre-configured), as in the paper's Fig. 5.
+- Solved with CBC via PuLP, CBC's default single-threaded search, fixed CBC seeds.
+- **Budget.** The paper uses a 120 s CBC time limit. A time limit makes the schedule depend on the machine and its load, so the reproduction stops CBC after a fixed number of branch-and-bound nodes instead (`method/budget.json`): 5800 nodes for collectives of up to 14 steps, scaled by (14 / steps)^2 for longer ones (CBC's node rate fell about that fast with the number of steps). The budget was calibrated once on the compute node so that CBC uses roughly 50-110 of the 120 CPU-seconds; the schedule is then the same on any machine. The evaluator's CPU budget is only a safety stop (CBC `sec`). CBC's `timeMode cpu` is not used: a time-limited stop in that mode wrote unusable solutions.
+- The paper leaves the big-M constant unspecified. The reproduction uses the lockstep (Strawman-ICR) completion time as M and bounds the CCT by it. The lockstep schedule is feasible, so the MILP optimum is unchanged (`--big-m horizon` keeps the loose variant of earlier iterations).
 - The MILP's plane-use/split decisions are written with exact earliest-start timing. If CBC returns no incumbent, the lockstep schedule is written.
 
 ## Main Claims
@@ -96,11 +97,11 @@ The primary claim is that demand-aware overlapping schedules reduce CCT compared
 A method is a script `scripts/solvers/<method>.sh`. Every evaluator calls it from the workspace root, once per workload instance:
 
 ```
-bash scripts/solvers/<method>.sh INSTANCE_JSON OUTPUT_JSON TIME_LIMIT_S
+bash scripts/solvers/<method>.sh INSTANCE_JSON OUTPUT_JSON CPU_BUDGET_S
 ```
 
 - `INSTANCE_JSON` holds `optical_degree` (k), `per_link_gbps`, `base_latency_us`, `reconfig_latency_us`, `nodes`, `algorithm`, `payload_mb` and the ordered `steps` (`step`, `config`, `message_mb`).
-- `TIME_LIMIT_S` is 120 (the source paper's solver limit). The process group is killed 150 s after it starts; a killed or non-zero exit counts as a failure.
+- `CPU_BUDGET_S` is 120: the source paper's per-instance solver budget, counted as **CPU time** by the evaluator over the solver's whole process tree (every process the solver starts, including detached ones, is reaped and counted). Using more than 120 CPU-seconds on any instance is a failure. Each process is also hard-limited to 135 CPU-seconds (a backstop against runaway processes), and a wall-clock cap of 300 s stops hung or sleeping solvers. Make your solver's work budget deterministic if you want repeatable scores (e.g. iteration or node counts rather than time).
 - The solver writes `{"schedule": [...]}` to `OUTPUT_JSON`. One entry per (step, plane) that carries data, with numeric fields `step`, `plane`, `message_mb`, `transmit_start_us`, `transmit_end_us`, and, when that plane must switch topology before this transmission, `reconfig_start_us` and `reconfig_end_us`. Optional `reconfigured` (0/1) and `config` must agree with the instance if present. Anything else in the file is ignored.
 
 The scored method key is **`swot`**; it is always reported (a missing `scripts/solvers/swot.sh` is a failed run). Every other `scripts/solvers/*.sh` on disk is scored too. `scripts/solvers/swot.sh` currently runs the reproduced paper method; replace it with your own solver.
@@ -114,27 +115,27 @@ The baseline is computed by the evaluator from the frozen instance: **Strawman-I
 ## Metrics (per experiment)
 
 - `cct_reduction_vs_strawman_pct` (primary, higher is better): mean over the experiment's instances of `100 * (CCT_strawman - CCT) / CCT_strawman`, each instance clipped to [-100, 100].
-- `valid_schedule` (constraint, higher is better): 1 when the run produced a valid schedule for every instance of every experiment.
+- `valid_schedule` (constraint, higher is better): 1 when the run produced a valid schedule within the budget for every instance of every experiment.
 
-**Failure rule.** If any instance (in any experiment) is missing, late, non-zero exit, unparseable or physically invalid, the whole run fails: every metric of every experiment gets its worst value (`-100` and `0`). Numbers the solver writes itself (CCTs, validity flags, specs, baselines) are never read.
+**Failure rule.** If any instance (in any experiment) is missing, over budget, non-zero exit, unparseable or physically invalid, the whole run fails: every metric of every experiment gets its worst value (`-100` and `0`). Numbers the solver writes itself (CCTs, validity flags, specs, baselines) are never read. The CPU-seconds each instance used are reported under `_status` (not scored).
 
 ## Experiments
 
-Three families from the source paper's evaluation, 6 instances each per slice (see `scoring/EXPERIMENTS.md`):
+Three families from the source paper's evaluation (see `scoring/EXPERIMENTS.md`):
 
-- `allreduce_scaling` (weight 0.40): Rabenseifner AllReduce, 64-1024 nodes, k=4.
-- `collective_algorithms` (weight 0.40): four collective algorithms, k=8.
-- `hardware_sensitivity` (weight 0.20): k in {2,4,8} and switching latency 0.02-20 ms.
+- `allreduce_scaling` (weight 0.40, 10 instances per slice): Rabenseifner AllReduce, 64-1024 nodes, k=4.
+- `high_optical_degree` (weight 0.30, 12 instances per slice): Rabenseifner ReduceScatter, 128-1024 nodes, k=8.
+- `hardware_sensitivity` (weight 0.30, 12 instances per slice): every combination of k in {2,4,8} and switching latency 0.02-20 ms once; four algorithms at k=2, no Bruck at k=4, ReduceScatter at k=8.
 
-Every instance is too large to enumerate plane-usage patterns within the budget.
+In every family the payloads are spread so that the share of the lockstep time spent switching covers the family's band evenly; train and test have the same mix.
 
 ## Train and test
 
-- `bash scripts/evaluate_train.sh` -> `scoring/scores_train.json`: public instances in `eval/train/instances.json` (includes the paper's Fig. 8 64- and 512-node AllReduce points). Train schedules are kept in `checkpoints/train/<method>/`.
-- `bash scripts/evaluate_test.sh` -> `scoring/scores_test.json`: held-out instances of the same families and ranges; scored the same way. Takes no arguments.
+- `bash scripts/evaluate_train.sh` -> `scoring/scores_train.json`: public instances in `eval/train/instances.json`. Train schedules are kept in `checkpoints/train/<method>/`.
+- `bash scripts/evaluate_test.sh` -> `scoring/scores_test.json`: held-out instances of the same families, ranges and difficulty mix; scored the same way. Takes no arguments.
 - `bash scripts/evaluate.sh` -> `scoring/scores_train.json` and `scoring/scores.json` (train experiments plus unscored `_paper_*` checks on the paper's own Fig. 5 and Fig. 8 instances, with `cct_us`).
 
-Each run costs up to ~2.5 min per instance per method (18 train + 3 paper instances for `evaluate.sh`, 18 test instances for the hidden test).
+Each run costs up to 2 CPU-minutes per instance per method (34 train + 3 paper instances for `evaluate.sh`, 34 test instances for the hidden test).
 
 ## Paper reference points
 
@@ -453,6 +454,46 @@ All comparisons use the frozen instance: same steps, optical degree, bandwidth, 
 ### [2026-11-12] - core_claim_plus
 - Hardening: the hidden test now runs solvers on held-out instances from the paper's Figs. 7-8 and Section 4.3 settings. It validates schedules physically and rewards better schedulers above seed noise.
 - The reference (the paper's MILP, tight valid big-M, 120 s CBC) beats Strawman-ICR in every family. Fig. 5 reproduces exactly (1500 -> 1200 us).
+
+</details>
+
+### Iteration 11: claude-opus-5-5 (hardener)
+- **Milestone**: `core_claim_plus` | **Status**: done
+- **Working time**: 1.9h | **GPU**: 0.0h
+- **Jobs**: 16 total (8 completed, 2 failed)
+
+<details>
+<summary>Progress Log</summary>
+
+### [2026-06-06 01:35] - core_claim
+- Managed CPU job ran `scripts/reproduce.sh` successfully.
+- Reproduced the paper's Fig. 5 Rabenseifner AllReduce example: Strawman-ICR 1500 us, SWOT 1200 us, 20% CCT reduction, valid schedule.
+
+### [2026-06-06 05:48] - core_claim
+- Added two paper Fig. 8 AllReduce scalability targets to the benchmark plan.
+- Fixed evaluator artifact merging so `eval/` independently validates generated schedules from their workload specs.
+- Tightened topology-bypass consistency so repeated use of the same plane/configuration cannot report a redundant reconfiguration.
+
+### [2026-06-06 05:58] - core_claim_plus
+- Managed CPU job `f4fb2013-489` regenerated all registered baseline and SWOT artifacts in the container.
+- Reproduced Fig. 5 exactly: Strawman-ICR 1500 us, SWOT 1200 us, 20.0% CCT reduction, valid schedule.
+- Reproduced the same claim on two Fig. 8 scalability settings with valid schedules: 64-node AllReduce reduction 35.89% versus the paper's 39.6%, and 512-node AllReduce reduction 42.09% versus the paper's 46.9%.
+- `python validate.py --compare` passed, including evaluation/method import separation and checks that evaluation reads generated artifacts.
+
+### [2026-06-06 06:35] - core_claim_plus
+- Final verification removed unscored Pairwise All-to-All target entries from the official rubric, keeping `TARGETS.md`, `EXPERIMENTS.md`, `reference.json`, and `scores.json` aligned.
+- Generalized the main evaluator to discover result artifacts under `checkpoints/` instead of loading only fixed baseline/SWOT paths.
+- Re-ran standalone evaluation and validation after the cleanup; both passed.
+
+### [2026-11-12] - core_claim_plus
+- Hardening: the hidden test now runs solvers on held-out instances from the paper's Figs. 7-8 and Section 4.3 settings. It validates schedules physically and rewards better schedulers above seed noise.
+- The reference (the paper's MILP, tight valid big-M, 120 s CBC) beats Strawman-ICR in every family. Fig. 5 reproduces exactly (1500 -> 1200 us).
+
+### [2026-11-14] - core_claim_plus
+- Hardening iteration 12. The evaluator counts a 120 CPU-second budget per instance over the solver's process tree, replacing the wall-clock limit. The reference MILP uses a deterministic CBC node budget and is bit-repeatable across nodes.
+- The test was scaled to 34 stratified instances per slice, restricted to settings where a 15-line relay rule does not match the paper's method.
+- Hidden-test reference: 32.08 / 26.88 / 24.29%. A hybrid positive control scores 45.62 / 40.33 / 34.57%: +12.4 points paired, 30 wins and 0 losses, against 1-2.4 points of seed noise.
+- Fig. 5 reproduces exactly (1500 -> 1200 us). Fig. 8: 38.2% at 64 nodes (paper 39.6%) and 41.6% at 512 nodes (paper 46.9%).
 
 </details>
 
