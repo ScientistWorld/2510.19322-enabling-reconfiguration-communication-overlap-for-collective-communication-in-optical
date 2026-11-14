@@ -5916,6 +5916,938 @@
     "id": "te61",
     "experiment": "allreduce_large_scale"
    }
+  ],
+  "reducescatter_large_scale": [
+   {
+    "name": "te62",
+    "description": "",
+    "nodes": 2048,
+    "optical_degree": 8,
+    "per_link_gbps": 100.0,
+    "base_latency_us": 20.0,
+    "reconfig_latency_us": 200.0,
+    "steps": [
+     {
+      "step": 1,
+      "config": 1,
+      "message_mb": 81.138
+     },
+     {
+      "step": 2,
+      "config": 2,
+      "message_mb": 40.569
+     },
+     {
+      "step": 3,
+      "config": 3,
+      "message_mb": 20.2845
+     },
+     {
+      "step": 4,
+      "config": 4,
+      "message_mb": 10.14225
+     },
+     {
+      "step": 5,
+      "config": 5,
+      "message_mb": 5.071125
+     },
+     {
+      "step": 6,
+      "config": 6,
+      "message_mb": 2.5355625
+     },
+     {
+      "step": 7,
+      "config": 7,
+      "message_mb": 1.26778125
+     },
+     {
+      "step": 8,
+      "config": 8,
+      "message_mb": 0.633890625
+     },
+     {
+      "step": 9,
+      "config": 9,
+      "message_mb": 0.3169453125
+     },
+     {
+      "step": 10,
+      "config": 10,
+      "message_mb": 0.15847265625
+     },
+     {
+      "step": 11,
+      "config": 11,
+      "message_mb": 0.079236328125
+     }
+    ],
+    "algorithm": "rabenseifner_reducescatter",
+    "payload_mb": 162.276,
+    "id": "te62",
+    "experiment": "reducescatter_large_scale"
+   },
+   {
+    "name": "te63",
+    "description": "",
+    "nodes": 16384,
+    "optical_degree": 8,
+    "per_link_gbps": 100.0,
+    "base_latency_us": 20.0,
+    "reconfig_latency_us": 200.0,
+    "steps": [
+     {
+      "step": 1,
+      "config": 1,
+      "message_mb": 35.246
+     },
+     {
+      "step": 2,
+      "config": 2,
+      "message_mb": 17.623
+     },
+     {
+      "step": 3,
+      "config": 3,
+      "message_mb": 8.8115
+     },
+     {
+      "step": 4,
+      "config": 4,
+      "message_mb": 4.40575
+     },
+     {
+      "step": 5,
+      "config": 5,
+      "message_mb": 2.202875
+     },
+     {
+      "step": 6,
+      "config": 6,
+      "message_mb": 1.1014375
+     },
+     {
+      "step": 7,
+      "config": 7,
+      "message_mb": 0.55071875
+     },
+     {
+      "step": 8,
+      "config": 8,
+      "message_mb": 0.275359375
+     },
+     {
+      "step": 9,
+      "config": 9,
+      "message_mb": 0.1376796875
+     },
+     {
+      "step": 10,
+      "config": 10,
+      "message_mb": 0.06883984375
+     },
+     {
+      "step": 11,
+      "config": 11,
+      "message_mb": 0.034419921875
+     },
+     {
+      "step": 12,
+      "config": 12,
+      "message_mb": 0.0172099609375
+     },
+     {
+      "step": 13,
+      "config": 13,
+      "message_mb": 0.00860498046875
+     },
+     {
+      "step": 14,
+      "config": 14,
+      "message_mb": 0.004302490234375
+     }
+    ],
+    "algorithm": "rabenseifner_reducescatter",
+    "payload_mb": 70.492,
+    "id": "te63",
+    "experiment": "reducescatter_large_scale"
+   },
+   {
+    "name": "te64",
+    "description": "",
+    "nodes": 8192,
+    "optical_degree": 8,
+    "per_link_gbps": 100.0,
+    "base_latency_us": 20.0,
+    "reconfig_latency_us": 200.0,
+    "steps": [
+     {
+      "step": 1,
+      "config": 1,
+      "message_mb": 12.4195
+     },
+     {
+      "step": 2,
+      "config": 2,
+      "message_mb": 6.20975
+     },
+     {
+      "step": 3,
+      "config": 3,
+      "message_mb": 3.104875
+     },
+     {
+      "step": 4,
+      "config": 4,
+      "message_mb": 1.5524375
+     },
+     {
+      "step": 5,
+      "config": 5,
+      "message_mb": 0.77621875
+     },
+     {
+      "step": 6,
+      "config": 6,
+      "message_mb": 0.388109375
+     },
+     {
+      "step": 7,
+      "config": 7,
+      "message_mb": 0.1940546875
+     },
+     {
+      "step": 8,
+      "config": 8,
+      "message_mb": 0.09702734375
+     },
+     {
+      "step": 9,
+      "config": 9,
+      "message_mb": 0.048513671875
+     },
+     {
+      "step": 10,
+      "config": 10,
+      "message_mb": 0.0242568359375
+     },
+     {
+      "step": 11,
+      "config": 11,
+      "message_mb": 0.01212841796875
+     },
+     {
+      "step": 12,
+      "config": 12,
+      "message_mb": 0.006064208984375
+     },
+     {
+      "step": 13,
+      "config": 13,
+      "message_mb": 0.0030321044921875
+     }
+    ],
+    "algorithm": "rabenseifner_reducescatter",
+    "payload_mb": 24.839,
+    "id": "te64",
+    "experiment": "reducescatter_large_scale"
+   },
+   {
+    "name": "te65",
+    "description": "",
+    "nodes": 16384,
+    "optical_degree": 8,
+    "per_link_gbps": 100.0,
+    "base_latency_us": 20.0,
+    "reconfig_latency_us": 200.0,
+    "steps": [
+     {
+      "step": 1,
+      "config": 1,
+      "message_mb": 141.222
+     },
+     {
+      "step": 2,
+      "config": 2,
+      "message_mb": 70.611
+     },
+     {
+      "step": 3,
+      "config": 3,
+      "message_mb": 35.3055
+     },
+     {
+      "step": 4,
+      "config": 4,
+      "message_mb": 17.65275
+     },
+     {
+      "step": 5,
+      "config": 5,
+      "message_mb": 8.826375
+     },
+     {
+      "step": 6,
+      "config": 6,
+      "message_mb": 4.4131875
+     },
+     {
+      "step": 7,
+      "config": 7,
+      "message_mb": 2.20659375
+     },
+     {
+      "step": 8,
+      "config": 8,
+      "message_mb": 1.103296875
+     },
+     {
+      "step": 9,
+      "config": 9,
+      "message_mb": 0.5516484375
+     },
+     {
+      "step": 10,
+      "config": 10,
+      "message_mb": 0.27582421875
+     },
+     {
+      "step": 11,
+      "config": 11,
+      "message_mb": 0.137912109375
+     },
+     {
+      "step": 12,
+      "config": 12,
+      "message_mb": 0.0689560546875
+     },
+     {
+      "step": 13,
+      "config": 13,
+      "message_mb": 0.03447802734375
+     },
+     {
+      "step": 14,
+      "config": 14,
+      "message_mb": 0.017239013671875
+     }
+    ],
+    "algorithm": "rabenseifner_reducescatter",
+    "payload_mb": 282.444,
+    "id": "te65",
+    "experiment": "reducescatter_large_scale"
+   },
+   {
+    "name": "te66",
+    "description": "",
+    "nodes": 4096,
+    "optical_degree": 8,
+    "per_link_gbps": 100.0,
+    "base_latency_us": 20.0,
+    "reconfig_latency_us": 200.0,
+    "steps": [
+     {
+      "step": 1,
+      "config": 1,
+      "message_mb": 14.5785
+     },
+     {
+      "step": 2,
+      "config": 2,
+      "message_mb": 7.28925
+     },
+     {
+      "step": 3,
+      "config": 3,
+      "message_mb": 3.644625
+     },
+     {
+      "step": 4,
+      "config": 4,
+      "message_mb": 1.8223125
+     },
+     {
+      "step": 5,
+      "config": 5,
+      "message_mb": 0.91115625
+     },
+     {
+      "step": 6,
+      "config": 6,
+      "message_mb": 0.455578125
+     },
+     {
+      "step": 7,
+      "config": 7,
+      "message_mb": 0.2277890625
+     },
+     {
+      "step": 8,
+      "config": 8,
+      "message_mb": 0.11389453125
+     },
+     {
+      "step": 9,
+      "config": 9,
+      "message_mb": 0.056947265625
+     },
+     {
+      "step": 10,
+      "config": 10,
+      "message_mb": 0.0284736328125
+     },
+     {
+      "step": 11,
+      "config": 11,
+      "message_mb": 0.01423681640625
+     },
+     {
+      "step": 12,
+      "config": 12,
+      "message_mb": 0.007118408203125
+     }
+    ],
+    "algorithm": "rabenseifner_reducescatter",
+    "payload_mb": 29.157,
+    "id": "te66",
+    "experiment": "reducescatter_large_scale"
+   },
+   {
+    "name": "te67",
+    "description": "",
+    "nodes": 4096,
+    "optical_degree": 8,
+    "per_link_gbps": 100.0,
+    "base_latency_us": 20.0,
+    "reconfig_latency_us": 200.0,
+    "steps": [
+     {
+      "step": 1,
+      "config": 1,
+      "message_mb": 130.0405
+     },
+     {
+      "step": 2,
+      "config": 2,
+      "message_mb": 65.02025
+     },
+     {
+      "step": 3,
+      "config": 3,
+      "message_mb": 32.510125
+     },
+     {
+      "step": 4,
+      "config": 4,
+      "message_mb": 16.2550625
+     },
+     {
+      "step": 5,
+      "config": 5,
+      "message_mb": 8.12753125
+     },
+     {
+      "step": 6,
+      "config": 6,
+      "message_mb": 4.063765625
+     },
+     {
+      "step": 7,
+      "config": 7,
+      "message_mb": 2.0318828125
+     },
+     {
+      "step": 8,
+      "config": 8,
+      "message_mb": 1.01594140625
+     },
+     {
+      "step": 9,
+      "config": 9,
+      "message_mb": 0.507970703125
+     },
+     {
+      "step": 10,
+      "config": 10,
+      "message_mb": 0.2539853515625
+     },
+     {
+      "step": 11,
+      "config": 11,
+      "message_mb": 0.12699267578125
+     },
+     {
+      "step": 12,
+      "config": 12,
+      "message_mb": 0.063496337890625
+     }
+    ],
+    "algorithm": "rabenseifner_reducescatter",
+    "payload_mb": 260.081,
+    "id": "te67",
+    "experiment": "reducescatter_large_scale"
+   },
+   {
+    "name": "te68",
+    "description": "",
+    "nodes": 2048,
+    "optical_degree": 8,
+    "per_link_gbps": 100.0,
+    "base_latency_us": 20.0,
+    "reconfig_latency_us": 200.0,
+    "steps": [
+     {
+      "step": 1,
+      "config": 1,
+      "message_mb": 42.103
+     },
+     {
+      "step": 2,
+      "config": 2,
+      "message_mb": 21.0515
+     },
+     {
+      "step": 3,
+      "config": 3,
+      "message_mb": 10.52575
+     },
+     {
+      "step": 4,
+      "config": 4,
+      "message_mb": 5.262875
+     },
+     {
+      "step": 5,
+      "config": 5,
+      "message_mb": 2.6314375
+     },
+     {
+      "step": 6,
+      "config": 6,
+      "message_mb": 1.31571875
+     },
+     {
+      "step": 7,
+      "config": 7,
+      "message_mb": 0.657859375
+     },
+     {
+      "step": 8,
+      "config": 8,
+      "message_mb": 0.3289296875
+     },
+     {
+      "step": 9,
+      "config": 9,
+      "message_mb": 0.16446484375
+     },
+     {
+      "step": 10,
+      "config": 10,
+      "message_mb": 0.082232421875
+     },
+     {
+      "step": 11,
+      "config": 11,
+      "message_mb": 0.0411162109375
+     }
+    ],
+    "algorithm": "rabenseifner_reducescatter",
+    "payload_mb": 84.206,
+    "id": "te68",
+    "experiment": "reducescatter_large_scale"
+   },
+   {
+    "name": "te69",
+    "description": "",
+    "nodes": 4096,
+    "optical_degree": 8,
+    "per_link_gbps": 100.0,
+    "base_latency_us": 20.0,
+    "reconfig_latency_us": 200.0,
+    "steps": [
+     {
+      "step": 1,
+      "config": 1,
+      "message_mb": 65.947
+     },
+     {
+      "step": 2,
+      "config": 2,
+      "message_mb": 32.9735
+     },
+     {
+      "step": 3,
+      "config": 3,
+      "message_mb": 16.48675
+     },
+     {
+      "step": 4,
+      "config": 4,
+      "message_mb": 8.243375
+     },
+     {
+      "step": 5,
+      "config": 5,
+      "message_mb": 4.1216875
+     },
+     {
+      "step": 6,
+      "config": 6,
+      "message_mb": 2.06084375
+     },
+     {
+      "step": 7,
+      "config": 7,
+      "message_mb": 1.030421875
+     },
+     {
+      "step": 8,
+      "config": 8,
+      "message_mb": 0.5152109375
+     },
+     {
+      "step": 9,
+      "config": 9,
+      "message_mb": 0.25760546875
+     },
+     {
+      "step": 10,
+      "config": 10,
+      "message_mb": 0.128802734375
+     },
+     {
+      "step": 11,
+      "config": 11,
+      "message_mb": 0.0644013671875
+     },
+     {
+      "step": 12,
+      "config": 12,
+      "message_mb": 0.03220068359375
+     }
+    ],
+    "algorithm": "rabenseifner_reducescatter",
+    "payload_mb": 131.894,
+    "id": "te69",
+    "experiment": "reducescatter_large_scale"
+   },
+   {
+    "name": "te70",
+    "description": "",
+    "nodes": 8192,
+    "optical_degree": 8,
+    "per_link_gbps": 100.0,
+    "base_latency_us": 20.0,
+    "reconfig_latency_us": 200.0,
+    "steps": [
+     {
+      "step": 1,
+      "config": 1,
+      "message_mb": 6.638
+     },
+     {
+      "step": 2,
+      "config": 2,
+      "message_mb": 3.319
+     },
+     {
+      "step": 3,
+      "config": 3,
+      "message_mb": 1.6595
+     },
+     {
+      "step": 4,
+      "config": 4,
+      "message_mb": 0.82975
+     },
+     {
+      "step": 5,
+      "config": 5,
+      "message_mb": 0.414875
+     },
+     {
+      "step": 6,
+      "config": 6,
+      "message_mb": 0.2074375
+     },
+     {
+      "step": 7,
+      "config": 7,
+      "message_mb": 0.10371875
+     },
+     {
+      "step": 8,
+      "config": 8,
+      "message_mb": 0.051859375
+     },
+     {
+      "step": 9,
+      "config": 9,
+      "message_mb": 0.0259296875
+     },
+     {
+      "step": 10,
+      "config": 10,
+      "message_mb": 0.01296484375
+     },
+     {
+      "step": 11,
+      "config": 11,
+      "message_mb": 0.006482421875
+     },
+     {
+      "step": 12,
+      "config": 12,
+      "message_mb": 0.0032412109375
+     },
+     {
+      "step": 13,
+      "config": 13,
+      "message_mb": 0.00162060546875
+     }
+    ],
+    "algorithm": "rabenseifner_reducescatter",
+    "payload_mb": 13.276,
+    "id": "te70",
+    "experiment": "reducescatter_large_scale"
+   },
+   {
+    "name": "te71",
+    "description": "",
+    "nodes": 16384,
+    "optical_degree": 8,
+    "per_link_gbps": 100.0,
+    "base_latency_us": 20.0,
+    "reconfig_latency_us": 200.0,
+    "steps": [
+     {
+      "step": 1,
+      "config": 1,
+      "message_mb": 204.7765
+     },
+     {
+      "step": 2,
+      "config": 2,
+      "message_mb": 102.38825
+     },
+     {
+      "step": 3,
+      "config": 3,
+      "message_mb": 51.194125
+     },
+     {
+      "step": 4,
+      "config": 4,
+      "message_mb": 25.5970625
+     },
+     {
+      "step": 5,
+      "config": 5,
+      "message_mb": 12.79853125
+     },
+     {
+      "step": 6,
+      "config": 6,
+      "message_mb": 6.399265625
+     },
+     {
+      "step": 7,
+      "config": 7,
+      "message_mb": 3.1996328125
+     },
+     {
+      "step": 8,
+      "config": 8,
+      "message_mb": 1.59981640625
+     },
+     {
+      "step": 9,
+      "config": 9,
+      "message_mb": 0.799908203125
+     },
+     {
+      "step": 10,
+      "config": 10,
+      "message_mb": 0.3999541015625
+     },
+     {
+      "step": 11,
+      "config": 11,
+      "message_mb": 0.19997705078125
+     },
+     {
+      "step": 12,
+      "config": 12,
+      "message_mb": 0.099988525390625
+     },
+     {
+      "step": 13,
+      "config": 13,
+      "message_mb": 0.0499942626953125
+     },
+     {
+      "step": 14,
+      "config": 14,
+      "message_mb": 0.02499713134765625
+     }
+    ],
+    "algorithm": "rabenseifner_reducescatter",
+    "payload_mb": 409.553,
+    "id": "te71",
+    "experiment": "reducescatter_large_scale"
+   },
+   {
+    "name": "te72",
+    "description": "",
+    "nodes": 8192,
+    "optical_degree": 8,
+    "per_link_gbps": 100.0,
+    "base_latency_us": 20.0,
+    "reconfig_latency_us": 200.0,
+    "steps": [
+     {
+      "step": 1,
+      "config": 1,
+      "message_mb": 84.1275
+     },
+     {
+      "step": 2,
+      "config": 2,
+      "message_mb": 42.06375
+     },
+     {
+      "step": 3,
+      "config": 3,
+      "message_mb": 21.031875
+     },
+     {
+      "step": 4,
+      "config": 4,
+      "message_mb": 10.5159375
+     },
+     {
+      "step": 5,
+      "config": 5,
+      "message_mb": 5.25796875
+     },
+     {
+      "step": 6,
+      "config": 6,
+      "message_mb": 2.628984375
+     },
+     {
+      "step": 7,
+      "config": 7,
+      "message_mb": 1.3144921875
+     },
+     {
+      "step": 8,
+      "config": 8,
+      "message_mb": 0.65724609375
+     },
+     {
+      "step": 9,
+      "config": 9,
+      "message_mb": 0.328623046875
+     },
+     {
+      "step": 10,
+      "config": 10,
+      "message_mb": 0.1643115234375
+     },
+     {
+      "step": 11,
+      "config": 11,
+      "message_mb": 0.08215576171875
+     },
+     {
+      "step": 12,
+      "config": 12,
+      "message_mb": 0.041077880859375
+     },
+     {
+      "step": 13,
+      "config": 13,
+      "message_mb": 0.0205389404296875
+     }
+    ],
+    "algorithm": "rabenseifner_reducescatter",
+    "payload_mb": 168.255,
+    "id": "te72",
+    "experiment": "reducescatter_large_scale"
+   },
+   {
+    "name": "te73",
+    "description": "",
+    "nodes": 2048,
+    "optical_degree": 8,
+    "per_link_gbps": 100.0,
+    "base_latency_us": 20.0,
+    "reconfig_latency_us": 200.0,
+    "steps": [
+     {
+      "step": 1,
+      "config": 1,
+      "message_mb": 34.185
+     },
+     {
+      "step": 2,
+      "config": 2,
+      "message_mb": 17.0925
+     },
+     {
+      "step": 3,
+      "config": 3,
+      "message_mb": 8.54625
+     },
+     {
+      "step": 4,
+      "config": 4,
+      "message_mb": 4.273125
+     },
+     {
+      "step": 5,
+      "config": 5,
+      "message_mb": 2.1365625
+     },
+     {
+      "step": 6,
+      "config": 6,
+      "message_mb": 1.06828125
+     },
+     {
+      "step": 7,
+      "config": 7,
+      "message_mb": 0.534140625
+     },
+     {
+      "step": 8,
+      "config": 8,
+      "message_mb": 0.2670703125
+     },
+     {
+      "step": 9,
+      "config": 9,
+      "message_mb": 0.13353515625
+     },
+     {
+      "step": 10,
+      "config": 10,
+      "message_mb": 0.066767578125
+     },
+     {
+      "step": 11,
+      "config": 11,
+      "message_mb": 0.0333837890625
+     }
+    ],
+    "algorithm": "rabenseifner_reducescatter",
+    "payload_mb": 68.37,
+    "id": "te73",
+    "experiment": "reducescatter_large_scale"
+   }
   ]
  }
 }

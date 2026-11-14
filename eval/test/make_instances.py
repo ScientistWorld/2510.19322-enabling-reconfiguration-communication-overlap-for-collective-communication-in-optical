@@ -60,6 +60,9 @@ EXTRA_FAMILIES = {
     "allreduce_large_scale": {"algorithm": "rabenseifner_allreduce", "k": 4, "recfg": 200.0,
                               "nodes": [2048, 4096, 8192, 16384], "per_size": 3,
                               "payload": (1.0, 4096.0), "draw_band": (0.35, 0.80), "keep_band": (0.35, 0.80)},
+    "reducescatter_large_scale": {"algorithm": "rabenseifner_reducescatter", "k": 8, "recfg": 200.0,
+                                  "nodes": [2048, 4096, 8192, 16384], "per_size": 3,
+                                  "payload": (1.0, 8192.0), "draw_band": (0.35, 0.92), "keep_band": (0.35, 0.92)},
 }
 
 def strawman_cct_us(spec) -> float:
