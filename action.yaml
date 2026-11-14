@@ -5,4 +5,4 @@ action: submit
 gpus: 0
 test: false
 milestone: core_claim_plus
-notes: "Hardening job 1 (revised): corrected reference (alone) vs relay / annealing / hybrid / seed-2 / tenth-nodes on candidate headroom families (AllReduce k=4 >1024 nodes, ReduceScatter k=8 >1024 nodes) and on the existing test families; resumes hardening/iter13_results/results.jsonl."
+notes: "Hardening final job: reference end to end alone (reproduce.sh -> scores_train/scores.json, evaluate_test.sh -> scores_test.json; CBC node budget only, no wall clock), then hardening.harness: a second independent reference run (determinism check), hybrid/annealing/seed-2/seed-3/tenth-nodes/relay/lockstep and all shortcut probes through the hidden-test evaluator (parallel), then validate.py."
