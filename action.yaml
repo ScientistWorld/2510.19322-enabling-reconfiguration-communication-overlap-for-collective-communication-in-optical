@@ -5,4 +5,4 @@ action: submit
 gpus: 0
 test: false
 milestone: core_claim_plus
-notes: "Hardening step 2/2 (rerun with an isolated, restart-safe harness): reference test + visible, relay rule, lockstep, shortcut probes incl. CPU-escape, hybrid, seed 2, 1/10-node MILP, full-budget annealing, train hybrid, seed 3, time-only MILP; publishes reference score files."
+notes: "Hardening follow-up: rerun the full-budget annealing (private search) probe on the hidden test through the isolated harness (~70 min); re-publish reference scores and re-analyze."
