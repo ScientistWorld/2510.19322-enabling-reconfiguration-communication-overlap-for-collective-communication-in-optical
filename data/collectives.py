@@ -269,8 +269,8 @@ FAMILIES = {
         "switching_share": [0.35, 0.80],
     },
     "high_optical_degree": {
-        "paper_section": "4.2.1 / Fig. 7(a)-(b)",
-        "algorithms": ["rabenseifner_reducescatter", "rabenseifner_allreduce"],
+        "paper_section": "4.2.1 / Fig. 7(a)",
+        "algorithms": ["rabenseifner_reducescatter"],
         "nodes": [128, 256, 512, 1024],
         "payload_mb": [1.0, 512.0],
         "optical_degree": [8],
@@ -282,8 +282,8 @@ FAMILIES = {
         "paper_section": "4.3 / Figs. 10-11",
         "algorithms": {
             "2": ["rabenseifner_reducescatter", "rabenseifner_allreduce", "bruck_alltoall", "pairwise_alltoall"],
-            "4": ["rabenseifner_reducescatter", "rabenseifner_allreduce", "bruck_alltoall", "pairwise_alltoall"],
-            "8": ["rabenseifner_reducescatter", "rabenseifner_allreduce"],
+            "4": ["rabenseifner_reducescatter", "rabenseifner_allreduce", "pairwise_alltoall"],
+            "8": ["rabenseifner_reducescatter"],
         },
         "nodes": {"default": [256], "pairwise_alltoall": [9, 17]},
         "payload_mb": [0.25, 8192.0],

@@ -32,8 +32,8 @@ The baseline is computed by the evaluator from the frozen instance: **Strawman-I
 Three families from the source paper's evaluation (see `scoring/EXPERIMENTS.md`):
 
 - `allreduce_scaling` (weight 0.40, 10 instances per slice): Rabenseifner AllReduce, 64-1024 nodes, k=4.
-- `high_optical_degree` (weight 0.30, 12 instances per slice): Rabenseifner ReduceScatter and AllReduce, 128-1024 nodes, k=8.
-- `hardware_sensitivity` (weight 0.30, 12 instances per slice): k in {2,4,8} and switching latency 0.02-20 ms, four algorithms.
+- `high_optical_degree` (weight 0.30, 12 instances per slice): Rabenseifner ReduceScatter, 128-1024 nodes, k=8.
+- `hardware_sensitivity` (weight 0.30, 12 instances per slice): every combination of k in {2,4,8} and switching latency 0.02-20 ms once; four algorithms at k=2, no Bruck at k=4, ReduceScatter at k=8.
 
 In every family the payloads are spread so that the share of the lockstep time spent switching covers the family's band evenly; train and test have the same mix.
 

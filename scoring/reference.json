@@ -37,7 +37,7 @@
       "_paper_note": "Anchor: the paper's Fig. 8(a) reduction over Strawman-ICR at 64 nodes (32 MB, k=4), 39.6%, growing to 46.9% at 512 nodes. The scored value is a mean over 64-1024 nodes and 16-64 MB payloads, which the paper does not report; the anchor is a paper point, not a target."
     },
     "high_optical_degree": {
-      "description": "Paper Fig. 7(a)-(b) setting: Rabenseifner ReduceScatter and AllReduce on 128-1024 nodes with k=8 optical planes at 100 Gbps, 1-512 MB payloads, 200 us reconfiguration latency; switching share 0.35-0.92. Bruck and Pairwise All-to-All at k=8 are not scored (see scoring/EXPERIMENTS.md).",
+      "description": "Paper Fig. 7(a) setting: Rabenseifner ReduceScatter on 128-1024 nodes (7-10 steps) with k=8 optical planes at 100 Gbps, 1-512 MB payloads, 200 us reconfiguration latency; switching share 0.35-0.92. AllReduce and All-to-All at k=8 are not scored (see scoring/EXPERIMENTS.md).",
       "weight": 0.3,
       "primary_metric": "cct_reduction_vs_strawman_pct",
       "metrics": {
@@ -84,10 +84,10 @@
           "cct_reduction_vs_strawman_pct": 45.5
         }
       },
-      "_paper_note": "The paper reports k=8 results for these algorithms only as peaks over a message-size sweep ('up to' 89.1% for ReduceScatter and 87.1% for AllReduce), kept under '_paper_fig7_peak_*' with the two unscored All-to-All peaks. Anchor (swot): the paper's only non-peak AllReduce reduction, 46.9% (Fig. 8(a), 512 nodes, k=4) - same algorithm, lower optical degree. The family mean is not reported by the paper; the anchor is not a target."
+      "_paper_note": "The paper reports k=8 results only as peaks over a message-size sweep ('up to' 89.1% for ReduceScatter), kept under '_paper_fig7_peak_*' with the unscored algorithms' peaks. The paper gives no non-peak ReduceScatter number; the swot anchor is its only non-peak Rabenseifner number, 46.9% (AllReduce, Fig. 8(a), 512 nodes, k=4) - same algorithm family, lower optical degree. The family mean is not reported by the paper; the anchor is not a target."
     },
     "hardware_sensitivity": {
-      "description": "Paper Section 4.3 setting: 256-node Rabenseifner/Bruck collectives and 9- or 17-node Pairwise All-to-All with optical degree k in {2,4,8} at 800/k Gbps and reconfiguration latency in {0.02, 0.2, 2, 20} ms (every algorithm once per k at k=2 and k=4, Rabenseifner only at k=8), payloads 0.25-8192 MB chosen around the transmission/switching knee (switching share 0.35-0.92).",
+      "description": "Paper Section 4.3 setting: 256-node Rabenseifner/Bruck collectives and 9- or 17-node Pairwise All-to-All with optical degree k in {2,4,8} at 800/k Gbps and reconfiguration latency in {0.02, 0.2, 2, 20} ms, every (k, latency) cell once: all four algorithms at k=2, no Bruck at k=4, ReduceScatter at k=8; payloads 0.25-8192 MB chosen around the transmission/switching knee (switching share 0.35-0.92).",
       "weight": 0.3,
       "primary_metric": "cct_reduction_vs_strawman_pct",
       "metrics": {
@@ -174,5 +174,5 @@
     },
     "solver_time_limit_s": 120
   },
-  "_weights_note": "Weights 0.4/0.3/0.3 (iteration 12): the paper's headline quantitative claim is cluster scalability (Fig. 8(a): 39.6% -> 46.9%); algorithm-level efficiency at high optical degree (Fig. 7) and robustness to optical degree and switching latency (Section 4.3, Figs. 10-11) are the other two evaluation axes. The k=8 family now covers two of Fig. 7's four algorithms, and the hardware sweep now separates a stronger scheduler from the reference (it was down-weighted to 0.2 in iteration 11 because it did not)."
+  "_weights_note": "Weights 0.4/0.3/0.3 (iteration 12): the paper's headline quantitative claim is cluster scalability (Fig. 8(a): 39.6% -> 46.9%); algorithm-level efficiency at high optical degree (Fig. 7) and robustness to optical degree and switching latency (Section 4.3, Figs. 10-11) are the other two evaluation axes. The k=8 family now covers one of Fig. 7's four algorithms (settings where a fixed relay rule matches the paper's budget-limited MILP are not scored), and the hardware sweep now separates a stronger scheduler from the reference (it was down-weighted to 0.2 in iteration 11 because it did not)."
 }

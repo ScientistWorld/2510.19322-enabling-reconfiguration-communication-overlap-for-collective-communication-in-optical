@@ -3,11 +3,11 @@
     python -m eval.test.make_instances
 
 The three scored families follow the source paper's evaluation settings
-(Sections 4.2-4.3). Within each family, every instance gets a target
-switching share at evenly spaced quantiles of the family's band (so the
-slices have the same mix of difficulty), and its payload is set by bisection
-to reach it within the family's payload range (falling back to log-uniform
-rejection sampling when the range cannot reach it). The share is how much of
+(Sections 4.2-4.3). Within each family, every instance gets an evenly
+spaced quantile (so the slices have the same mix of difficulty), mapped into
+the part of the family's share band that its payload range can reach; its
+payload is set by bisection to hit that share. Duplicate instances are
+redrawn. The share is how much of
 the lockstep (Strawman-ICR) completion time is spent switching:
 
     switching_share = (#topology changes x T_recfg) / CCT_strawman in SHARE_BAND[family].
@@ -16,11 +16,14 @@ Outside that band the scheduling problem is degenerate: below it, lockstep is
 close to optimal for every scheduler; above it, a fixed round-robin relay of
 plane groups is close to optimal. (AllReduce at k=4 uses a 0.80 cap: above it,
 on 18-20 step collectives, a fixed relay already matches the best schedules
-found, which says nothing about scheduling skill.) Bruck and Pairwise
-All-to-All at k=8 are not scored: every step needs a different topology on
-eight interchangeable planes, the regime the paper reports its time-limited
-solver handles badly (Section 4.3.1), and a fixed relay rule beats the
-paper's MILP there. This is a property of the
+found, which says nothing about scheduling skill.) Settings where a fixed
+round-robin relay of plane groups (a 15-line rule) matches or beats the
+paper's budget-limited MILP are not scored, because there the test would
+reward a hand-written rule rather than scheduling: AllReduce, Bruck and
+Pairwise All-to-All at k=8 and Bruck at k=4. These are long or
+all-distinct-topology collectives on many interchangeable planes, the regime
+the paper itself reports its time-limited solver handles badly (Section
+4.3.1). This is a property of the
 instance alone and does not depend on any scheduler. The seed below is the
 only thing that distinguishes these instances from the public train ones; it
 lives only here.
@@ -71,8 +74,18 @@ def payload_for_share(algorithm, nodes, k, recfg, payload_range, target):
     return round(math.exp(0.5 * (lo + hi)), 3)
 
 
-def draw(rng, experiment, algorithm, nodes, k, recfg, payload_range, target):
+def reachable_band(experiment, algorithm, nodes, k, recfg, payload_range):
+    """The family's share band intersected with the shares the payload range can reach."""
+    lo, hi = SHARE_BAND[experiment]
+    at_max = switching_share(make_instance("x", algorithm, nodes, payload_range[1], k, reconfig_latency_us=recfg))
+    at_min = switching_share(make_instance("x", algorithm, nodes, payload_range[0], k, reconfig_latency_us=recfg))
+    return max(lo, at_max), min(hi, at_min)
+
+
+def draw(rng, experiment, algorithm, nodes, k, recfg, payload_range, quantile):
     band = SHARE_BAND[experiment]
+    lo, hi = reachable_band(experiment, algorithm, nodes, k, recfg, payload_range)
+    target = lo + (hi - lo) * quantile if hi > lo else 0.5 * (band[0] + band[1])
     payload = payload_for_share(algorithm, nodes, k, recfg, payload_range, target)
     spec = make_instance("x", algorithm, nodes, payload, k, reconfig_latency_us=recfg)
     if band[0] <= switching_share(spec) <= band[1]:
@@ -94,21 +107,20 @@ def plan(rng):
     rng.shuffle(nodes)
     for p in nodes:
         items.append(("allreduce_scaling", "rabenseifner_allreduce", p, 4, 200.0, (16.0, 64.0)))
-    # Fig. 7(a)-(b): Rabenseifner ReduceScatter and AllReduce at k=8 (100 Gbps),
-    # 200 us switching, 128-1024 nodes; six instances each.
-    for a in ["rabenseifner_reducescatter", "rabenseifner_allreduce"]:
-        sizes = [128, 256, 512, 1024] + rng.sample([128, 256, 512, 1024], 2)
-        for p in sorted(sizes):
-            items.append(("high_optical_degree", a, p, 8, 200.0, (1.0, 512.0)))
+    # Fig. 7(a): Rabenseifner ReduceScatter at k=8 (100 Gbps), 200 us switching,
+    # 128-1024 nodes; three instances per cluster size.
+    for p in [128, 256, 512, 1024] * 3:
+        items.append(("high_optical_degree", "rabenseifner_reducescatter", p, 8, 200.0, (1.0, 512.0)))
     # Section 4.3: every (k, T_recfg) cell of the paper's sweep once, 256 nodes
     # (9 or 17 for Pairwise), payload around the transmission/switching knee.
-    # Every algorithm once per optical degree at k=2 and k=4 (Rabenseifner only
-    # at k=8, see above), each at a different switching latency.
+    # Each (k, T_recfg) cell once: all four algorithms at k=2; at k=4 no Bruck;
+    # at k=8 ReduceScatter only (see the module docstring).
     for k in (2, 4, 8):
-        if k == 8:
-            algos = ["rabenseifner_reducescatter", "rabenseifner_allreduce"] * 2
-        else:
-            algos = ["rabenseifner_reducescatter", "rabenseifner_allreduce", "bruck_alltoall", "pairwise_alltoall"]
+        algos = {
+            2: ["rabenseifner_reducescatter", "rabenseifner_allreduce", "bruck_alltoall", "pairwise_alltoall"],
+            4: ["rabenseifner_reducescatter", "rabenseifner_allreduce", "pairwise_alltoall", "rabenseifner_allreduce"],
+            8: ["rabenseifner_reducescatter"] * 4,
+        }[k]
         rng.shuffle(algos)
         for r, a in zip((20.0, 200.0, 2000.0, 20000.0), algos):
             p = rng.choice([9, 17]) if a == "pairwise_alltoall" else 256
@@ -116,25 +128,30 @@ def plan(rng):
     return items
 
 
-def stratified_targets(rng, items):
-    """Target switching shares at evenly spaced quantiles of each family's band, randomly assigned."""
-    targets = []
+def stratified_quantiles(rng, items):
+    """Evenly spaced quantiles (one per instance, jittered, randomly assigned) within each family."""
+    quantiles = []
     for experiment in dict.fromkeys(item[0] for item in items):
         idx = [i for i, item in enumerate(items) if item[0] == experiment]
-        lo, hi = SHARE_BAND[experiment]
-        values = [lo + (hi - lo) * (j + rng.random()) / len(idx) for j in range(len(idx))]
+        values = [(j + rng.random()) / len(idx) for j in range(len(idx))]
         rng.shuffle(values)
-        targets.extend(zip(idx, values))
-    return dict(targets)
+        quantiles.extend(zip(idx, values))
+    return dict(quantiles)
 
 
 def build() -> dict:
     rng = random.Random(SEED)
     experiments: dict[str, list] = {}
     items = plan(rng)
-    targets = stratified_targets(rng, items)
+    quantiles = stratified_quantiles(rng, items)
+    used = set()
     for n, (experiment, algorithm, nodes, k, recfg, prange) in enumerate(items, start=1):
-        payload = draw(rng, experiment, algorithm, nodes, k, recfg, prange, targets[n - 1])
+        quantile = quantiles[n - 1]
+        payload = draw(rng, experiment, algorithm, nodes, k, recfg, prange, quantile)
+        while (algorithm, nodes, k, recfg, payload) in used:  # no duplicate instances
+            quantile = min(0.999, max(0.001, quantile + rng.uniform(-0.05, 0.05)))
+            payload = draw(rng, experiment, algorithm, nodes, k, recfg, prange, quantile)
+        used.add((algorithm, nodes, k, recfg, payload))
         iid = f"{PREFIX}{n:02d}"
         spec = make_instance(iid, algorithm, nodes, payload, k, reconfig_latency_us=recfg)
         payload_json = spec.to_json()
