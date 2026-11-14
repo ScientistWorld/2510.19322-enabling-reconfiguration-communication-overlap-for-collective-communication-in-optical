@@ -1,8 +1,8 @@
 # Once you set action to 'submit' or 'done', STOP immediately.
 # Do NOT sleep, poll, or wait for jobs. The system reads this file
 # only after your turn ends.
-action: pending
+action: submit
 gpus: 0
 test: false
 milestone: core_claim_plus
-notes: ""
+notes: "Hardening job 1: smoke + load-determinism check of the corrected reference (CBC node budget only, no wall-clock limit), then reference vs relay rule / annealing / hybrid / seed-2 / tenth-nodes on candidate headroom families (k=8 AllReduce, AllReduce >1024 nodes) and on the existing test families, one solver process at a time; per-instance results in hardening/iter13_results/results.jsonl (resumable)."
